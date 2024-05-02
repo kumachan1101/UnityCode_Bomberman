@@ -9,10 +9,8 @@ public class Bom_Explode : Bom
         GameObject g = Instantiate(ExplosionPrefab);
         g.GetComponent<Renderer>().material = cMaterialType;
         Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z);
-        if(cField.CheckPositionAndName(v3Temp, "Explosion(Clone)")){
-            Destroy(g);
-            return false;
-        }
+        cField.DeletePositionAndName(v3Temp, "Explosion(Clone)");
+
         bool bRet = IsWall(v3Temp);
         if(bRet){
             Destroy(g);
@@ -26,10 +24,8 @@ public class Bom_Explode : Bom
         GameObject g = Instantiate(ExplosionPrefab);
         g.GetComponent<Renderer>().material = cMaterialType;
         Vector3 v3Temp = new Vector3(transform.position.x,transform.position.y,transform.position.z+i);
-        if(cField.CheckPositionAndName(v3Temp, "Explosion(Clone)")){
-            Destroy(g);
-            return false;
-        }        
+        cField.DeletePositionAndName(v3Temp, "Explosion(Clone)");
+
         bool bRet = IsWall(v3Temp);
         if(bRet){
             Destroy(g);

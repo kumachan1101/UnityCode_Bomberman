@@ -25,6 +25,9 @@ public class RoomButton : MonoBehaviour
         button = GetComponent<Button>();
         button.interactable = false;
         button.onClick.AddListener(OnButtonClick);
+
+        //Field cField = GameObject.Find("Field").GetComponent<Field>();
+        //cField.SetPlayerNum(MaxPlayers-1);
     }
 
     private void OnButtonClick() {

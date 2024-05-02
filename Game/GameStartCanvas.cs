@@ -6,9 +6,13 @@ using UnityEngine.SceneManagement;
 public class GameStartCanvas : MonoBehaviour
 {
     // Start is called before the first frame update
+
+    void Awake()
+    {
+    }
+
     void Start()
     {
-        
     }
 
     // Update is called once per frame
@@ -19,10 +23,12 @@ public class GameStartCanvas : MonoBehaviour
 
     public void LoadGameScene()
     {
+        
         SceneManager.LoadScene("GameScene");
     }
     public void LoadGameOnline()
     {
+        
         SceneManager.LoadScene("GameOnline");
     }
 

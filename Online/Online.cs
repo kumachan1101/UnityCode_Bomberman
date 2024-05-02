@@ -36,14 +36,29 @@ public class Online : MonoBehaviourPunCallbacks
     {
         playerCount = PhotonNetwork.PlayerList.Length; //ルームにいる人数を確認
 
-        if (playerCount == 1)
-        {
-            GameObject gItemControl = GameObject.Find("ItemControl");
-            gItemControl.GetComponent<ItemControl>().SetMaster();
-        }
         GameObject gField = GameObject.Find("Field");
         cField = gField.GetComponent<Field>();
         cField.CreateBrokenBlock();
+
+        GameObject gItemControl = GameObject.Find("ItemControl");
+
+        if (playerCount == 1)
+        {
+            //GameObject gField = PhotonNetwork.Instantiate("Field", new Vector3(0,0,0), Quaternion.identity);
+            //gField.name = "Field";
+
+            //GameObject gBomControl = PhotonNetwork.Instantiate("BomControl", new Vector3(0,0,0), Quaternion.identity);
+            //gBomControl.AddComponent<BomControl>();
+
+            //GameObject gItemControl = PhotonNetwork.Instantiate("ItemControl", new Vector3(0,0,0), Quaternion.identity);
+            //gItemControl.AddComponent<ItemControl>();
+            
+            gItemControl.GetComponent<ItemControl>().SetMaster();
+                
+
+        }
+
+
         SpawnPlayerObjects(playerCount);
 
 /*
@@ -71,7 +86,7 @@ public class Online : MonoBehaviourPunCallbacks
         Vector3 v3PwrGage = new Vector3(0, 0, 0);
 
         GameObject gCanvas = PhotonNetwork.Instantiate(canvasName + playerCount, v3PwrGage, Quaternion.identity);
-        Vector3 v3PlayerPos = cField.GetPlayerPosition(playerCount);
+        Vector3 v3PlayerPos = cField.GetPlayerPosition(1, playerCount-1);
         GameObject gPlayer = PhotonNetwork.Instantiate("PlayerOnline" + playerCount, v3PlayerPos, Quaternion.identity);
         cField.SetName("PlayerOnline" + playerCount + "(Clone)");
         //Player cPlayer = gPlayer.GetComponent<Player_Online>();

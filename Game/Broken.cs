@@ -4,11 +4,20 @@ using UnityEngine;
 
 public class Broken : MonoBehaviour
 {
-    private ItemControl cItemControl;
+    protected GameObject gItemControl;
+    protected ItemControl cItemControl;
 
     void Awake(){
         cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
         //g.transform.position = transform.position;
+        /*
+        if(null == gItemControl){
+            gItemControl = GameObject.Find("ItemControl(Clone)");
+            if(null != gItemControl){
+                cItemControl = gItemControl.GetComponent<ItemControl>();
+            }
+        }
+        */
 
     }
     // Start is called before the first frame update
@@ -20,7 +29,7 @@ public class Broken : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     private void OnCollisionEnter(Collision col) {

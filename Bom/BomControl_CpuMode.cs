@@ -6,16 +6,19 @@ using BomName;
 
 public class BomControl_CpuMode : BomControl
 {
-    public override void Awake(){
+    public void Start(){
+        init();
         cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl_CpuMode>();
         cField = GameObject.Find("Field").GetComponent<Field_CpuMode>();
     }
 
-    protected override void MakeBom_RPC(Vector3 v3, BomKind.BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType){
-        MakeBom_CPU(v3, eBomKind,iViewID, iExplosionNum,  bBomKick, sMaterialType);
+
+
+    protected override void MakeBom_RPC(Vector3 v3, BomKind.BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType, bool bBomAttack, Vector3 direction){
+        MakeBom_CPU(v3, eBomKind,iViewID, iExplosionNum,  bBomKick, sMaterialType, bBomAttack, direction);
     }
 
-    private void MakeBom_CPU(Vector3 v3, BomKind.BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType){
+    private void MakeBom_CPU(Vector3 v3, BomKind.BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType, bool bBomAttack, Vector3 direction){
         GameObject g;
         if(eBomKind == BomKind.BOM_KIND.BOM_KIND_BIGBAN){
             g = Instantiate(BomBigBanPrefab);    
@@ -40,6 +43,10 @@ public class BomControl_CpuMode : BomControl
         if(bBomKick){
             cBom.AbailableBomKick();
         }
+        if(bBomAttack){
+            cBom.AbailableBomAttack(direction);
+        }
+
         tempBom = g;
     }
 

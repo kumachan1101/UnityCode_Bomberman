@@ -14,6 +14,7 @@ namespace PlayerBomName
         private int iViewID;
 
         private bool bBomKick;
+        private bool bBomAttack;
         private bool bWall;
         private List<GameObject> BomList = new List<GameObject>();
 
@@ -58,6 +59,15 @@ namespace PlayerBomName
 
         public bool GetBomKick(){
             return bBomKick;
+        }
+
+        public void BomAttack(){
+            bBomAttack = true;
+        }
+
+
+        public bool GetBomAttack(){
+            return bBomAttack;
         }
 
         public void Wall(){

@@ -10,10 +10,7 @@ public class Bom_BigBan : Bom_Explode
         GameObject g = Instantiate(ExplosionPrefab);
         g.GetComponent<Renderer>().material = cMaterialType;
         Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z+j);
-        if(cField.CheckPositionAndName(v3Temp, "Explosion(Clone)")){
-            Destroy(g);
-            return false;
-        }
+        cField.DeletePositionAndName(v3Temp, "Explosion(Clone)");
 
         bool bRet = IsWall(v3Temp);
         if(bRet){
@@ -30,16 +27,10 @@ public class Bom_BigBan : Bom_Explode
         {
             Vector3 v3 = GetPos(transform.position);
             transform.position = v3;
-            if(!cField.CheckPositionAndName(v3, "Explosion(Clone)")){
-                GameObject g = Instantiate(ExplosionPrefab);
-                g.GetComponent<Renderer>().material = cMaterialType;
-                g.transform.position = v3;
-            }
-
-            //GameObject gPlayer =  GameObject.Find(objname);
-            //gPlayer.GetComponent<Player>().SetBomKind(BomKind.BOM_KIND.BOM_KIND_BIGBAN);
-            //GameObject gBomControl = GameObject.Find("BomControl");
-            //int iExplosionNum = gBomControl.GetComponent<BomControl>().GetExplosionNum();
+            cField.DeletePositionAndName(v3, "Explosion(Clone)");
+            GameObject g = Instantiate(ExplosionPrefab);
+            g.GetComponent<Renderer>().material = cMaterialType;
+            g.transform.position = v3;
 
             for (int j = 1; j <= iExplosionNum; j++) 
             {

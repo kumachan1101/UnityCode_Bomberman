@@ -35,12 +35,14 @@ public class LongPressButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     protected Player FindAndSetPlayer()
     {
         Field cField = GameObject.Find("Field").GetComponent<Field>();
+        //Debug.Log(cField);
         string name = cField.GetName();
         GameObject gPlayer = FindPlayerObject(name);
 
         if (name.Contains("PlayerOnline"))
         {
-            return gPlayer.GetComponent<Player_Online>();
+            //return gPlayer.GetComponent<Player_Online>();
+            return gPlayer.GetComponent<Player>();
         }
         if (name.Contains("Player"))
         {

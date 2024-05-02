@@ -20,7 +20,25 @@ namespace PowerGageName
             cSlider.value -= iDamage;
         }
 
+
+
+        public void HeartUp(int iHeart){
+            HeartUp_RPC(iHeart);
+        }
+
+        protected virtual void HeartUp_RPC(int iHeart){
+            photonView.RPC(nameof(SyncHeartUp),RpcTarget.All, iHeart);
+        }
+
+        [PunRPC]
+        public void SyncHeartUp(int iHeart){
+            cSlider.value += iHeart;
+        }
+
+
+
         public void init(Color cColor, Vector3 v3){
+            Debug.Log("init");
             cSlider.GetComponent<RectTransform>().position = v3;
             GameObject gFill = cSlider.transform.Find("Fill Area/Fill").gameObject;
             gFill.GetComponent<Image>().color = cColor;

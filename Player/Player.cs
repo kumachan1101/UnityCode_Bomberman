@@ -38,6 +38,7 @@ public class Player : MonoBehaviourPunCallbacks
 
     protected PlayerAction cPlayerAction;
 
+
     public virtual void SetSlider(GameObject gCanvas){
         cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage_CpuMode>();
     }
@@ -50,6 +51,7 @@ public class Player : MonoBehaviourPunCallbacks
     // Use this for initialization
     void Start ()
     {
+        
         /*
         if(iViewID != GetComponent<PhotonView>().ViewID){
             return;
@@ -63,6 +65,7 @@ public class Player : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void Update ()
     {
+        
         //Debug.Log(this.gameObject.name);
         /*
         if(!GetComponent<PhotonView>().IsMine){
@@ -99,6 +102,7 @@ public class Player : MonoBehaviourPunCallbacks
                 //Debug.Log($"{iViewID} is Return");
                 pushFlag = true;
                 DropBom();
+                //AttackExplosion();
              }
         }
         else{
@@ -114,8 +118,18 @@ public class Player : MonoBehaviourPunCallbacks
         }
     }
 
+    private void AttackExplosion(){
+        //Vector3 v3 = GetPos();
+        //Vector3 direction = myTransform.forward;
+        //DropBomと同じように実装しよう。
+        GameObject gBomControl = GameObject.Find("BomControl");
+        gBomControl.GetComponent<BomControl_CpuMode>().CancelInvokeAndCallExplosion();
+    }
+
+
     protected virtual void DropBom_BomControl(GameObject gBomControl, Vector3 v3, int iViewID){
-        gBomControl.GetComponent<BomControl_CpuMode>().DropBom(ref cPlayerBom, v3, iViewID);
+        Vector3 direction = myTransform.forward;
+        gBomControl.GetComponent<BomControl_CpuMode>().DropBom(ref cPlayerBom, v3, iViewID, direction);
     }
 
 
@@ -132,7 +146,7 @@ public class Player : MonoBehaviourPunCallbacks
                 if(tag == "Player"){
                     cPlayer = this.gameObject.GetComponent<Player>();
                 }
-                else if(tag == "Player_CpuMode"){
+                else if(tag == "Player_CpuMode" || tag == "Player_DummyMode" ){
                     cPlayer = this.gameObject.GetComponent<Player_CpuMode>();
                 }
                 else if(tag == "Player_Online"){
@@ -141,12 +155,23 @@ public class Player : MonoBehaviourPunCallbacks
 
                 cPlayer.cPowerGage.SetDamage(iDamage);
                 if(cPlayer.cPowerGage.IsDead()){
+                    Dead(tag);
                     Destroy(this.gameObject);
                 }
 
             }
         }
     }
+
+    // オブジェクトが破棄されるときに呼ばれる
+    void Dead(string tag)
+    {
+        // ここに破棄時の処理を記述する
+        cField = GetField();
+        cField.DeadPlayer(tag);
+
+    }
+
 
     public void OnTriggerExit (Collider other)
     {
@@ -179,7 +204,7 @@ public class Player : MonoBehaviourPunCallbacks
         collisionDirectionTemp /= collision.contacts.Length;
 
         //Debug.Log("X :" + collisionDirectionTemp.x + "Z :" + collisionDirectionTemp.z);
-        float threshold = 0.4f; // 閾値
+        float threshold = 0.3f; // 閾値
         // x軸方向の判定
         if (Mathf.Abs(collisionDirectionTemp.x) > threshold)
         {
@@ -303,6 +328,10 @@ public class Player : MonoBehaviourPunCallbacks
         }
         */
         return new Vector3(x,y,z);
+    }
+
+    public void HeartUp(int iHeart){
+        cPowerGage.HeartUp(iHeart);
     }
 
 

@@ -23,7 +23,8 @@ namespace BomName{
         // Playerクラスから方向を受け取るメソッド
         public void SetMoveDirection(Vector3 direction)
         {
-            moveDirection = direction.normalized; // 方向を正規化することで、速度を一定に保つ
+            moveDirection =direction;
+            //moveDirection = direction.normalized; // 方向を正規化することで、速度を一定に保つ
         }
         
         public void SetMaterialType(Material cParamMaterial){
@@ -52,8 +53,9 @@ namespace BomName{
         {
             if (isMoving)
             {
+                //Debug.Log(moveDirection);
                 //Debug.Log("moveDirection" + moveDirection);
-                transform.position += moveDirection * moveSpeed * Time.deltaTime;
+                transform.position += moveDirection * moveSpeed * Time.deltaTime * 2;
             }
 
         }
@@ -76,10 +78,8 @@ namespace BomName{
             GameObject g = Instantiate(ExplosionPrefab);
             g.GetComponent<Renderer>().material = cMaterialType;
             Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z);
-            if(cField.CheckPositionAndName(v3Temp, "Explosion(Clone)")){
-                Destroy(g);
-                return false;
-            }            
+            cField.DeletePositionAndName(v3Temp, "Explosion(Clone)");
+
             bool bRet = IsWall(v3Temp);
             if(bRet){
                 Destroy(g);
@@ -98,10 +98,7 @@ namespace BomName{
             GameObject g = Instantiate(ExplosionPrefab);
             g.GetComponent<Renderer>().material = cMaterialType;
             Vector3 v3Temp = new Vector3(transform.position.x,transform.position.y,transform.position.z+i);
-            if(cField.CheckPositionAndName(v3Temp, "Explosion(Clone)")){
-                Destroy(g);
-                return false;
-            }            
+            cField.DeletePositionAndName(v3Temp, "Explosion(Clone)");
             bool bRet = IsWall(v3Temp);
             if(bRet){
                 Destroy(g);
@@ -123,12 +120,12 @@ namespace BomName{
             {
                 Vector3 v3 = GetPos(transform.position);
                 transform.position = v3;
-                if(!cField.CheckPositionAndName(v3, "Explosion(Clone)")){
-                    GameObject g = Instantiate(ExplosionPrefab);
-                    g.GetComponent<Renderer>().material = cMaterialType;
-                    g.transform.position = v3;
-                }
+                cField.DeletePositionAndName(v3, "Explosion(Clone)");
 
+                //中心の爆風は、アイテム効果で、地面に沈まないようにする
+                GameObject g = Instantiate(ExplosionPrefab);
+                g.GetComponent<Renderer>().material = cMaterialType;
+                g.transform.position = v3;
 
                 //float x = g.transform.position.x;
                 for (int i = 1; i <= iExplosionNum; i++) 
@@ -234,6 +231,12 @@ namespace BomName{
         public void AbailableBomKick(){
             isMoving = true;
         }
+
+        public void AbailableBomAttack(Vector3 direction){
+            isMoving = true;
+            SetMoveDirection(direction);
+        }
+
 
     }
     

@@ -92,7 +92,9 @@ namespace PlayerActionName{
             Vector3 v3_ground = new Vector3(v3.x, v3.y-1, v3.z);
             
             canMove = cField.IsMatch(v3_ground, cMaterial);
-            
+            if(false == canMove){
+                canMove = cField.IsMatchObjMove(v3_ground);
+            }
             //Debug.Log("canMove : " + canMove + " cMaterial :" + cMaterial + " v3 :"  + v3 + " v3_ground :" + v3_ground);
 
             if(canMove){
@@ -289,7 +291,11 @@ namespace PlayerActionName{
         }
 
         public void SpeedUp(){
+            if(moveSpeed >= 2){
+                return;
+            }
             moveSpeed += 0.5f;
         }
+        
     }
 }

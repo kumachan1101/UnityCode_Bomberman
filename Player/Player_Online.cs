@@ -20,6 +20,7 @@ public class Player_Online : Player
         GameObject gCanvas = GameObject.Find(newCanvasName);
         SetSlider(gCanvas);
         SetViewID(GetComponent<PhotonView>().ViewID);
+        Debug.Log("ViewID:"+iViewID);
     }
 
     void Update ()
@@ -31,7 +32,7 @@ public class Player_Online : Player
     }
 
     protected override void DropBom_BomControl(GameObject gBomControl, Vector3 v3, int iViewID){
-        gBomControl.GetComponent<BomControl>().DropBom(ref cPlayerBom, v3, iViewID);
+        gBomControl.GetComponent<BomControl>().DropBom(ref cPlayerBom, v3, iViewID, myTransform.forward);
     }
 
     protected override Field GetField(){
