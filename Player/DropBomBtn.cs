@@ -9,7 +9,7 @@ public class DropBomBtn : LongPressButton {
         Player cPlayer = FindAndSetPlayer();
         if (cPlayer != null)
         {
-            cPlayer.GetPlayerAction().BtnDropBom();
+            cPlayer.GetPlayerAction().DropBom();
         }
     }
 

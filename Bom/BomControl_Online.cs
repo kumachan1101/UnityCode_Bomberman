@@ -1,37 +1,22 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 using PlayerBomName;
 using BomKind;
 using BomPosName;
 using BomName;
 
-public class BomControl_CpuMode : BomControl
+public class BomControl_Online : BomControl
 {
-    public void Start(){
-        init();
-        //cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl_CpuMode>();
-        //cField = GameObject.Find("Field").GetComponent<Field_CpuMode>();
-    }
-    void Update()
-    {
-        if(null == gField){
-            gField = GameObject.Find("Field");
-            if(null != gField){
-                cField = gField.GetComponent<Field_CpuMode>();
-            }
-        }
-        if(null == gItemControl){
-            gItemControl = GameObject.Find("ItemControl");
-            if(null != gItemControl){
-                cItemControl = gItemControl.GetComponent<ItemControl_CpuMode>();
-            }
-        }
-    }
+
 
     protected override void MakeBom_RPC(Vector3 v3, BomKind.BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType, bool bBomAttack, Vector3 direction){
-        MakeBom(v3, eBomKind,iViewID, iExplosionNum,  bBomKick, sMaterialType, bBomAttack, direction);
+        photonView.RPC(nameof(MakeBom), RpcTarget.All, v3, eBomKind,iViewID, iExplosionNum,  bBomKick, sMaterialType, bBomAttack, direction);
     }
 
-    private void MakeBom(Vector3 v3, BomKind.BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType, bool bBomAttack, Vector3 direction){
+    [PunRPC]
+    public void MakeBom(Vector3 v3, BomKind.BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType, bool bBomAttack, Vector3 direction){
         GameObject g;
         if(eBomKind == BomKind.BOM_KIND.BOM_KIND_BIGBAN){
             g = Instantiate(BomBigBanPrefab);    

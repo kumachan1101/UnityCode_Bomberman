@@ -17,57 +17,22 @@ public class Item:MonoBehaviour{
 
 
     private void OnTriggerEnter(Collider col){
-        //Debug.Log($"{col.transform.name} is OnTriggerEnter");
-        //if("SDunitychan1(Clone)" == col.transform.name || "SDunitychan2(Clone)" == col.transform.name){
-        /*
-        for (int i = 1; i <= 4; i++)
-        {
-            if((("Player"+i+"(Clone)")== col.transform.name)
-            || (("PlayerOnline"+i+"(Clone)")== col.transform.name)
-            || (("PlayerDummy"+i)== col.transform.name))
-            {
-                Reflection(col.transform.name);
-                Destroy(this.gameObject);
-            }
+        if(col.transform.name.StartsWith("Player")){
+            Reflection(col.transform.name);
+            Destroy(this.gameObject);
+            soundManager.PlaySoundEffect("GETITEM");
         }
-        */
-
-            if(col.transform.name.StartsWith("Player")){
-                Reflection(col.transform.name);
-                Destroy(this.gameObject);
-                soundManager.PlaySoundEffect("GETITEM");
-            }
-
     }
 
     protected PlayerBom GetPlayerBomFromObject(string objname)
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
         PlayerBom cPlayerBom = null; // PlayerBomコンポーネントの参照を初期化
-
-        if (gPlayer != null)
+        Player cPlayer = GetcPlayerFromObject(objname);
+        if (cPlayer != null)
         {
-            Player cPlayer = null;
-            if(gPlayer.tag == "Player"){
-                cPlayer = gPlayer.GetComponent<Player>();
-            }
-            else if(gPlayer.tag == "Player_CpuMode" || gPlayer.tag == "Player_DummyMode" ){
-                cPlayer = gPlayer.GetComponent<Player_CpuMode>();
-            }
-            else if(gPlayer.tag == "Player_Online"){
-                cPlayer = gPlayer.GetComponent<Player_Online>();
-            }
-
-            if (cPlayer != null)
-            {
-                cPlayerBom = cPlayer.GetPlayerBom();
-            }
+            cPlayerBom = cPlayer.GetPlayerBom();
         }
-        else
-        {
-            Debug.LogError("Object with the name not found.");
-        }
-        //Debug.Log("objname: "+objname + "cPlayerBom :" + cPlayerBom);
         return cPlayerBom;
     }
 
@@ -75,30 +40,11 @@ public class Item:MonoBehaviour{
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
         PlayerAction cPlayerAction = null;
-
-        if (gPlayer != null)
+        Player cPlayer = GetcPlayerFromObject(objname);
+        if (cPlayer != null)
         {
-            Player cPlayer = null;
-            if(gPlayer.tag == "Player"){
-                cPlayer = gPlayer.GetComponent<Player>();
-            }
-            else if(gPlayer.tag == "Player_CpuMode" || gPlayer.tag == "Player_DummyMode" ){
-                cPlayer = gPlayer.GetComponent<Player_CpuMode>();
-            }
-            else if(gPlayer.tag == "Player_Online"){
-                cPlayer = gPlayer.GetComponent<Player_Online>();
-            }
-
-            if (cPlayer != null)
-            {
-                cPlayerAction = cPlayer.GetPlayerAction();
-            }
+            cPlayerAction = cPlayer.GetPlayerAction();
         }
-        else
-        {
-            Debug.LogError("Object with the name not found.");
-        }
-
         return cPlayerAction;
     }
 
@@ -106,24 +52,18 @@ public class Item:MonoBehaviour{
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
         Player cPlayer = null;
-
-        if (gPlayer != null)
-        {
-            if(gPlayer.tag == "Player"){
-                cPlayer = gPlayer.GetComponent<Player>();
-            }
-            else if(gPlayer.tag == "Player_CpuMode" || gPlayer.tag == "Player_DummyMode" ){
-                cPlayer = gPlayer.GetComponent<Player_CpuMode>();
-            }
-            else if(gPlayer.tag == "Player_Online"){
-                cPlayer = gPlayer.GetComponent<Player_Online>();
-            }
-        }
-        else
+        if (gPlayer == null)
         {
             Debug.LogError("Object with the name not found.");
+            return cPlayer;
         }
-
+        cPlayer = gPlayer.GetComponent<Player>();
+        if(null == cPlayer){
+            cPlayer = gPlayer.GetComponent<Player_CpuMode>();
+        }
+        if(null == cPlayer){
+            cPlayer = gPlayer.GetComponent<Player_Online>();
+        }
         return cPlayer;
     }
 

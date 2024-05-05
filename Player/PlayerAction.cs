@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using PlayerBomName;
+using System;
 
 namespace PlayerActionName{
     public class PlayerAction
     {
         protected Vector3 LastV3;
-
         protected Rigidbody rigidBody;
         protected Transform myTransform;
         protected Animator animator;
@@ -14,18 +14,14 @@ namespace PlayerActionName{
         protected float moveSpeed;
         private int iViewID;
         private bool canMove = true;
-
         private Material cMaterial;
-
         private float elapsedTime = 0f;
-
         public bool pushBtnUp = false;
         public bool pushBtnDown = false;
         public bool pushBtnLeft = false;
         public bool pushBtnRight = false;
         public bool pushBtnEnter = false;
-
-
+        protected Library cLibrary;
         public PlayerAction(ref Rigidbody rb, ref Transform tf, ref Animator ani, ref Field fi, int iViewID){
             rigidBody = rb;
             myTransform = tf;
@@ -43,37 +39,26 @@ namespace PlayerActionName{
         public void UpdateButton()
         {
             elapsedTime += Time.deltaTime;
-            /*
-            // 経過時間が0.5秒以上の場合
-            if (elapsedTime >= 0.25f)
-            {
-                GameObject gPlayer = GameObject.Find("Player1(Clone)");
-                Player cPlayer = gPlayer.GetComponent<Player>();
-                BtnMoveClear(cPlayer);
-                elapsedTime = 0f;
-            }
-            */
 
-            //Debug.Log("UpdateButton");
             if (pushBtnUp)
             {
-                BtnMoveUp();
+                MoveUp();
             }
             else if (pushBtnDown)
             {
-                BtnMoveDown();
+                MoveDown();
             }
             else if (pushBtnRight)
             {
-                BtnMoveRight();
+                MoveRight();
             }
             else if (pushBtnLeft)
             {
-                BtnMoveLeft();
+                MoveLeft();
             }
             else if(pushBtnEnter)
             {
-                BtnDropBom();
+                DropBom();
             }
             else 
             {
@@ -88,7 +73,11 @@ namespace PlayerActionName{
             animator.SetBool ("Walking", false);
             UpdatePlayerMovement();
 
-            Vector3 v3 = GetPos();
+            if(null == cLibrary){
+                cLibrary = GameObject.Find("Library").GetComponent<Library>();
+            }
+
+            Vector3 v3 = cLibrary.GetPos(myTransform.position);
             Vector3 v3_ground = new Vector3(v3.x, v3.y-1, v3.z);
             
             canMove = cField.IsMatch(v3_ground, cMaterial);
@@ -106,7 +95,7 @@ namespace PlayerActionName{
 
         }
 
-        public void BtnMoveClear(Player cPlayer)
+        public void MoveClear(Player cPlayer)
         {
             PlayerAction cPlayerAction = cPlayer.GetPlayerAction();
             cPlayerAction.pushBtnUp = false;
@@ -116,77 +105,76 @@ namespace PlayerActionName{
             cPlayerAction.pushBtnEnter = false;
         }
 
-
-        public  void BtnMoveUp()
-        {
+        private GameObject GetPlayerGameObject(){
             string name = cField.GetName();
             GameObject gPlayer = GameObject.Find(name);
-            Player cPlayer = gPlayer.GetComponent<Player>();
-            BtnMoveClear(cPlayer);
-            PlayerAction cPlayerAction = cPlayer.GetPlayerAction();
-            cPlayerAction.pushBtnUp = true;
-            MovePlayer(gPlayer,Vector3.forward);
+            return gPlayer;
         }
 
-        public  void BtnMoveDown()
-        {
-            string name = cField.GetName();
-            GameObject gPlayer = GameObject.Find(name);
+        private Player GetPlayerComponent(GameObject gPlayer){
             Player cPlayer = gPlayer.GetComponent<Player>();
-            BtnMoveClear(cPlayer);
-            PlayerAction cPlayerAction = cPlayer.GetPlayerAction();
-            cPlayerAction.pushBtnDown = true;
-            MovePlayer(gPlayer,Vector3.back);
+            return cPlayer;
         }
 
-        public  void BtnMoveRight()
+
+        public void PerformPlayerAction(Vector3 moveDirection, Action<PlayerAction> flagSetter)
         {
-            string name = cField.GetName();
-            GameObject gPlayer = GameObject.Find(name);
-            Player cPlayer = gPlayer.GetComponent<Player>();
-            BtnMoveClear(cPlayer);
+            GameObject gPlayer = GetPlayerGameObject();
+            Player cPlayer = GetPlayerComponent(gPlayer);
+            MoveClear(cPlayer);
+
             PlayerAction cPlayerAction = cPlayer.GetPlayerAction();
-            cPlayerAction.pushBtnRight = true;
-            MovePlayer(gPlayer,Vector3.right);
+
+            // フラグの設定を呼び出し元から受け取った関数で行う
+            flagSetter(cPlayerAction);
+
+            MovePlayer(gPlayer, moveDirection);
+        }
+        public virtual void MoveUp()
+        {
+            PerformPlayerAction(Vector3.forward, (cPlayerAction) => {
+                cPlayerAction.pushBtnUp = true;
+            });
         }
 
-        public  void BtnMoveLeft()
+        public virtual void MoveDown()
         {
-            string name = cField.GetName();
-            GameObject gPlayer = GameObject.Find(name);
-            Player cPlayer = gPlayer.GetComponent<Player>();
-            BtnMoveClear(cPlayer);
-            PlayerAction cPlayerAction = cPlayer.GetPlayerAction();
-            cPlayerAction.pushBtnLeft = true;
-            MovePlayer(gPlayer, Vector3.left);
+            PerformPlayerAction(Vector3.back, (cPlayerAction) => {
+                cPlayerAction.pushBtnDown = true;
+            });
         }
 
-        public  void BtnDropBom()
+        public virtual void MoveRight()
         {
-            string name = cField.GetName();
-            GameObject gPlayer = GameObject.Find(name);
-            Player cPlayer = gPlayer.GetComponent<Player>();
-            BtnMoveClear(cPlayer);
-            PlayerAction cPlayerAction = cPlayer.GetPlayerAction();
-            cPlayerAction.pushBtnEnter = true;
+            PerformPlayerAction(Vector3.right, (cPlayerAction) => {
+                cPlayerAction.pushBtnRight = true;
+            });
+        }
+
+        public virtual void MoveLeft()
+        {
+            PerformPlayerAction(Vector3.left, (cPlayerAction) => {
+                cPlayerAction.pushBtnLeft = true;
+            });
+        }
+
+        public virtual void DropBom()
+        {
+            PerformPlayerAction(Vector3.zero, (cPlayerAction) => {
+                cPlayerAction.pushBtnEnter = true;
+            });
+            
+            GameObject gPlayer = GetPlayerGameObject();
+            Player cPlayer = GetPlayerComponent(gPlayer);
             cPlayer.DropBom();
         }
 
         private void MovePlayer(GameObject gPlayer, Vector3 direction)
         {
-            //Debug.Log("MovePlayer: " + direction);
-            /*
-            Rigidbody cRigidbody = gPlayer.GetComponent<Rigidbody>();
-            cRigidbody.velocity = gPlayer.transform.position + direction * gridSize;
-            Rigidbody cRigidbody = gPlayer.GetComponent<Rigidbody>();
-            cRigidbody.velocity = direction * gridSize;
-            */
-            /*
-            Vector3 newPosition = gPlayer.transform.position + direction * gridSize;
-            newPosition.x = Mathf.RoundToInt(newPosition.x / gridSize) * gridSize;
-            newPosition.z = Mathf.RoundToInt(newPosition.z / gridSize) * gridSize;
-            gPlayer.transform.position = newPosition;
-            */
+            
+            if(direction == Vector3.zero){
+                return;
+            }
             Transform cTransform = gPlayer.GetComponent<Transform>();
             float moveDistance = moveSpeed * Time.deltaTime;
             cTransform.Translate(Vector3.forward * moveDistance);
@@ -196,44 +184,15 @@ namespace PlayerActionName{
             Animator cAnimator = cTransform.Find("PlayerModel").GetComponent<Animator>();
             cAnimator.SetBool("Walking", true);
         }
-
-        public void MoveUp()
+        public void Move(Vector3 direction, float rotationY)
         {
-            Vector3 newPosition = rigidBody.position + Vector3.forward * gridSize * moveSpeed; // gridSizeに移動スピードを掛ける
+            Vector3 newPosition = rigidBody.position + direction * gridSize * moveSpeed;
             newPosition.x = Mathf.RoundToInt(newPosition.x / gridSize) * gridSize;
             newPosition.z = Mathf.RoundToInt(newPosition.z / gridSize) * gridSize;
             rigidBody.MovePosition(newPosition);
-            myTransform.rotation = Quaternion.Euler(0, 0, 0);
-            animator.SetBool("Walking", true);
-        }
 
-        public void MoveDown()
-        {
-            Vector3 newPosition = rigidBody.position - Vector3.forward * gridSize * moveSpeed;
-            newPosition.x = Mathf.RoundToInt(newPosition.x / gridSize) * gridSize;
-            newPosition.z = Mathf.RoundToInt(newPosition.z / gridSize) * gridSize;
-            rigidBody.MovePosition(newPosition);
-            myTransform.rotation = Quaternion.Euler(0, 180, 0);
-            animator.SetBool("Walking", true);
-        }
+            myTransform.rotation = Quaternion.Euler(0, rotationY, 0); // Y軸周りの回転を設定
 
-        public void MoveLeft()
-        {
-            Vector3 newPosition = rigidBody.position - Vector3.right * gridSize * moveSpeed;
-            newPosition.x = Mathf.RoundToInt(newPosition.x / gridSize) * gridSize;
-            newPosition.z = Mathf.RoundToInt(newPosition.z / gridSize) * gridSize;
-            rigidBody.MovePosition(newPosition);
-            myTransform.rotation = Quaternion.Euler(0, 270, 0);
-            animator.SetBool("Walking", true);
-        }
-
-        public void MoveRight()
-        {
-            Vector3 newPosition = rigidBody.position + Vector3.right * gridSize * moveSpeed;
-            newPosition.x = Mathf.RoundToInt(newPosition.x / gridSize) * gridSize;
-            newPosition.z = Mathf.RoundToInt(newPosition.z / gridSize) * gridSize;
-            rigidBody.MovePosition(newPosition);
-            myTransform.rotation = Quaternion.Euler(0, 90, 0);
             animator.SetBool("Walking", true);
         }
 
@@ -242,19 +201,19 @@ namespace PlayerActionName{
             // Keyboard input
             if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
             {
-                BtnMoveUp();
+                MoveUp();
             }
             else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
             {
-                BtnMoveDown();
+                MoveDown();
             }
             else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
             {
-                BtnMoveLeft();
+                MoveLeft();
             }
             else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
             {
-                BtnMoveRight();
+                MoveRight();
             }
 
             if (Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.W) ||
@@ -262,32 +221,11 @@ namespace PlayerActionName{
                 Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.A) ||
                 Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.S))
             {
-                string name = cField.GetName();
-                GameObject gPlayer = GameObject.Find(name);
-                Player cPlayer = gPlayer.GetComponent<Player>();
-                BtnMoveClear(cPlayer);
+
+                GameObject gPlayer = GetPlayerGameObject();
+                Player cPlayer = GetPlayerComponent(gPlayer);
+                MoveClear(cPlayer);
             }
-                
-
-        }
-
-
-
-        private Vector3 GetPos(){
-            float x = Mathf.Round(myTransform.position.x);
-            /*
-            if(x % 2 == 1){
-                x += 1;
-            }
-            */
-            float z = Mathf.Round(myTransform.position.z);
-            /*
-            if(z % 2 == 1){
-                z += 1;
-            }
-            */
-            float y = 1;
-            return new Vector3(x,y,z);
         }
 
         public void SpeedUp(){

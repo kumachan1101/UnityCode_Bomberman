@@ -8,7 +8,7 @@ public class MoveUpBtn : LongPressButton {
         Player cPlayer = FindAndSetPlayer();
         if (cPlayer != null)
         {
-            cPlayer.GetPlayerAction().BtnMoveUp();
+            cPlayer.GetPlayerAction().MoveUp();
         }
     }
     

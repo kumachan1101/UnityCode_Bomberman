@@ -11,6 +11,8 @@ namespace BomName{
 
         protected Material cMaterialType;
         protected Field cField;
+
+        protected Library cLibrary;
         private int iViewID;
         //private List<GameObject> ExplosionList = new List<GameObject>();
         // Start is called before the first frame update
@@ -33,7 +35,11 @@ namespace BomName{
 
 
         void Awake(){
-            cField = GameObject.Find("Field").GetComponent<Field>();
+            cField = GameObject.Find("Field").GetComponent<Field_CpuMode>();
+            if(null == cField){
+                cField = GameObject.Find("Field").GetComponent<Field>();
+            }
+            cLibrary = GameObject.Find("Library").GetComponent<Library>();
         }
         // Start is called before the first frame update
         void Start()
@@ -78,7 +84,7 @@ namespace BomName{
             GameObject g = Instantiate(ExplosionPrefab);
             g.GetComponent<Renderer>().material = cMaterialType;
             Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z);
-            cField.DeletePositionAndName(v3Temp, "Explosion(Clone)");
+            cLibrary.DeletePositionAndName(v3Temp, "Explosion(Clone)");
 
             bool bRet = IsWall(v3Temp);
             if(bRet){
@@ -98,7 +104,7 @@ namespace BomName{
             GameObject g = Instantiate(ExplosionPrefab);
             g.GetComponent<Renderer>().material = cMaterialType;
             Vector3 v3Temp = new Vector3(transform.position.x,transform.position.y,transform.position.z+i);
-            cField.DeletePositionAndName(v3Temp, "Explosion(Clone)");
+            cLibrary.DeletePositionAndName(v3Temp, "Explosion(Clone)");
             bool bRet = IsWall(v3Temp);
             if(bRet){
                 Destroy(g);
@@ -118,9 +124,9 @@ namespace BomName{
         {
             lock (lockObject)
             {
-                Vector3 v3 = GetPos(transform.position);
+                Vector3 v3 = cLibrary.GetPos(transform.position);
                 transform.position = v3;
-                cField.DeletePositionAndName(v3, "Explosion(Clone)");
+                cLibrary.DeletePositionAndName(v3, "Explosion(Clone)");
 
                 //中心の爆風は、アイテム効果で、地面に沈まないようにする
                 GameObject g = Instantiate(ExplosionPrefab);
@@ -156,12 +162,6 @@ namespace BomName{
                         break;
                     }
                 }
-    /*
-                BomPos cBom = new BomPos();
-                cBom.SetPos(transform.position);
-                GameObject gBomControl = GameObject.Find("BomControl");
-                gBomControl.GetComponent<BomControl>().DelBom(cBom);
-    */
                 Destroy(this.gameObject);
             }
         }
@@ -197,7 +197,7 @@ namespace BomName{
                     return;
             }
             // 衝突を検知したら座標を補正して移動を止める
-            transform.position = GetPos(transform.position);
+            transform.position = cLibrary.GetPos(transform.position);
             isMoving = false; // 移動停止
         }
 
@@ -206,26 +206,6 @@ namespace BomName{
             //Debug.Log("すり抜けた！");
             GetComponent<SphereCollider>().isTrigger = false;
             
-        }
-
-        protected Vector3 GetPos(Vector3 position)
-        {
-            float x = Mathf.Round(position.x);
-            /*
-            if (x % 2 == 1)
-            {
-                x += 1;
-            }
-            */
-            float y = 1;
-            float z = Mathf.Round(position.z);
-            /*
-            if (z % 2 == 1)
-            {
-                z += 1;
-            }
-            */
-            return new Vector3(x, y, z);
         }
 
         public void AbailableBomKick(){

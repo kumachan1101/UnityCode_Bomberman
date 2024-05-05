@@ -6,9 +6,6 @@ public class Explosion : MonoBehaviour
 {
     private Field cField;
     protected bool bField = false;
-
-    //private bool bStopInvoke = false;
-
     private SoundManager soundManager;
 
     public void FieldValid()
@@ -29,18 +26,10 @@ public class Explosion : MonoBehaviour
         }
 
         Invoke(nameof(hide), 1f);
-
-        
         soundManager.PlaySoundEffect("EXPLOISON");
     }
-
-/*
-    public void StopInvoke(){
-        CancelInvoke(nameof(hide));
-        bStopInvoke = true;
-    }
-*/
     void hide(){
+        
         transform.position = new Vector3(transform.position.x, transform.position.y-1, transform.position.z);
         cField = GameObject.Find("Field").GetComponent<Field>();
         bool bRet = cField.IsMatchObjMove(transform.position);
@@ -75,19 +64,10 @@ public class Explosion : MonoBehaviour
                 break;
             case "FixedWall(Clone)":
                 Destroy(gameObject);
-                //transform.position = GetPos();
-                //hide();
                 break;
             default:
                 return;
         }
-    }
-
-    private Vector3 GetPos(){
-        float x = Mathf.Round(transform.position.x);
-        float y = 1;
-        float z = Mathf.Round(transform.position.z);
-        return new Vector3(x,y,z);
     }
 
 }

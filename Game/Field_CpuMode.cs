@@ -3,8 +3,11 @@ using UnityEngine;
 public class Field_CpuMode : Field {
     private bool bFlag;
 
+    private GameManager cGameManager;
+
     void start(){
         bFlag = false;
+        cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     protected override void CPUmodeInit(){
@@ -15,7 +18,7 @@ public class Field_CpuMode : Field {
         CreateBrokenBlock();
         SpawnPlayerObjects(playerCount);
 
-        PlayerName = "Player1(Clone)";
+        SetName("Player1(Clone)");
         SetPlayerNum(playerCount-1);
 
     }
@@ -59,6 +62,10 @@ public class Field_CpuMode : Field {
             return; 
         }
 
+        if(null == cGameManager){
+            cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        }
+
         // "Player1(Clone)" または "PlayerDummy1" の存在を確認します
         GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
         foreach (GameObject obj in allObjects)
@@ -89,7 +96,7 @@ public class Field_CpuMode : Field {
                 GameObject.Find("PlayerDummy3") == null &&
                 GameObject.Find("PlayerDummy4") == null)
             {
-                GameWin();
+                cGameManager.GameWin();
                 bFlag = true;
             }
             else
@@ -99,7 +106,7 @@ public class Field_CpuMode : Field {
         }
         else
         {
-            GameOver();
+            cGameManager.GameOver();
             bFlag = true;
         }
 /*

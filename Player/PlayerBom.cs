@@ -89,15 +89,6 @@ namespace PlayerBomName
         private int GetBomNum(){
             int iBomNum = GetBomViewIDNum(iViewID);
             return iBomNum;
-            /*
-            int iLen = 0;
-            foreach (Bom gBom in BomList) {
-                if(null != gBom){
-                    iLen++;
-                }
-            }
-            return iLen;
-            */
         }
 
         public bool isAbalableBom(Vector3 v3){
@@ -140,21 +131,6 @@ namespace PlayerBomName
             //Debug.Log(BomList.Count);
         }
 
-/*
-
-        private int GetBomNum(){
-            int iLen = 0;
-            foreach (GameObject gBom in BomList) {
-                if(null != gBom){
-                    iLen++;
-                }
-            }
-            return iLen;
-        }
-
-
-
-*/
     }
 
 }

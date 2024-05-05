@@ -17,7 +17,7 @@ public class LongPressButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         Player cPlayer = FindAndSetPlayer();
         if (cPlayer != null)
         {
-            cPlayer.GetPlayerAction().BtnMoveClear(cPlayer);
+            cPlayer.GetPlayerAction().MoveClear(cPlayer);
         }
 
     }
@@ -39,12 +39,16 @@ public class LongPressButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         string name = cField.GetName();
         GameObject gPlayer = FindPlayerObject(name);
 
+        if(null == name){
+            return null;
+        }
+
         if (name.Contains("PlayerOnline"))
         {
-            //return gPlayer.GetComponent<Player_Online>();
-            return gPlayer.GetComponent<Player>();
+            return gPlayer.GetComponent<Player_Online>();
+            //return gPlayer.GetComponent<Player>();
         }
-        if (name.Contains("Player"))
+        else if (name.Contains("Player"))
         {
             return gPlayer.GetComponent<Player>();
         }

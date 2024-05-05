@@ -54,8 +54,10 @@ public class GameManager : MonoBehaviourPunCallbacks
             CreateStage(scene.name);
         }
         else if("GameOnline" == scene.name){
-            iStage = 0;
             CreateStage(scene.name);
+        }
+        else if("GameTitle" == scene.name){
+            iStage = 1;
         }
     }
 
@@ -69,34 +71,11 @@ public class GameManager : MonoBehaviourPunCallbacks
             GameObject prefab = (GameObject)Resources.Load(prefabName);
             gField = Instantiate(prefab);
             gField.name = "Field";
-/*
-            GameObject gItemControl = Instantiate(Resources.Load("ItemControl") as GameObject);
-            gItemControl.name = "ItemControl";
-            gItemControl.AddComponent<ItemControl_CpuMode>();
-
-            GameObject gBomControl = Instantiate(Resources.Load("BomControl") as GameObject);
-            gBomControl.name = "BomControl";
-            gBomControl.AddComponent<BomControl_CpuMode>();
-*/
         }
 
         GameObject gGameEndCanvas = Instantiate(Resources.Load("GameEndCanvas") as GameObject);
-
-        //GameObject gMaterialManager = Instantiate(Resources.Load("MaterialManager") as GameObject);
-        //gMaterialManager.name = "MaterialManager";
-
         GameObject gCanvas = Instantiate(Resources.Load("Canvas") as GameObject);
-
-        /*
-        else if("GameOnline"  == scenename){
-            gItemControl.AddComponent<ItemControl>();
-            gBomControl.AddComponent<BomControl>();
-        }
-        */
-
     }
-
-
 
     void Start()
     {
@@ -117,6 +96,32 @@ public class GameManager : MonoBehaviourPunCallbacks
         iStage += 1;
         return iStage;
     }
+
+    public void GameWin(){
+        int iStage = GameManager.NextStage();
+        if(iStage <= 5){
+            Invoke("SwitchGameScene", 5f);
+        }
+        else{
+            GameOver();
+        }
+        
+    }
+
+    public void GameOver(){
+        Invoke("SwitchGameOver", 5f);
+    }
+
+    public void SwitchGameScene()
+    {
+        SceneManager.LoadScene("GameScene");
+    }
+
+    public void SwitchGameOver()
+    {
+        SceneManager.LoadScene("GameTitle");
+    }
+
 
 
 }

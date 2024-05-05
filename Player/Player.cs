@@ -11,67 +11,24 @@ public class Player : MonoBehaviourPunCallbacks
 {
 
     public string MaterialType;
-    //Player parameters
     public int playerNumber = 1;
-    //Indicates what player this is: P1 or P2
-
-    //Can the player drop bombs?
-    //Can the player move?
-
-    //Cached components
     protected Rigidbody rigidBody;
     protected Transform myTransform;
     protected Animator animator;
     protected Field cField;
-
     private bool pushFlag = false;
-
     public int iViewID = 9999;
-
-
     public PowerGageName.PowerGage cPowerGage;
-    //private Slider s;
-    //private Vector3 SliderPos;
-
     protected PlayerBomName.PlayerBom cPlayerBom;
-
-
     protected PlayerAction cPlayerAction;
-
-
+    protected Library cLibrary;
     public virtual void SetSlider(GameObject gCanvas){
         cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage_CpuMode>();
-    }
-
-    void Awake ()
-    {  
-
-    }
-
-    // Use this for initialization
-    void Start ()
-    {
-        
-        /*
-        if(iViewID != GetComponent<PhotonView>().ViewID){
-            return;
-        }
-        */
-        //Cache the attached components for better performance and less typing
-
-        //cBomControl.SetBomSetting(MaterialType);
     }
 
     // Update is called once per frame
     void Update ()
     {
-        
-        //Debug.Log(this.gameObject.name);
-        /*
-        if(!GetComponent<PhotonView>().IsMine){
-            return;
-        }
-        */
         if(false == IsAvairable()){
             return;
         }
@@ -85,11 +42,6 @@ public class Player : MonoBehaviourPunCallbacks
     }
 
     protected virtual bool IsAvairable(){
-        /*
-        if(iViewID != GetComponent<PhotonView>().ViewID){
-            return false;
-        }
-        */
         if(iViewID == 9999){
             return false;
         }
@@ -111,9 +63,12 @@ public class Player : MonoBehaviourPunCallbacks
     }
 
     public void DropBom(){
-        GameObject gBomControl = GameObject.Find("BomControl");
-        Vector3 v3 = GetPos();
+        if(null == cLibrary){
+            cLibrary = GameObject.Find("Library").GetComponent<Library>();
+        }
+        Vector3 v3 = cLibrary.GetPos(transform.position);
         if(cPlayerBom.isAbalableBom(v3)){
+            GameObject gBomControl = GameObject.Find("BomControl");
             DropBom_BomControl(gBomControl, v3, iViewID);
         }
     }
@@ -132,8 +87,6 @@ public class Player : MonoBehaviourPunCallbacks
         gBomControl.GetComponent<BomControl_CpuMode>().DropBom(ref cPlayerBom, v3, iViewID, direction);
     }
 
-
-
     public virtual void OnTriggerEnter (Collider other)
     {
         if (other.CompareTag ("Explosion"))
@@ -141,40 +94,21 @@ public class Player : MonoBehaviourPunCallbacks
             string materialName = other.GetComponent<Renderer>().material.name.Replace(" (Instance)", "");
             if(MaterialType != materialName){
                 int iDamage = other.GetComponent<Explosion>().GetDamage();
-                string tag = this.gameObject.tag;
-                Player cPlayer = null;
-                if(tag == "Player"){
-                    cPlayer = this.gameObject.GetComponent<Player>();
-                }
-                else if(tag == "Player_CpuMode" || tag == "Player_DummyMode" ){
-                    cPlayer = this.gameObject.GetComponent<Player_CpuMode>();
-                }
-                else if(tag == "Player_Online"){
-                    cPlayer = this.gameObject.GetComponent<Player_Online>();
-                }
-
+                Player cPlayer = GetComponent();
+                //Debug.Log(cPlayer);
                 cPlayer.cPowerGage.SetDamage(iDamage);
+    
                 if(cPlayer.cPowerGage.IsDead()){
-                    Dead(tag);
+                    string tag = this.gameObject.tag;
+                    //Dead(tag);
                     Destroy(this.gameObject);
                 }
-
             }
         }
     }
 
-    // オブジェクトが破棄されるときに呼ばれる
-    void Dead(string tag)
-    {
-        // ここに破棄時の処理を記述する
-        cField = GetField();
-        cField.DeadPlayer(tag);
-
-    }
-
-
-    public void OnTriggerExit (Collider other)
-    {
+    protected virtual Player GetComponent(){
+        return this.gameObject.GetComponent<Player>();
     }
 
 
@@ -274,60 +208,6 @@ public class Player : MonoBehaviourPunCallbacks
     [PunRPC]
     public void SetIsTrigger(bool bSet){
         GetComponent<Collider>().isTrigger = bSet;        
-    }
-
-
-
-    public  void BtnMoveUp()
-    {
-        GameObject gPlayer = GameObject.Find("Player1(Clone)");
-        Player cPlayer = gPlayer.GetComponent<Player>();
-        cPlayer.GetPlayerAction().BtnMoveUp();
-    }
-
-    public  void BtnMoveDown()
-    {
-        GameObject gPlayer = GameObject.Find("Player1(Clone)");
-        Player cPlayer = gPlayer.GetComponent<Player>();
-        cPlayer.GetPlayerAction().BtnMoveDown();
-    }
-
-    public  void BtnMoveRight()
-    {
-        GameObject gPlayer = GameObject.Find("Player1(Clone)");
-        Player cPlayer = gPlayer.GetComponent<Player>();
-        cPlayer.GetPlayerAction().BtnMoveRight();
-    }
-
-    public  void BtnMoveLeft()
-    {
-        GameObject gPlayer = GameObject.Find("Player1(Clone)");
-        Player cPlayer = gPlayer.GetComponent<Player>();
-        cPlayer.GetPlayerAction().BtnMoveLeft();
-    }
-
-    public  void BtnDropBom()
-    {
-        GameObject gPlayer = GameObject.Find("Player1(Clone)");
-        Player cPlayer = gPlayer.GetComponent<Player>();
-        cPlayer.GetPlayerAction().BtnDropBom();
-    }
-
-    private Vector3 GetPos(){
-        float x = Mathf.Round(transform.position.x);
-        /*
-        if(x % 2 == 1){
-            x += 1;
-        }
-        */
-        float y = 1;
-        float z = Mathf.Round(transform.position.z);
-        /*
-        if(z % 2 == 1){
-            z += 1;
-        }
-        */
-        return new Vector3(x,y,z);
     }
 
     public void HeartUp(int iHeart){

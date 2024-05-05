@@ -28,7 +28,7 @@ public class Field : MonoBehaviourPunCallbacks {
 
 
     protected string PlayerName;
-
+    protected Library cLibrary;
     protected Vector3[] v3PlayerPos1 = new Vector3[]
     {
         new Vector3(1, 1, 1),
@@ -46,7 +46,6 @@ public class Field : MonoBehaviourPunCallbacks {
 
     void Awake() {
     }
-
 
     public Vector3 GetPlayerPosition(int arrayIndex, int elementIndex)
     {
@@ -99,14 +98,7 @@ public class Field : MonoBehaviourPunCallbacks {
     // Start is called before the first frame update
     void Start()
     {
-        /*
-        int iPlayerCnt = GameObject.Find("Online").GetComponent<Online>().GetPlayerCnt();
-        if(iPlayerCnt >= 2){
-            return;
-        }
-        */
-        
-        //iPowerGageYPos = 0;
+        cLibrary = GameObject.Find("Library").GetComponent<Library>();
         CreateBox();
         CPUmodeInit();
     }
@@ -205,7 +197,7 @@ public class Field : MonoBehaviourPunCallbacks {
 
     private void SetupSlider(int i, GameObject gCanvas)
     {
-        Debug.Log("PoewrGage:"+i);
+        //Debug.Log("PoewrGage:"+i);
         Slider slider = gCanvas.GetComponentInChildren<Slider>(); // Canvasの子要素からSliderを取得します。
         RectTransform sliderRectTransform = slider.GetComponent<RectTransform>(); // SliderのRectTransformを取得します。
         Vector3 newPosition = sliderRectTransform.position; // 現在の位置を取得します。
@@ -231,28 +223,13 @@ public class Field : MonoBehaviourPunCallbacks {
     {
         GameTransision();        
     }
-/*
-    // playerCountを引数に取り、v3PlayerPos[playerCount-1]を返す関数
-    public virtual Vector3 GetPlayerPosition(int playerCount, int index)
-    {
-        if (playerCount >= 1 && playerCount <= GetArrayLength(index).Length)
-        {
-            return GetPlayerPosition(index,playerCount - 1);
-        }
-        else
-        {
-            Debug.LogError("Invalid playerCount: " + playerCount);
-            return Vector3.zero; // エラー時は適当な値を返すか、エラーハンドリングを行う
-        }
-    }
-*/
 
     public void AddBrokenBlock(){
         int y = 1;
         for (int x = 0; x < GameManager.xmax; x++) {
             for (int z = 0; z < GameManager.zmax; z++) {
                 Vector3 v3 = new Vector3(x,y,z);
-                if(false == CheckPosition(v3)){
+                if(false == cLibrary.CheckPosition(v3)){
                     int iRand = Random.Range(0, 10);
                     if(0 == iRand){
                         InsBrokenBlock_RPC(x, y, z);
@@ -282,10 +259,6 @@ public class Field : MonoBehaviourPunCallbacks {
             }
         }
     }
-
-
-
-
 
     private bool IsAbalableBlock(int x,int z){
         if ((x == 1 || x == 2 || x == GameManager.xmax-3 || x == GameManager.xmax-2) && (z == GameManager.zmax-3 || z == GameManager.zmax-2 || z == 1 || z == 2))
@@ -403,33 +376,6 @@ public class Field : MonoBehaviourPunCallbacks {
         return "InvalidMaterial";
     }
 
-
-/*
-    private string GetBomMaterial(int x, int z)
-    {
-        if ((x == 1 && z == 1) || (x == 1 && z == 2) || (x == 2 && z == 1) || (x == 2 && z == 2))
-        {
-            return "BomMaterial1";
-        }
-        else if ((x == xmax - 2 && z == zmax - 2) || (x == xmax - 2 && z == zmax - 3) || (x == xmax - 3 && z == zmax - 2) || (x == xmax - 3 && z == zmax - 3))
-        {
-            return "BomMaterial2";
-        }
-        else if ((x == 1 && z == zmax - 2) || (x == 1 && z == zmax - 3) || (x == 2 && z == zmax - 2) || (x == 2 && z == zmax - 3))
-        {
-            return "BomMaterial3";
-        }
-        else if ((x == xmax - 2 && z == 1) || (x == xmax - 2 && z == 2) || (x == xmax - 3 && z == 1) || (x == xmax - 3 && z == 2))
-        {
-            return "BomMaterial4";
-        }
-        else
-        {
-            // 対応する座標がない場合、もしくは不正な座標が渡された場合
-            return "InvalidMaterial";
-        }
-    }
-*/
     private void CreateBox(){
         for (int x = 0; x < GameManager.xmax; x++) {
             for (int z = 0; z < GameManager.zmax; z++) {
@@ -636,86 +582,6 @@ public class Field : MonoBehaviourPunCallbacks {
         ExplosionList.Add(g);       
     }
 
-    // 指定した座標と名称が一致し、かつアクティブであるオブジェクトが存在するかをチェックする関数
-    public bool CheckPositionAndName(Vector3 targetPosition, string targetName)
-    {
-        // シーン内の全てのGameObjectを取得
-        GameObject[] allGameObjects = GameObject.FindObjectsOfType<GameObject>();
-
-        // 全てのGameObjectに対してループ処理を行う
-        foreach (GameObject obj in allGameObjects)
-        {
-            // GameObjectのTransformコンポーネントを取得
-            Transform objTransform = obj.transform;
-
-            // アクティブかつ座標と名称が一致するかをチェックする
-            if (obj.activeInHierarchy && objTransform.position == targetPosition && obj.name == targetName)
-            {
-                // 一致する場合はtrueを返す
-                return true;
-            }
-        }
-
-        // 一致するGameObjectが見つからない場合はfalseを返す
-        return false;
- 
- 
-    }
-
-public bool CheckPosition(Vector3 targetPosition)
-{
-    // シーン内の全てのGameObjectを取得
-    GameObject[] allGameObjects = GameObject.FindObjectsOfType<GameObject>();
-
-    // 全てのGameObjectに対してループ処理を行う
-    foreach (GameObject obj in allGameObjects)
-    {
-        // GameObjectのTransformコンポーネントを取得
-        Transform objTransform = obj.transform;
-
-        // アクティブかつ座標が一致するかをチェックする
-        if (obj.activeInHierarchy && objTransform.position == targetPosition)
-        {
-            // 一致する場合はtrueを返す
-            return true;
-        }
-    }
-
-    // 一致するGameObjectが見つからない場合はfalseを返す
-    return false;
-}
-
-
-
-    public void DeletePositionAndName(Vector3 targetPosition, string targetName)
-    {
-        // シーン内の全てのGameObjectを取得
-        GameObject[] allGameObjects = GameObject.FindObjectsOfType<GameObject>();
-        GameObject g = null;
-
-        // 全てのGameObjectに対してループ処理を行う
-        foreach (GameObject obj in allGameObjects)
-        {
-            // GameObjectのTransformコンポーネントを取得
-            Transform objTransform = obj.transform;
-
-            // アクティブかつ座標と名称が一致するかをチェックする
-            if (obj.activeInHierarchy && objTransform.position == targetPosition && obj.name == targetName)
-            {
-                g = obj;
-                break;
-            }
-        }
-        if(null != g){
-            Destroy(g);
-        }
-        
-
-        // 一致するGameObjectが見つからない場合はfalseを返す
-        return;
- 
- 
-    }
 
     
     public void SetName(string namepara){
@@ -733,69 +599,13 @@ public bool CheckPosition(Vector3 targetPosition)
         return CuurentPlayerNum;
     }
 
-    public void DeadPlayer(string tag){
-        /*
-        if(tag == "Player"){
-            GameOver();
-            return;
-        }
 
-        if(tag != "Player" && tag != "Player_Online"){
-            CuurentPlayerNum--;
-        }
-        
-        Debug.Log(CuurentPlayerNum);
-        if(0 >= CuurentPlayerNum){
-            Debug.Log("Win");
-            GameWin();
-        }
-        */
-        
-    }
-
-    public void GameWin(){
-        int iStage = GameManager.NextStage();
-        if(iStage <= 5){
-            Invoke("SwitchGameScene", 5f);
-        }
-        else{
-            GameOver();
-        }
-        
-    }
-
-    public void GameOver(){
-        Invoke("SwitchGameOver", 5f);
-    }
-
-    void SwitchGameScene()
-    {
-        SceneManager.LoadScene("GameScene");
-    }
-
-    void SwitchGameOver()
-    {
-        SceneManager.LoadScene("GameTitle");
-    }
 
     protected virtual void GameTransision()
     {
     }
 
-    int CountObjectsWithName(string name)
-    {
-        int count = 0;
-        GameObject[] objects = GameObject.FindObjectsOfType<GameObject>();
-        foreach (GameObject obj in objects)
-        {
-            if (obj.name == name)
-            {
-                count++;
-            }
-        }
-        return count;
-    }
-
+ 
     [PunRPC]
     public void Rainbow(string sMaterialType){
 

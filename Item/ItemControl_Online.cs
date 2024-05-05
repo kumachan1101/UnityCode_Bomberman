@@ -1,11 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-
-public class ItemControl_CpuMode: ItemControl
+using Photon.Pun;
+public class ItemControl_Online: ItemControl
 {
-    protected override void CreateItem_RPC(ABILITY eRand, Vector3 v3){
-        CreateItem(eRand, v3);
-    }
-
     public override GameObject Create(ABILITY eItem){
         GameObject gItem = null;
         switch(eItem){
@@ -19,10 +17,7 @@ public class ItemControl_CpuMode: ItemControl
                 gItem= ItemBomExplodePrefab;
                 break;
             case ABILITY.ABILITY_BOM_BIGBAN:
-                int iRand = Random.Range(0, 5);
-                if(0 == iRand){
-                    gItem= ItemBomBigBanPrefab;
-                }
+                gItem= ItemBomBigBanPrefab;
                 break;
             case ABILITY.ABILITY_SPEED_UP:
                 gItem= ItemSpeedPrefab;
@@ -42,9 +37,6 @@ public class ItemControl_CpuMode: ItemControl
             case ABILITY.ABILITY_ADD_BLOCK:
                 gItem= ItemAddBlockPrefab;
                 break;
-            case ABILITY.ABILITY_ADD_DUMMY:
-                gItem= ItemAddDummyPrefab;
-                break;
             default:
                 gItem = null;
                 break;
@@ -52,6 +44,13 @@ public class ItemControl_CpuMode: ItemControl
         return gItem;
     }
 
+
+    protected override void CreateItem_RPC(ABILITY eRand, Vector3 v3){
+        photonView.RPC(nameof(CreateItem), RpcTarget.All, eRand, v3);
+    }
+
+
+    [PunRPC]
     public void CreateItem(ABILITY eRand, Vector3 v3){
         GameObject gItem = Create(eRand);
         if(gItem != null){
@@ -59,4 +58,5 @@ public class ItemControl_CpuMode: ItemControl
             g.transform.position = v3;
         }
     }
+
 }

@@ -8,17 +8,10 @@ public class Broken : MonoBehaviour
     protected ItemControl cItemControl;
 
     void Awake(){
-        cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
-        //g.transform.position = transform.position;
-        /*
-        if(null == gItemControl){
-            gItemControl = GameObject.Find("ItemControl(Clone)");
-            if(null != gItemControl){
-                cItemControl = gItemControl.GetComponent<ItemControl>();
-            }
+        cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl_CpuMode>();
+        if(null == cItemControl){
+            cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl_Online>();
         }
-        */
-
     }
     // Start is called before the first frame update
     void Start()

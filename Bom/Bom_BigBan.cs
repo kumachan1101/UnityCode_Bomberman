@@ -10,7 +10,7 @@ public class Bom_BigBan : Bom_Explode
         GameObject g = Instantiate(ExplosionPrefab);
         g.GetComponent<Renderer>().material = cMaterialType;
         Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z+j);
-        cField.DeletePositionAndName(v3Temp, "Explosion(Clone)");
+        cLibrary.DeletePositionAndName(v3Temp, "Explosion(Clone)");
 
         bool bRet = IsWall(v3Temp);
         if(bRet){
@@ -25,9 +25,9 @@ public class Bom_BigBan : Bom_Explode
     {
         lock (lockObject)
         {
-            Vector3 v3 = GetPos(transform.position);
+            Vector3 v3 = cLibrary.GetPos(transform.position);
             transform.position = v3;
-            cField.DeletePositionAndName(v3, "Explosion(Clone)");
+            cLibrary.DeletePositionAndName(v3, "Explosion(Clone)");
             GameObject g = Instantiate(ExplosionPrefab);
             g.GetComponent<Renderer>().material = cMaterialType;
             g.transform.position = v3;

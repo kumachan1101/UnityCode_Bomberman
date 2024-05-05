@@ -8,7 +8,7 @@ public class MoveLeftBtn : LongPressButton {
         Player cPlayer = FindAndSetPlayer();
         if (cPlayer != null)
         {
-            cPlayer.GetPlayerAction().BtnMoveLeft();
+            cPlayer.GetPlayerAction().MoveLeft();
         }
     }
 

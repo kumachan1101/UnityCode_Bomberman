@@ -22,4 +22,11 @@ public class Player_CpuMode : Player
         return true;
     }
 
+    protected override void DropBom_BomControl(GameObject gBomControl, Vector3 v3, int iViewID){
+        Vector3 direction = myTransform.forward;
+        gBomControl.GetComponent<BomControl_CpuMode>().DropBom(ref cPlayerBom, v3, iViewID, direction);
+    }
+    protected override Player GetComponent(){
+        return this.gameObject.GetComponent<Player_CpuMode>();
+    }
 }

@@ -39,5 +39,29 @@ namespace PlayerActionName{
             }
 
         }
+
+
+        public override void MoveUp()
+        {
+            Move(Vector3.forward, 0); // 上方向への移動と回転角度0度を指定
+        }
+
+        public override void MoveDown()
+        {
+            Move(-Vector3.forward, 180); // 下方向への移動と回転角度180度を指定
+        }
+
+        public override void MoveLeft()
+        {
+            Move(-Vector3.right, 270); // 左方向への移動と回転角度270度を指定
+        }
+
+        public override void MoveRight()
+        {
+            Move(Vector3.right, 90); // 右方向への移動と回転角度90度を指定
+        }
+
     }
+
+
 }

@@ -9,7 +9,7 @@ public class MoveDownBtn : LongPressButton {
         Player cPlayer = FindAndSetPlayer();
         if (cPlayer != null)
         {
-            cPlayer.GetPlayerAction().BtnMoveDown();
+            cPlayer.GetPlayerAction().MoveDown();
         }
     }
 
