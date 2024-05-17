@@ -28,7 +28,7 @@ public class Item:MonoBehaviour{
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
         PlayerBom cPlayerBom = null; // PlayerBomコンポーネントの参照を初期化
-        Player cPlayer = GetcPlayerFromObject(objname);
+        Player_Base cPlayer = GetcPlayerFromObject(objname);
         if (cPlayer != null)
         {
             cPlayerBom = cPlayer.GetPlayerBom();
@@ -40,7 +40,7 @@ public class Item:MonoBehaviour{
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
         PlayerAction cPlayerAction = null;
-        Player cPlayer = GetcPlayerFromObject(objname);
+        Player_Base cPlayer = GetcPlayerFromObject(objname);
         if (cPlayer != null)
         {
             cPlayerAction = cPlayer.GetPlayerAction();
@@ -48,10 +48,10 @@ public class Item:MonoBehaviour{
         return cPlayerAction;
     }
 
-    protected Player GetcPlayerFromObject(string objname)
+    protected Player_Base GetcPlayerFromObject(string objname)
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
-        Player cPlayer = null;
+        Player_Base cPlayer = null;
         if (gPlayer == null)
         {
             Debug.LogError("Object with the name not found.");

@@ -7,7 +7,7 @@ using PowerGageName;
 using PlayerActionName;
 using PlayerBomName;
 using System.Text.RegularExpressions;
-public class Player_Online : Player
+public class Player_Online : Player_Base
 {
     void Awake ()
     {
@@ -43,7 +43,7 @@ public class Player_Online : Player
         cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage>();
     }
 
-    protected override Player GetComponent(){
+    protected override Player_Base GetComponent(){
         return this.gameObject.GetComponent<Player_Online>();
     }
 }

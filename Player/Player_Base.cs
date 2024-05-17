@@ -8,7 +8,7 @@ using PlayerActionName;
 using PlayerBomName;
 using System.Collections.Generic;
 
-public class Player_Common : MonoBehaviourPunCallbacks
+public class Player_Base : MonoBehaviourPunCallbacks
 {
 
     public string MaterialType;
@@ -17,7 +17,7 @@ public class Player_Common : MonoBehaviourPunCallbacks
     protected Transform myTransform;
     protected Animator animator;
     protected Field cField;
-    private bool pushFlag = false;
+    protected bool pushFlag = false;
     public int iViewID = 9999;
     public PowerGageName.PowerGage cPowerGage;
     protected PlayerBomName.PlayerBom cPlayerBom;
@@ -95,7 +95,7 @@ public class Player_Common : MonoBehaviourPunCallbacks
             string materialName = other.GetComponent<Renderer>().material.name.Replace(" (Instance)", "");
             if(MaterialType != materialName){
                 int iDamage = other.GetComponent<Explosion>().GetDamage();
-                Player cPlayer = GetComponent();
+                Player_Base cPlayer = GetComponent();
                 //Debug.Log(cPlayer);
                 cPlayer.cPowerGage.SetDamage(iDamage);
     
@@ -108,7 +108,7 @@ public class Player_Common : MonoBehaviourPunCallbacks
         }
     }
 
-    protected virtual Player GetComponent(){
+    protected virtual Player_Base GetComponent(){
         return this.gameObject.GetComponent<Player>();
     }
 

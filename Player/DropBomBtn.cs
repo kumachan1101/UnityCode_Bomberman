@@ -6,7 +6,7 @@ public class DropBomBtn : LongPressButton {
 
     public override void PushButton()
     {
-        Player cPlayer = FindAndSetPlayer();
+        Player_Base cPlayer = FindAndSetPlayer();
         if (cPlayer != null)
         {
             cPlayer.GetPlayerAction().DropBom();

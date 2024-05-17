@@ -118,7 +118,7 @@ public class Field : MonoBehaviourPunCallbacks {
         gPlayer.transform.position = v3;
 
         // gPlayerにアタッチされているPlayerスクリプトを取得
-        Player playerComponent = gPlayer.GetComponent<Player>();
+        Player_Base playerComponent = gPlayer.GetComponent<Player>();
         if (playerComponent != null)
         {
             // Playerスクリプトを削除
@@ -133,7 +133,7 @@ public class Field : MonoBehaviourPunCallbacks {
         }
 
         //CPUモードに切り替え
-        Player cPlayer = AddComponent(gPlayer);
+        Player_Base cPlayer = AddComponent(gPlayer);
         cPlayer.MaterialType = "BomMaterial"+playercnt;
         m_playerCount++;
         
@@ -150,8 +150,8 @@ public class Field : MonoBehaviourPunCallbacks {
         return "PlayerOnline";
     }
 
-    protected virtual Player AddComponent(GameObject gPlayer){
-        Player cPlayer = gPlayer.AddComponent<Player>();
+    protected virtual Player_Base AddComponent(GameObject gPlayer){
+        Player_Base cPlayer = gPlayer.AddComponent<Player>();
         return cPlayer;
     }
 
@@ -169,7 +169,7 @@ public class Field : MonoBehaviourPunCallbacks {
 
             string PlayerName = "Player" + i;
             GameObject gPlayer = LoadResource(PlayerName);
-            Player cPlayer;
+            Player_Base cPlayer;
             if(i == 1){
                 cPlayer = gPlayer.GetComponent<Player>();
             }
@@ -185,7 +185,7 @@ public class Field : MonoBehaviourPunCallbacks {
     {
         gPlayer.transform.position = GetPlayerPosition(GetIndex(),i-1);
 
-        Player cPlayer = gPlayer.GetComponent<Player_CpuMode>(); // デフォルトでは Player_CpuMode を取得する
+        Player_Base cPlayer = gPlayer.GetComponent<Player_CpuMode>(); // デフォルトでは Player_CpuMode を取得する
         if (i == 1)
         {
             cPlayer = gPlayer.GetComponent<Player>();

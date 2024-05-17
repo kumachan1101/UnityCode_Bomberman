@@ -95,7 +95,7 @@ namespace PlayerActionName{
 
         }
 
-        public void MoveClear(Player cPlayer)
+        public void MoveClear(Player_Base cPlayer)
         {
             PlayerAction cPlayerAction = cPlayer.GetPlayerAction();
             cPlayerAction.pushBtnUp = false;
@@ -111,8 +111,8 @@ namespace PlayerActionName{
             return gPlayer;
         }
 
-        private Player GetPlayerComponent(GameObject gPlayer){
-            Player cPlayer = gPlayer.GetComponent<Player>();
+        private Player_Base GetPlayerComponent(GameObject gPlayer){
+            Player_Base cPlayer = gPlayer.GetComponent<Player>();
             return cPlayer;
         }
 
@@ -120,7 +120,7 @@ namespace PlayerActionName{
         public void PerformPlayerAction(Vector3 moveDirection, Action<PlayerAction> flagSetter)
         {
             GameObject gPlayer = GetPlayerGameObject();
-            Player cPlayer = GetPlayerComponent(gPlayer);
+            Player_Base cPlayer = GetPlayerComponent(gPlayer);
             MoveClear(cPlayer);
 
             PlayerAction cPlayerAction = cPlayer.GetPlayerAction();
@@ -165,7 +165,7 @@ namespace PlayerActionName{
             });
             
             GameObject gPlayer = GetPlayerGameObject();
-            Player cPlayer = GetPlayerComponent(gPlayer);
+            Player_Base cPlayer = GetPlayerComponent(gPlayer);
             cPlayer.DropBom();
         }
 
@@ -223,7 +223,7 @@ namespace PlayerActionName{
             {
 
                 GameObject gPlayer = GetPlayerGameObject();
-                Player cPlayer = GetPlayerComponent(gPlayer);
+                Player_Base cPlayer = GetPlayerComponent(gPlayer);
                 MoveClear(cPlayer);
             }
         }

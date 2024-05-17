@@ -14,7 +14,7 @@ public class LongPressButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     public void OnPointerUp(PointerEventData eventData) {
         // ボタンが離されたときの処理をここに記述
         isPressed = false;
-        Player cPlayer = FindAndSetPlayer();
+        Player_Base cPlayer = FindAndSetPlayer();
         if (cPlayer != null)
         {
             cPlayer.GetPlayerAction().MoveClear(cPlayer);
@@ -32,7 +32,7 @@ public class LongPressButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     {
     }
     
-    protected Player FindAndSetPlayer()
+    protected Player_Base FindAndSetPlayer()
     {
         Field cField = GameObject.Find("Field").GetComponent<Field>();
         //Debug.Log(cField);

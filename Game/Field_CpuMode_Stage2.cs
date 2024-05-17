@@ -20,7 +20,7 @@ public class Field_CpuMode_Stage2 : Field_CpuMode {
             string canvasName;
             string playerName;
             GameObject gPlayer;
-            Player cPlayer;
+            Player_Base cPlayer;
 
 
             if (i == 1)

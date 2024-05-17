@@ -48,8 +48,8 @@ public class Field_CpuMode : Field {
     protected override string GetPlayerName(){
         return "Player";
     }
-    protected override Player AddComponent(GameObject gPlayer){
-        Player cPlayer = gPlayer.AddComponent<Player_CpuMode>();
+    protected override Player_Base AddComponent(GameObject gPlayer){
+        Player_Base cPlayer = gPlayer.AddComponent<Player_CpuMode>();
         return cPlayer;
     }
 

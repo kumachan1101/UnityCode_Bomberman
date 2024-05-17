@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using PlayerActionName;
 using PowerGageName;
-public class Player_CpuMode : Player
+using System.Collections.Generic;
+
+public class Player_CpuMode : Player_Base
 {
 
     public override void UpdateKey(){
         DropBom();
     }
-
 
     protected override void CreatePlayerAction(){
         cPlayerAction = new PlayerAction_CpuMode(ref rigidBody, ref myTransform, ref animator, ref cField, iViewID);
@@ -26,7 +27,7 @@ public class Player_CpuMode : Player
         Vector3 direction = myTransform.forward;
         gBomControl.GetComponent<BomControl_CpuMode>().DropBom(ref cPlayerBom, v3, iViewID, direction);
     }
-    protected override Player GetComponent(){
+    protected override Player_Base GetComponent(){
         return this.gameObject.GetComponent<Player_CpuMode>();
     }
 }

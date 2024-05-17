@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 public class MoveUpBtn : LongPressButton {
     public override void PushButton()
     {
-        Player cPlayer = FindAndSetPlayer();
+        Player_Base cPlayer = FindAndSetPlayer();
         if (cPlayer != null)
         {
             cPlayer.GetPlayerAction().MoveUp();
