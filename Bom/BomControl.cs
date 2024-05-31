@@ -1,22 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using PlayerBomName;
-using BomKind;
-using BomPosName;
-using BomName;
 
 public class BomControl : MonoBehaviourPunCallbacks
 {
     public GameObject BomPrefab;
-    public GameObject BomExplodePrefab;
-    public GameObject BomBigBanPrefab;
     protected GameObject tempBom;
     protected GameObject gItemControl;
     protected ItemControl cItemControl;
     protected GameObject gField;
-    protected Field cField;
+    protected Field_Base cField;
     private SoundManager soundManager;
 
     protected Library cLibrary;
@@ -24,20 +16,52 @@ public class BomControl : MonoBehaviourPunCallbacks
     public virtual void Awake(){
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
         cLibrary = GameObject.Find("Library").GetComponent<Library>();
+		ReadBomResource();
     }
-    
-    void Start()
+
+	protected void ReadBomResource(){
+		BomPrefab = Resources.Load<GameObject>("Bom");
+/*
+		DeleteComponent_Bom(BomPrefab);
+		AddComponent_Bom(BomPrefab);
+		DeleteComponent_Bom(BomExplodePrefab);
+		AddComponent_BomExplode(BomExplodePrefab);
+		DeleteComponent_Bom(BomBigBanPrefab);
+		AddComponent_BomBigBan(BomBigBanPrefab);
+*/
+	}
+
+	protected void DeleteComponent_Bom(GameObject gBom){
+		Bom_Base cBom = gBom.AddComponent<Bom_Base>();
+		Destroy(cBom);
+	}
+
+    protected virtual Bom_Base AddComponent_Bom(GameObject gBom){
+        return null;
+    }
+    protected virtual Bom_Base AddComponent_BomExplode(GameObject gBom){
+        return null;
+    }
+    protected virtual Bom_Base AddComponent_BomBigBan(GameObject gBom){
+        return null;
+    }
+
+    void Update()
     {
-        init();
+        if(null == gField){
+            gField = GameObject.Find("Field");
+            if(null != gField){
+                cField = gField.GetComponent<Field_Base>();
+            }
+        }
+        if(null == gItemControl){
+            gItemControl = GameObject.Find("ItemControl");
+            if(null != gItemControl){
+                cItemControl = gItemControl.GetComponent<ItemControl>();
+            }
+        }
     }
-
-
-    protected void init(){
-        BomPrefab =Resources.Load<GameObject>("Bom");
-        BomExplodePrefab = Resources.Load<GameObject>("BomExplode");
-        BomBigBanPrefab = Resources.Load<GameObject>("BomBigBan");
-    }
-    
+   
  
     public void DropBom(ref PlayerBomName.PlayerBom cPlayerBom, Vector3 v3, int iViewID,  Vector3 direction){
         if(null != cItemControl){
@@ -46,7 +70,7 @@ public class BomControl : MonoBehaviourPunCallbacks
             }
         }
         if(null != cLibrary){
-            if(cLibrary.CheckPositionAndName(v3, "Explosion(Clone)")){
+            if(cLibrary.CheckPositionAndName(v3, "Explosion")){
                 return;
             }
         }
@@ -68,7 +92,7 @@ public class BomControl : MonoBehaviourPunCallbacks
 
     public void CancelInvokeAndCallExplosion(){
         if(null != tempBom){
-            tempBom.GetComponent<Bom>().CancelInvokeAndCallExplosion();
+            tempBom.GetComponent<Bom_Base>().CancelInvokeAndCallExplosion();
         }
         
     }

@@ -1,6 +1,8 @@
 using UnityEngine;
+using UnityEngine.UI;
+using System.Reflection;
+public class Field_CpuMode : Field_Base {
 
-public class Field_CpuMode : Field {
     private bool bFlag;
 
     private GameManager cGameManager;
@@ -13,7 +15,7 @@ public class Field_CpuMode : Field {
     protected override void CPUmodeInit(){
         int playerCount = GetArrayLength(GetIndex());
         GameObject gItemControl = GameObject.Find("ItemControl");
-        gItemControl.GetComponent<ItemControl_CpuMode>().SetMaster();
+        gItemControl.GetComponent<ItemControl>().SetMaster();
 
         CreateBrokenBlock();
         SpawnPlayerObjects(playerCount);
@@ -22,7 +24,17 @@ public class Field_CpuMode : Field {
         SetPlayerNum(playerCount-1);
 
     }
+    protected void GetPlayerInfo(ref string canvasName, ref string playerName){
+		canvasName = "Canvas1";
+		playerName = "Player1";
+    }
 
+    protected virtual void GetCPUPlayerInfo(ref string canvasName, ref string playerName){
+    }
+
+
+    protected virtual void SetPower(Slider cSlider){
+    }
 
     protected override void ClearBrokenList_RPC(){
         ClearBrokenList();
@@ -33,24 +45,14 @@ public class Field_CpuMode : Field {
         InsBrokenBlock(x, y, z);
     }
 
+
     protected override void InsObjMove_RPC(int x, int y, int z, Direction randomDirection){
         InsObjMove(x, y, z, randomDirection);
     }
 
+
     protected override void Rainbow_RPC(string sMaterialType){
         Rainbow(sMaterialType);
-    }
-
-    protected override string GetCanvasName(){
-        return "Canvas";
-    }
-
-    protected override string GetPlayerName(){
-        return "Player";
-    }
-    protected override Player_Base AddComponent(GameObject gPlayer){
-        Player_Base cPlayer = gPlayer.AddComponent<Player_CpuMode>();
-        return cPlayer;
     }
 
     protected override void GameTransision()
@@ -129,6 +131,21 @@ public class Field_CpuMode : Field {
         Debug.Log("PlayerDummy3の数: " + playerDummy3Count);
         Debug.Log("PlayerDummy4の数: " + playerDummy4Count);
 */
+    }
+
+
+
+    protected override string GetCanvasName(){
+        return "Canvas";
+    }
+
+    protected override string GetPlayerName(){
+        return "Player";
+    }
+
+    protected override Player_Base AddComponent(GameObject gPlayer){
+        Player_Base cPlayer = gPlayer.AddComponent<Player_CpuMode>();
+        return cPlayer;
     }
 
 }

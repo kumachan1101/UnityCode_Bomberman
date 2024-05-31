@@ -8,10 +8,7 @@ public class Broken : MonoBehaviour
     protected ItemControl cItemControl;
 
     void Awake(){
-        cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl_CpuMode>();
-        if(null == cItemControl){
-            cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl_Online>();
-        }
+		cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
     }
     // Start is called before the first frame update
     void Start()
@@ -27,7 +24,7 @@ public class Broken : MonoBehaviour
 
     private void OnCollisionEnter(Collision col) {
         //Debug.Log($"{col.transform.name} is OnCollisionEnter.");
-        if("Explosion(Clone)" == col.transform.name){
+        if("Explosion" == col.transform.name){
             DelBox();
         }
         /*
@@ -40,7 +37,7 @@ public class Broken : MonoBehaviour
     }
     private void OnTriggerEnter(Collider col){
         //Debug.Log($"{col.transform.name} is OnTriggerEnter");
-        if("Explosion(Clone)" == col.transform.name){
+        if(col.transform.name.Contains("Explosion")){
             DelBox();
         }
     }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using PlayerBomName;
 using System;
+using Unity.IO.LowLevel.Unsafe;
 
 namespace PlayerActionName{
     public class PlayerAction
@@ -9,7 +10,7 @@ namespace PlayerActionName{
         protected Rigidbody rigidBody;
         protected Transform myTransform;
         protected Animator animator;
-        protected Field cField;
+        protected Field_Base cField;
         private float gridSize = 0.005f; // マス目のサイズ
         protected float moveSpeed;
         private int iViewID;
@@ -22,7 +23,7 @@ namespace PlayerActionName{
         public bool pushBtnRight = false;
         public bool pushBtnEnter = false;
         protected Library cLibrary;
-        public PlayerAction(ref Rigidbody rb, ref Transform tf, ref Animator ani, ref Field fi, int iViewID){
+        public PlayerAction(ref Rigidbody rb, ref Transform tf, ref Animator ani, ref Field_Base fi, int iViewID){
             rigidBody = rb;
             myTransform = tf;
             animator = ani;
@@ -111,8 +112,8 @@ namespace PlayerActionName{
             return gPlayer;
         }
 
-        private Player_Base GetPlayerComponent(GameObject gPlayer){
-            Player_Base cPlayer = gPlayer.GetComponent<Player>();
+        protected Player_Base GetPlayerComponent(GameObject gPlayer){
+			Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
             return cPlayer;
         }
 

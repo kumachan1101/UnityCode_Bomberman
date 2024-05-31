@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using BomName;
-public class Explosion : MonoBehaviour
+using Photon.Pun;
+public class Explosion : MonoBehaviourPunCallbacks
 {
-    private Field cField;
+    private Field_Base cField;
     protected bool bField = false;
     private SoundManager soundManager;
 
@@ -31,7 +29,7 @@ public class Explosion : MonoBehaviour
     void hide(){
         
         transform.position = new Vector3(transform.position.x, transform.position.y-1, transform.position.z);
-        cField = GameObject.Find("Field").GetComponent<Field>();
+        cField = GameObject.Find("Field").GetComponent<Field_Base>();
         bool bRet = cField.IsMatchObjMove(transform.position);
         if(bRet){
             Destroy(gameObject);
@@ -60,7 +58,7 @@ public class Explosion : MonoBehaviour
             case "Bombigban(Clone)":
             case "BomExplode(Clone)":
                 GameObject collidedObject = other.gameObject;
-                collidedObject.GetComponent<Bom>().CancelInvokeAndCallExplosion();
+                collidedObject.GetComponent<Bom_Base>().CancelInvokeAndCallExplosion();
                 break;
             case "FixedWall(Clone)":
                 Destroy(gameObject);

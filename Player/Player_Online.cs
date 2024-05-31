@@ -31,19 +31,39 @@ public class Player_Online : Player_Base
         UpdatePlayer();
     }
 
-    protected override void DropBom_BomControl(GameObject gBomControl, Vector3 v3, int iViewID){
-        gBomControl.GetComponent<BomControl_Online>().DropBom(ref cPlayerBom, v3, iViewID, myTransform.forward);
+    public override void UpdateKey(){
+        if (Input.GetKey(KeyCode.Return)) {
+             if (pushFlag == false){
+                //Debug.Log($"{iViewID} is Return");
+                pushFlag = true;
+                DropBom();
+                //AttackExplosion();
+             }
+        }
+        else{
+            pushFlag = false;
+        }
+    }
+/*
+    public override void SetViewID(int iParamViewID){
+        //Debug.Log(iParamViewID);
+        iViewID = iParamViewID;
+        CreatePlayerBom();
+        cPlayerBom.SetViewID(iViewID);
+        cPlayerBom.SetMaterialType(MaterialType);
+
+        rigidBody = GetComponent<Rigidbody> ();
+        myTransform = transform;
+        animator = myTransform.Find ("PlayerModel").GetComponent<Animator> ();
+        cField = GetField();
+
+        CreatePlayerAction();
+        cPlayerAction.SetMaterialType(MaterialType);
+    }
+*/
+
+    protected override void CreatePlayerAction(){
+        cPlayerAction = new PlayerAction(ref rigidBody, ref myTransform, ref animator, ref cField, iViewID);
     }
 
-    protected override Field GetField(){
-        return GameObject.Find("Field").GetComponent<Field>();
-    }
-
-    public override void SetSlider(GameObject gCanvas){
-        cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage>();
-    }
-
-    protected override Player_Base GetComponent(){
-        return this.gameObject.GetComponent<Player_Online>();
-    }
 }

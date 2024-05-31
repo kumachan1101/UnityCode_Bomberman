@@ -12,15 +12,7 @@ public class Player : Player_Base
 {
 
     public override void SetSlider(GameObject gCanvas){
-        cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage_CpuMode>();
-    }
-
-
-    protected override bool IsAvairable(){
-        if(iViewID == 9999){
-            return false;
-        }
-        return true;
+        cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage>();
     }
 
     public override void UpdateKey(){
@@ -37,42 +29,36 @@ public class Player : Player_Base
         }
     }
 
-    protected override void DropBom_BomControl(GameObject gBomControl, Vector3 v3, int iViewID){
-        Vector3 direction = myTransform.forward;
-        gBomControl.GetComponent<BomControl_CpuMode>().DropBom(ref cPlayerBom, v3, iViewID, direction);
-    }
-
-    public override void OnTriggerEnter (Collider other)
-    {
-        if (other.CompareTag ("Explosion"))
-        {
-            string materialName = other.GetComponent<Renderer>().material.name.Replace(" (Instance)", "");
-            if(MaterialType != materialName){
-                int iDamage = other.GetComponent<Explosion>().GetDamage();
-                Player_Base cPlayer = GetComponent();
-                //Debug.Log(cPlayer);
-                cPlayer.cPowerGage.SetDamage(iDamage);
-    
-                if(cPlayer.cPowerGage.IsDead()){
-                    string tag = this.gameObject.tag;
-                    //Dead(tag);
-                    Destroy(this.gameObject);
-                }
-            }
+    protected override bool IsAvairable(){
+        if(iViewID == 9999){
+            return false;
         }
-    }
-
-    protected override Player_Base GetComponent(){
-        return this.gameObject.GetComponent<Player>();
+        return true;
     }
 
 
-    protected override Field GetField(){
-        return GameObject.Find("Field").GetComponent<Field_CpuMode>();
-    }
+
+
 
     protected override void CreatePlayerAction(){
         cPlayerAction = new PlayerAction(ref rigidBody, ref myTransform, ref animator, ref cField, iViewID);
     }
+/*
+    public override void SetViewID(int iParamViewID){
+        //Debug.Log(iParamViewID);
+        iViewID = iParamViewID;
+        CreatePlayerBom();
+        cPlayerBom.SetViewID(iViewID);
+        cPlayerBom.SetMaterialType(MaterialType);
+
+        rigidBody = GetComponent<Rigidbody> ();
+        myTransform = transform;
+        animator = myTransform.Find ("PlayerModel").GetComponent<Animator> ();
+        cField = GetField();
+
+        CreatePlayerAction();
+        cPlayerAction.SetMaterialType(MaterialType);
+    }
+*/
 
 }

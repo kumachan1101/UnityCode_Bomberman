@@ -2,54 +2,50 @@ using UnityEngine;
 using PlayerBomName;
 using BomKind;
 using BomPosName;
-using BomName;
 
 public class BomControl_CpuMode : BomControl
 {
-    public void Start(){
-        init();
-        //cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl_CpuMode>();
-        //cField = GameObject.Find("Field").GetComponent<Field_CpuMode>();
+
+    protected override Bom_Base AddComponent_Bom(GameObject gBom){
+        Bom_Base cBom = gBom.AddComponent<Bom_CpuMode>();
+        return cBom;
     }
-    void Update()
-    {
-        if(null == gField){
-            gField = GameObject.Find("Field");
-            if(null != gField){
-                cField = gField.GetComponent<Field_CpuMode>();
-            }
-        }
-        if(null == gItemControl){
-            gItemControl = GameObject.Find("ItemControl");
-            if(null != gItemControl){
-                cItemControl = gItemControl.GetComponent<ItemControl_CpuMode>();
-            }
-        }
+    protected override Bom_Base AddComponent_BomExplode(GameObject gBom){
+        Bom_Base cBom = gBom.AddComponent<BomExplode_CpuMode>();
+        return cBom;
     }
+    protected override Bom_Base AddComponent_BomBigBan(GameObject gBom){
+        Bom_Base cBom = gBom.AddComponent<BomBigBan_CpuMode>();
+        return cBom;
+    }
+
+
 
     protected override void MakeBom_RPC(Vector3 v3, BomKind.BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType, bool bBomAttack, Vector3 direction){
         MakeBom(v3, eBomKind,iViewID, iExplosionNum,  bBomKick, sMaterialType, bBomAttack, direction);
     }
 
     private void MakeBom(Vector3 v3, BomKind.BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType, bool bBomAttack, Vector3 direction){
-        GameObject g;
+        GameObject g = Instantiate(BomPrefab);
+		//DeleteComponent_Bom(g);
         if(eBomKind == BomKind.BOM_KIND.BOM_KIND_BIGBAN){
-            g = Instantiate(BomBigBanPrefab);    
+			AddComponent_BomBigBan(g);
         }
         else if(eBomKind == BomKind.BOM_KIND.BOM_KIND_EXPLODE){
-            g = Instantiate(BomExplodePrefab);
+			AddComponent_BomExplode(g);
         }
         else{
-            g = Instantiate(BomPrefab);
+			AddComponent_Bom(g);
         }
 
-        MaterialManager cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-        Material newMaterial = cMaterialMng.GetMaterialOfType(sMaterialType);
-        g.GetComponent<Renderer>().material = newMaterial;
-        g.GetComponent<Bom>().SetMaterialType(newMaterial);
+        //MaterialManager cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+        //Material newMaterial = cMaterialMng.GetMaterialOfType(sMaterialType);
+        //g.GetComponent<Renderer>().material = newMaterial;
+        //g.GetComponent<Bom_Base>().SetMaterialType(newMaterial);
 
         g.transform.position = v3;
-        Bom cBom = g.GetComponent<Bom>();
+        Bom_Base cBom = g.GetComponent<Bom_Base>();
+		cBom.SetMaterialKind(sMaterialType);
         cBom.iExplosionNum = iExplosionNum;
         cBom.SetViewID(iViewID);
         if(bBomKick){

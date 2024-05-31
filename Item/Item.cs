@@ -57,14 +57,8 @@ public class Item:MonoBehaviour{
             Debug.LogError("Object with the name not found.");
             return cPlayer;
         }
-        cPlayer = gPlayer.GetComponent<Player>();
-        if(null == cPlayer){
-            cPlayer = gPlayer.GetComponent<Player_CpuMode>();
-        }
-        if(null == cPlayer){
-            cPlayer = gPlayer.GetComponent<Player_Online>();
-        }
-        return cPlayer;
+        cPlayer = gPlayer.GetComponent<Player_Base>();
+		return cPlayer;
     }
 
     protected static int ExtractNumberFromString(string input)

@@ -16,7 +16,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
     protected Rigidbody rigidBody;
     protected Transform myTransform;
     protected Animator animator;
-    protected Field cField;
+    protected Field_Base cField;
     protected bool pushFlag = false;
     public int iViewID = 9999;
     public PowerGageName.PowerGage cPowerGage;
@@ -24,8 +24,45 @@ public class Player_Base : MonoBehaviourPunCallbacks
     protected PlayerAction cPlayerAction;
     protected Library cLibrary;
     public virtual void SetSlider(GameObject gCanvas){
-        cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage_CpuMode>();
+		cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage>();
+	}
+
+    protected virtual bool IsAvairable(){
+        return false;
     }
+
+    public virtual void UpdateKey(){}
+
+    protected virtual void DropBom_BomControl(GameObject gBomControl, Vector3 v3, int iViewID){
+        Vector3 direction = myTransform.forward;
+        gBomControl.GetComponent<BomControl>().DropBom(ref cPlayerBom, v3, iViewID, direction);
+	}
+
+
+    protected virtual Player_Base GetComponent(){
+		return this.gameObject.GetComponent<Player_Base>();
+    }
+
+    protected virtual Field_Base GetField(){
+		return GameObject.Find("Field").GetComponent<Field_Base>();
+    }
+
+    protected virtual void CreatePlayerAction(){}
+
+    public virtual void SetViewID(int iParamViewID){
+        iViewID = iParamViewID;
+        CreatePlayerBom();
+        cPlayerBom.SetViewID(iViewID);
+        cPlayerBom.SetMaterialType(MaterialType);
+
+        rigidBody = GetComponent<Rigidbody> ();
+        myTransform = transform;
+        animator = myTransform.Find ("PlayerModel").GetComponent<Animator> ();
+        cField = GetField();
+
+        CreatePlayerAction();
+        cPlayerAction.SetMaterialType(MaterialType);
+	}
 
     // Update is called once per frame
     void Update ()
@@ -42,26 +79,6 @@ public class Player_Base : MonoBehaviourPunCallbacks
         cPlayerAction.UpdateButton();
     }
 
-    protected virtual bool IsAvairable(){
-        if(iViewID == 9999){
-            return false;
-        }
-        return true;
-    }
-
-    public virtual void UpdateKey(){
-        if (Input.GetKey(KeyCode.Return)) {
-             if (pushFlag == false){
-                //Debug.Log($"{iViewID} is Return");
-                pushFlag = true;
-                DropBom();
-                //AttackExplosion();
-             }
-        }
-        else{
-            pushFlag = false;
-        }
-    }
 
     public void DropBom(){
         if(null == cLibrary){
@@ -79,16 +96,10 @@ public class Player_Base : MonoBehaviourPunCallbacks
         //Vector3 direction = myTransform.forward;
         //DropBomと同じように実装しよう。
         GameObject gBomControl = GameObject.Find("BomControl");
-        gBomControl.GetComponent<BomControl_CpuMode>().CancelInvokeAndCallExplosion();
+        gBomControl.GetComponent<BomControl>().CancelInvokeAndCallExplosion();
     }
 
-
-    protected virtual void DropBom_BomControl(GameObject gBomControl, Vector3 v3, int iViewID){
-        Vector3 direction = myTransform.forward;
-        gBomControl.GetComponent<BomControl_CpuMode>().DropBom(ref cPlayerBom, v3, iViewID, direction);
-    }
-
-    public virtual void OnTriggerEnter (Collider other)
+    public void OnTriggerEnter (Collider other)
     {
         if (other.CompareTag ("Explosion"))
         {
@@ -108,9 +119,6 @@ public class Player_Base : MonoBehaviourPunCallbacks
         }
     }
 
-    protected virtual Player_Base GetComponent(){
-        return this.gameObject.GetComponent<Player>();
-    }
 
 
     private void OnCollisionEnter(Collision collision){
@@ -150,40 +158,17 @@ public class Player_Base : MonoBehaviourPunCallbacks
             collisionDirection.z = collisionDirectionTemp.z;
         }
         // Bomオブジェクトに方向を伝える
-        collision.transform.GetComponent<BomName.Bom>().SetMoveDirection(collisionDirection);
+        collision.transform.GetComponent<Bom_Base>().SetMoveDirection(collisionDirection);
     }
 
     public void OnCollisionExit(Collision col) {
     }
 
 
-    public void SetViewID(int iParamViewID){
-        //Debug.Log(iParamViewID);
-        iViewID = iParamViewID;
-        CreatePlayerBom();
-        cPlayerBom.SetViewID(iViewID);
-        cPlayerBom.SetMaterialType(MaterialType);
-
-        rigidBody = GetComponent<Rigidbody> ();
-        myTransform = transform;
-        animator = myTransform.Find ("PlayerModel").GetComponent<Animator> ();
-        cField = GetField();
-
-        CreatePlayerAction();
-        cPlayerAction.SetMaterialType(MaterialType);
-    }
-
-    protected virtual Field GetField(){
-        return GameObject.Find("Field").GetComponent<Field_CpuMode>();
-    }
-
-    private void CreatePlayerBom(){
+    protected void CreatePlayerBom(){
         cPlayerBom = new PlayerBom();
     }
 
-    protected virtual void CreatePlayerAction(){
-        cPlayerAction = new PlayerAction(ref rigidBody, ref myTransform, ref animator, ref cField, iViewID);
-    }
 
 
     public PlayerBom GetPlayerBom(){

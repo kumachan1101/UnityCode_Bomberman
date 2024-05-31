@@ -8,7 +8,7 @@ namespace PlayerActionName{
         private int randomDirection;
         private float changeDirectionInterval = 3f; // 向きを変える間隔
 
-        public PlayerAction_CpuMode(ref Rigidbody rb, ref Transform tf, ref Animator ani, ref Field fi, int iViewID) : base(ref rb, ref tf, ref ani, ref fi, iViewID) {
+        public PlayerAction_CpuMode(ref Rigidbody rb, ref Transform tf, ref Animator ani, ref Field_Base fi, int iViewID) : base(ref rb, ref tf, ref ani, ref fi, iViewID) {
             // サブクラス固有の初期化処理
         }
 

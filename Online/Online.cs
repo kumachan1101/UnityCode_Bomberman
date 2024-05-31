@@ -5,7 +5,7 @@ using PowerGageName;
 public class Online : MonoBehaviourPunCallbacks
 {
     private int playerCount;
-    private Field cField;
+    private Field_Base cField;
 
     private void Start()
     {
@@ -23,14 +23,14 @@ public class Online : MonoBehaviourPunCallbacks
         playerCount = PhotonNetwork.PlayerList.Length; //ルームにいる人数を確認
 
         GameObject gField = GameObject.Find("Field");
-        cField = gField.GetComponent<Field>();
+        cField = gField.GetComponent<Field_Base>();
         cField.CreateBrokenBlock();
 
         GameObject gItemControl = GameObject.Find("ItemControl");
 
         if (playerCount == 1)
         {
-            gItemControl.GetComponent<ItemControl_Online>().SetMaster();
+            gItemControl.GetComponent<ItemControl>().SetMaster();
         }
 
 

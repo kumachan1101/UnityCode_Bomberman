@@ -7,7 +7,7 @@ public class ItemRainbow : Item{
         PlayerBom cPlayerBom = GetPlayerBomFromObject(objname);
         if(null != cPlayerBom){
             string sMaterialType = cPlayerBom.GetMaterialType();
-            Field cField = GameObject.Find("Field").GetComponent<Field>();
+            Field_Base cField = GameObject.Find("Field").GetComponent<Field_Base>();
             cField.Rainbow(sMaterialType);
         }
     }

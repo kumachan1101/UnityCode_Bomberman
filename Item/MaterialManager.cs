@@ -24,4 +24,23 @@ public class MaterialManager : MonoBehaviour
                 return null;
         }
     }
+
+    public string GetMaterialOfExplosion(string type)
+    {
+        switch (type)
+        {
+            case "BomMaterial1":
+                return "Explosion1";
+            case "BomMaterial2":
+                return "Explosion2";
+            case "BomMaterial3":
+                return "Explosion3";
+            case "BomMaterial4":
+                return "Explosion4";
+            default:
+                Debug.LogError("Invalid material type: " + type);
+                return null;
+        }
+    }
+
 }

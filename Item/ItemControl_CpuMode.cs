@@ -19,10 +19,13 @@ public class ItemControl_CpuMode: ItemControl
                 gItem= ItemBomExplodePrefab;
                 break;
             case ABILITY.ABILITY_BOM_BIGBAN:
+				gItem= ItemBomBigBanPrefab;
+				/*
                 int iRand = Random.Range(0, 5);
                 if(0 == iRand){
                     gItem= ItemBomBigBanPrefab;
                 }
+				*/
                 break;
             case ABILITY.ABILITY_SPEED_UP:
                 gItem= ItemSpeedPrefab;

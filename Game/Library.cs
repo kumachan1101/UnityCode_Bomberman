@@ -60,7 +60,7 @@ public class Library : MonoBehaviour{
             Transform objTransform = obj.transform;
 
             // アクティブかつ座標と名称が一致するかをチェックする
-            if (obj.activeInHierarchy && objTransform.position == targetPosition && obj.name == targetName)
+            if (obj.activeInHierarchy && objTransform.position == targetPosition && obj.name.Contains(targetName))
             {
                 // 一致する場合はtrueを返す
                 return true;
@@ -70,6 +70,30 @@ public class Library : MonoBehaviour{
         // 一致するGameObjectが見つからない場合はfalseを返す
         return false;
     }
+
+    public GameObject GetPositionAndNameObj(Vector3 targetPosition, string targetName)
+    {
+        // シーン内の全てのGameObjectを取得
+        GameObject[] allGameObjects = GameObject.FindObjectsOfType<GameObject>();
+
+        // 全てのGameObjectに対してループ処理を行う
+        foreach (GameObject obj in allGameObjects)
+        {
+            // GameObjectのTransformコンポーネントを取得
+            Transform objTransform = obj.transform;
+
+            // アクティブかつ座標と名称が一致するかをチェックする
+            if (obj.activeInHierarchy && objTransform.position == targetPosition && obj.name.Contains(targetName))
+            {
+                // 一致する場合はtrueを返す
+                return obj;
+            }
+        }
+
+        // 一致するGameObjectが見つからない場合はfalseを返す
+        return null;
+    }
+
 
     public bool CheckPosition(Vector3 targetPosition)
     {
@@ -109,7 +133,7 @@ public class Library : MonoBehaviour{
             Transform objTransform = obj.transform;
 
             // アクティブかつ座標と名称が一致するかをチェックする
-            if (obj.activeInHierarchy && objTransform.position == targetPosition && obj.name == targetName)
+            if (obj.activeInHierarchy && objTransform.position == targetPosition && obj.name.Contains(targetName))
             {
                 g = obj;
                 break;

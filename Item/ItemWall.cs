@@ -6,7 +6,7 @@ public class ItemWall : Item{
     
     public override void Reflection(string objname){
         GameObject gPlayer =  GameObject.Find(objname);
-        gPlayer.GetComponent<Player_CpuMode>().Wall();
+        gPlayer.GetComponent<Player_Base>().Wall();
     }
 
 }

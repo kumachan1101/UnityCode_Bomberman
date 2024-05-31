@@ -23,11 +23,21 @@ public class Player_CpuMode : Player_Base
         return true;
     }
 
-    protected override void DropBom_BomControl(GameObject gBomControl, Vector3 v3, int iViewID){
-        Vector3 direction = myTransform.forward;
-        gBomControl.GetComponent<BomControl_CpuMode>().DropBom(ref cPlayerBom, v3, iViewID, direction);
+/*
+    public override void SetViewID(int iParamViewID){
+        //Debug.Log(iParamViewID);
+        iViewID = iParamViewID;
+        CreatePlayerBom();
+        cPlayerBom.SetViewID(iViewID);
+        cPlayerBom.SetMaterialType(MaterialType);
+
+        rigidBody = GetComponent<Rigidbody> ();
+        myTransform = transform;
+        animator = myTransform.Find ("PlayerModel").GetComponent<Animator> ();
+        cField = GetField();
+
+        CreatePlayerAction();
+        cPlayerAction.SetMaterialType(MaterialType);
     }
-    protected override Player_Base GetComponent(){
-        return this.gameObject.GetComponent<Player_CpuMode>();
-    }
+*/
 }

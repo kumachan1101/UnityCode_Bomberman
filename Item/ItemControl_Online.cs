@@ -37,6 +37,10 @@ public class ItemControl_Online: ItemControl
             case ABILITY.ABILITY_ADD_BLOCK:
                 gItem= ItemAddBlockPrefab;
                 break;
+            case ABILITY.ABILITY_ADD_DUMMY:
+                gItem= ItemAddDummyPrefab;
+                break;
+
             default:
                 gItem = null;
                 break;
