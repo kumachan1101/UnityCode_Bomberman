@@ -25,7 +25,7 @@ public class Player_Online : Player_Base
 
     void Update ()
     {
-        if(!GetComponent<PhotonView>().IsMine){
+        if(false == GetComponent<PhotonView>().IsMine){
             return;
         }
         UpdatePlayer();

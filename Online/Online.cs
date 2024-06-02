@@ -21,18 +21,13 @@ public class Online : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         playerCount = PhotonNetwork.PlayerList.Length; //ルームにいる人数を確認
-
+        if (playerCount == 1)
+        {
+			Library.Instance.SetMaster();
+        }
         GameObject gField = GameObject.Find("Field");
         cField = gField.GetComponent<Field_Base>();
         cField.CreateBrokenBlock();
-
-        GameObject gItemControl = GameObject.Find("ItemControl");
-
-        if (playerCount == 1)
-        {
-            gItemControl.GetComponent<ItemControl>().SetMaster();
-        }
-
 
         SpawnPlayerObjects(playerCount);
     }

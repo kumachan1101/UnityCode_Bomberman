@@ -15,7 +15,7 @@ public class Field_CpuMode : Field_Base {
     protected override void CPUmodeInit(){
         int playerCount = GetArrayLength(GetIndex());
         GameObject gItemControl = GameObject.Find("ItemControl");
-        gItemControl.GetComponent<ItemControl>().SetMaster();
+		Library.Instance.SetMaster();
 
         CreateBrokenBlock();
         SpawnPlayerObjects(playerCount);

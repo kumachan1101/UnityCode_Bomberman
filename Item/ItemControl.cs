@@ -21,11 +21,7 @@ public class ItemControl: MonoBehaviourPunCallbacks
     public GameObject ItemAddBlockPrefab;
     public GameObject ItemAddDummyPrefab;
 
-
     public List<GameObject> ItemList = new List<GameObject>();
-
-    private bool bMaster = false;
-
 
     void Awake(){
         ItemFirePrefab = Resources.Load<GameObject>("item_fire");
@@ -41,14 +37,6 @@ public class ItemControl: MonoBehaviourPunCallbacks
         ItemAddBlockPrefab = Resources.Load<GameObject>("item_addblock");
         ItemAddDummyPrefab = Resources.Load<GameObject>("item_adddummy");        
     }
-    public bool IsMaster(){
-        return bMaster;
-    }
-
-    public void SetMaster(){
-        bMaster = true;
-    }
-
     public enum ABILITY {
         ABILITY_NOTHING,//能力なし
         /* 良い能力 */
@@ -100,9 +88,9 @@ public class ItemControl: MonoBehaviourPunCallbacks
     }
 
     public void CreateRandItem(Vector3 v3){
-        if(false == bMaster){
-            return;
-        }
+		if(false == GetComponent<PhotonView>().IsMine){
+			return;
+		}
         int iRand = Random.Range((int)ABILITY.ABILITY_FIRE_UP, (int)ABILITY.ABILITY_RANGE);
         GameObject gItem = Create((ABILITY)iRand);
         if(gItem != null){

@@ -105,7 +105,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
         {
             string materialName = other.GetComponent<Renderer>().material.name.Replace(" (Instance)", "");
             if(MaterialType != materialName){
-                int iDamage = other.GetComponent<Explosion>().GetDamage();
+                int iDamage = other.GetComponent<Explosion_Base>().GetDamage();
                 Player_Base cPlayer = GetComponent();
                 //Debug.Log(cPlayer);
                 cPlayer.cPowerGage.SetDamage(iDamage);

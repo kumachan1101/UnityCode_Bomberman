@@ -6,6 +6,12 @@ public class Bom_CpuMode : Bom_Base
 		GameObject g = Instantiate(ExplosionPrefab);
 		return g;
 	}
+	protected override void DestroySync(GameObject g){
+		Destroy(g);
+	}
+	protected override bool IsExplosion(){
+		return true;
+	}
 
 }
 

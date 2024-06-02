@@ -227,7 +227,6 @@ public class Field_Base : MonoBehaviourPunCallbacks {
                 if(false == IsWall(v3) && false == IsFixedWall(v3)){
                     int iRand = Random.Range(0, 5);
                     if(0 == iRand){
-                        
                         InsBrokenBlock_RPC(x, y, z);
                     }
                 }
@@ -321,7 +320,7 @@ public class Field_Base : MonoBehaviourPunCallbacks {
         Material newMaterial = cMaterialMng.GetMaterialOfType(sMaterialType);
         g.GetComponent<Renderer>().material = newMaterial;
 
-        g.GetComponent<Explosion>().FieldValid();
+        g.GetComponent<Explosion_Base>().FieldValid();
         g.transform.position = v3;
         AddExplosion(g);
     }
@@ -586,7 +585,7 @@ public class Field_Base : MonoBehaviourPunCallbacks {
         
         foreach (GameObject objToAdd in newExplosionList)
         {
-            objToAdd.GetComponent<Explosion>().FieldValid();
+            objToAdd.GetComponent<Explosion_Base>().FieldValid();
             AddExplosion(objToAdd);
         }
         

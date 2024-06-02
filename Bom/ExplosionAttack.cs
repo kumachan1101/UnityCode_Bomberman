@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ExplosionAttack : Explosion
+public class ExplosionAttack : Explosion_Base
 {
     private Vector3 moveDirection;
     private float moveSpeed;

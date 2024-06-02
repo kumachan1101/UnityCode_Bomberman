@@ -1,6 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
-public class Explosion : MonoBehaviourPunCallbacks
+public class Explosion_Base : MonoBehaviourPunCallbacks
 {
     private Field_Base cField;
     protected bool bField = false;
@@ -40,6 +40,11 @@ public class Explosion : MonoBehaviourPunCallbacks
         
     }
 
+	protected virtual void DestroySync(GameObject g){}
+
+	protected virtual bool IsSync(){
+		return false;
+	}
 
     // Update is called once per frame
     void Update()
@@ -50,18 +55,23 @@ public class Explosion : MonoBehaviourPunCallbacks
         return 1;
     }
 
+	
+
     private void OnTriggerEnter(Collider other)
     {
+        if(false == IsSync()){
+            return;
+        }
         switch (other.transform.name)
         {
             case "Bom(Clone)":
             case "Bombigban(Clone)":
             case "BomExplode(Clone)":
-                GameObject collidedObject = other.gameObject;
-                collidedObject.GetComponent<Bom_Base>().CancelInvokeAndCallExplosion();
+                //GameObject collidedObject = other.gameObject;
+                //collidedObject.GetComponent<Bom_Base>().CancelInvokeAndCallExplosion();
                 break;
             case "FixedWall(Clone)":
-                Destroy(gameObject);
+                DestroySync(gameObject);
                 break;
             default:
                 return;

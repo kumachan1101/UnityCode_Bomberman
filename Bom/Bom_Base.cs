@@ -19,10 +19,10 @@ using PlayerBomName;
 		protected MaterialManager cMaterialMng;
 
 		protected BomControl cBomControl;
-        private int iViewID;
         //private List<GameObject> ExplosionList = new List<GameObject>();
         // Start is called before the first frame update
         private Vector3 moveDirection = Vector3.zero;
+		private Vector3 previousPosition;
         private float moveSpeed = 3f; // 動く速さ
         protected bool isMoving = false; // 移動中フラグ
         public int iExplosionNum;
@@ -47,6 +47,7 @@ using PlayerBomName;
         // Start is called before the first frame update
         void Start()
         {
+			previousPosition = transform.position;
 			// インスタンス生成直後にマテリアルを設定している事もあり、Awakeのタイミングではまだマテリアルが取得できない。
 			// 初回描画のタイミングであれば取得可能であるため、ここでマテリアルを設定している
 			GetComponent<Renderer>().material = cMaterialMng.GetMaterialOfType(sMaterialKind);
@@ -70,17 +71,8 @@ using PlayerBomName;
             {
                 transform.position += moveDirection * moveSpeed * Time.deltaTime * 2;
             }
-
+			previousPosition = transform.position;
         }
-
-        public void SetViewID(int iParamViewID){
-            iViewID = iParamViewID;
-        }
-
-        public int GetViewID(){
-            return iViewID;
-        }
-
 
         protected virtual bool IsWall(Vector3 v3Temp){
             bool bRet = cField.IsAllWall(v3Temp);
@@ -123,13 +115,12 @@ using PlayerBomName;
         }
 
 		protected virtual bool IsExplosion(){
-			return true;
+			return false;
 		}
 
         protected virtual void Explosion()
         {
 			if(false == IsExplosion()){
-				Destroy(this.gameObject);
 				return;
 			}
 
@@ -172,9 +163,11 @@ using PlayerBomName;
                         break;
                     }
                 }
-                Destroy(this.gameObject);
+                DestroySync(this.gameObject);
             }
         }
+
+		protected virtual void DestroySync(GameObject g){}
 
         private void OnDestroy()
         {
@@ -182,34 +175,39 @@ using PlayerBomName;
             CancelInvoke();
         }
 
-        void OnCollisionEnter(Collision collision)
-        {
-            ProcessCollision(collision.transform.name);
-        }
-
-        void OnTriggerEnter(Collider other)
-        {
-            ProcessCollision(other.transform.name);
-        }
-
-        void ProcessCollision(string collisionName)
-        {
-            switch (collisionName)
+		private void OnCollisionEnter(Collision collision){
+            switch (collision.transform.name)
             {
-                case "Bom(Clone)":
-                case "Bombigban(Clone)":
-                case "BomExplode(Clone)":
                 case "Broken(Clone)":
                 case "FixedWall(Clone)":
                 case "Wall(Clone)":
+				case "Bom(Clone)":
+				case "Bombigban(Clone)":
+				case "BomExplode(Clone)":
                     break;
                 default:
                     return;
             }
             // 衝突を検知したら座標を補正して移動を止める
-            transform.position = cLibrary.GetPos(transform.position);
+            transform.position = cLibrary.GetPos(previousPosition);
             isMoving = false; // 移動停止
+		}
+
+        void OnTriggerEnter(Collider other)
+        {
+            switch (other.transform.name)
+            {
+				case "Explosion1(Clone)":
+				case "Explosion2(Clone)":
+				case "Explosion3(Clone)":
+				case "Explosion4(Clone)":
+					CancelInvokeAndCallExplosion();
+	                break;
+                default:
+                    return;
+            }
         }
+
 
         void OnTriggerExit(Collider other)
         {

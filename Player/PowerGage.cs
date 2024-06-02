@@ -12,6 +12,9 @@ namespace PowerGageName
         }
 
         protected virtual void SetDamage_RPC(int iDamage){
+			if(false == GetComponent<PhotonView>().IsMine){
+				return;
+			}
             photonView.RPC(nameof(SyncSetDamage),RpcTarget.All, iDamage);
         }
 
@@ -27,6 +30,10 @@ namespace PowerGageName
         }
 
         protected virtual void HeartUp_RPC(int iHeart){
+			if(false == GetComponent<PhotonView>().IsMine){
+				return;
+			}
+
             photonView.RPC(nameof(SyncHeartUp),RpcTarget.All, iHeart);
         }
 

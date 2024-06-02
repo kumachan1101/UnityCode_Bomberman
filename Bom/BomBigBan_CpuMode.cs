@@ -2,16 +2,87 @@ using UnityEngine;
 
 public class BomBigBan_CpuMode : BomExplode_CpuMode
 {
-    protected bool XZ_Explosion(int i, int j){
-        GameObject g = Instantiate(ExplosionPrefab);
-        Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z+j);
-        cLibrary.DeletePositionAndName(v3Temp, "Explosion");
-
-        bool bRet = IsWall(v3Temp);
-        if(bRet){
-            Destroy(g);
+    protected bool XZ_Explosion(int i, int j)
+    {
+        Vector3 v3Temp = new Vector3(transform.position.x + i, transform.position.y, transform.position.z + j);
+        bool isWall = IsWall(v3Temp);
+        if (isWall)
+        {
             return true;
         }
+        cLibrary.DeletePositionAndName(v3Temp, "Explosion");
+        GameObject explosion = Instantiate(ExplosionPrefab, v3Temp, Quaternion.identity);
+        return false;
+    }
+
+    protected override void Explosion()
+    {
+        if (!IsExplosion())
+        {
+            return;
+        }
+
+        lock (lockObject)
+        {
+            Vector3 position = cLibrary.GetPos(transform.position);
+            transform.position = position;
+            cLibrary.DeletePositionAndName(position, "Explosion");
+            Instantiate(ExplosionPrefab, position, Quaternion.identity);
+
+            // 上下左右の爆発処理
+            for (int j = 1; j <= iExplosionNum; j++)
+            {
+                if (XZ_Explosion(0, j)) break;
+            }
+            for (int j = 1; j <= iExplosionNum; j++)
+            {
+                if (XZ_Explosion(0, -j)) break;
+            }
+            for (int i = 1; i <= iExplosionNum; i++)
+            {
+                if (XZ_Explosion(-i, 0)) break;
+
+                for (int j = 1; j <= iExplosionNum; j++)
+                {
+                    if (XZ_Explosion(-i, j)) break;
+                }
+                for (int j = 1; j <= iExplosionNum; j++)
+                {
+                    if (XZ_Explosion(-i, -j)) break;
+                }
+            }
+            for (int i = 1; i <= iExplosionNum; i++)
+            {
+                if (XZ_Explosion(i, 0)) break;
+
+                for (int j = 1; j <= iExplosionNum; j++)
+                {
+                    if (XZ_Explosion(i, j)) break;
+                }
+                for (int j = 1; j <= iExplosionNum; j++)
+                {
+                    if (XZ_Explosion(i, -j)) break;
+                }
+            }
+
+            DestroySync(this.gameObject);
+        }
+    }
+}
+
+/*
+using UnityEngine;
+
+public class BomBigBan_CpuMode : BomExplode_CpuMode
+{
+    protected bool XZ_Explosion(int i, int j){
+        Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z+j);
+        bool bRet = IsWall(v3Temp);
+        if(bRet){
+            return true;
+        }
+        cLibrary.DeletePositionAndName(v3Temp, "Explosion");
+        GameObject g = Instantiate(ExplosionPrefab);
         g.transform.position = v3Temp;
         return false;
     }
@@ -19,7 +90,6 @@ public class BomBigBan_CpuMode : BomExplode_CpuMode
     protected override void Explosion()
     {
 		if(false == IsExplosion()){
-			Destroy(this.gameObject);
 			return;
 		}
 
@@ -110,9 +180,9 @@ public class BomBigBan_CpuMode : BomExplode_CpuMode
                     }
                 }
             }
-
-            Destroy(this.gameObject);
+            DestroySync(this.gameObject);
         }
     }
 
 }
+*/

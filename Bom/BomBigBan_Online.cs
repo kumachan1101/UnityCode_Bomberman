@@ -4,14 +4,13 @@ public class BomBigBan_Online : BomExplode_Online
 {
     protected bool XZ_Explosion(int i, int j){
         Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z+j);
-        cLibrary.DeletePositionAndName(v3Temp, "Explosion");
-		GameObject g = Instantiate_Explosion(v3Temp);
-
         bool bRet = IsWall(v3Temp);
         if(bRet){
-            Destroy(g);
             return true;
         }
+
+        cLibrary.DeletePositionAndName(v3Temp, "Explosion");
+		GameObject g = Instantiate_Explosion(v3Temp);
         g.transform.position = v3Temp;
         return false;
     }
@@ -19,7 +18,6 @@ public class BomBigBan_Online : BomExplode_Online
     protected override void Explosion()
     {
 		if(false == IsExplosion()){
-			Destroy(this.gameObject);
 			return;
 		}
 
@@ -111,7 +109,7 @@ public class BomBigBan_Online : BomExplode_Online
                 }
             }
 
-            Destroy(this.gameObject);
+            DestroySync(this.gameObject);
         }
     }
 

@@ -18,7 +18,7 @@ public class ObjMove : MonoBehaviour
         // 衝突中の物体があるかを確認
         if (IsTagMatch("Player", other.tag)) 
         {
-            //other.gameObject.GetComponent<Explosion>().StopInvoke();
+            //other.gameObject.GetComponent<Explosion_Base>().StopInvoke();
         }
     }
 

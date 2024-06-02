@@ -58,6 +58,9 @@ public class Field : Field_Base {
 
 
     protected override void InsObjMove_RPC(int x, int y, int z, Direction randomDirection){
+		if(false == GetComponent<PhotonView>().IsMine){
+			return;
+		}
         photonView.RPC(nameof(InsObjMove), RpcTarget.All, x, y, z, randomDirection);
     }
 
@@ -87,43 +90,24 @@ public class Field : Field_Base {
 
 
     protected override void Rainbow_RPC(string sMaterialType){
+		if(false == GetComponent<PhotonView>().IsMine){
+			return;
+		}
         photonView.RPC(nameof(Rainbow), RpcTarget.All, sMaterialType);
     }
 
     public override void AddDummyPlayer(int playercnt, Vector3 v3){
         m_playerCount++;
-		ItemControl cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
-		if(false == cItemControl.IsMaster()){
+		if(false == GetComponent<PhotonView>().IsMine){
 			return;
 		}
-
         Vector3 v3PwrGage = new Vector3(0, 0, 0);
         string canvasName = GetCanvasName() + playercnt;
 		GameObject gCanvas = PhotonNetwork.Instantiate(canvasName, v3PwrGage, Quaternion.identity);
 
         GameObject gPlayer = PhotonNetwork.Instantiate(GetPlayerName() + "Dummy"+ playercnt, v3, Quaternion.identity);
-		//gPlayer.name = "PlayerDummy" + playercnt;
-        //gPlayer.tag = "Player_DummyMode";
-
-        // gPlayerにアタッチされているPlayerスクリプトを取得
-		/*
-        Player_Base playerComponent = gPlayer.GetComponent<Player_Base>();
-        if (playerComponent != null)
-        {
-            // Playerスクリプトを削除
-            Destroy(playerComponent);
-        }
-		*/
-        //CPUモードに切り替え
-        //Player_Base cPlayer = AddComponent(gPlayer);
-
-        //cPlayer.MaterialType = "BomMaterial"+playercnt;
-        
-        //cPlayer.SetViewID(GetComponent<PhotonView>().ViewID);
-        //cPlayer.SetSlider(gCanvas);
-        //SetupSlider(m_playerCount, gCanvas);
-
     }
+
     protected override Player_Base AddComponent(GameObject gPlayer){
         Player_Base cPlayer = gPlayer.AddComponent<Player_Online_Dummy>();
         return cPlayer;

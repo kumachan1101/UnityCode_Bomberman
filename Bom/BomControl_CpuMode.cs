@@ -47,7 +47,7 @@ public class BomControl_CpuMode : BomControl
         Bom_Base cBom = g.GetComponent<Bom_Base>();
 		cBom.SetMaterialKind(sMaterialType);
         cBom.iExplosionNum = iExplosionNum;
-        cBom.SetViewID(iViewID);
+        //cBom.SetViewID(iViewID);
         if(bBomKick){
             cBom.AbailableBomKick();
         }

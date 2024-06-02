@@ -1,10 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
+using System.Collections.Generic;
 
-public class Library : MonoBehaviour{
+public class Library : MonoBehaviourPunCallbacks{
 
     private static Library instance; // GameManagerのシングルトンインスタンス
+	private static bool bMaster;
 
     public static Library Instance
     {
@@ -30,6 +31,15 @@ public class Library : MonoBehaviour{
         }
         DontDestroyOnLoad(gameObject);
         instance = this;
+		bMaster = false;
+    }
+
+    public bool IsMaster(){
+        return bMaster;
+    }
+
+    public void SetMaster(){
+        bMaster = true;
     }
 
    public int CountObjectsWithName(string name)
@@ -152,5 +162,36 @@ public class Library : MonoBehaviour{
         float z = Mathf.Round(position.z);
         return new Vector3(x, y, z);
     }
+
+	public int GetPhotonUniqueID(){
+        PhotonView[] photonViews = FindObjectsOfType<PhotonView>();
+        HashSet<int> usedIDs = new HashSet<int>();
+
+        foreach (var view in photonViews)
+        {
+            usedIDs.Add(view.ViewID);
+        }
+
+        // 新しいIDを生成するか確認するロジック
+        int newID = GenerateUniqueID(usedIDs);
+
+        if (usedIDs.Contains(newID))
+        {
+			Debug.LogError("Duplicate PhotonView ID detected. Instantiation aborted.");
+			return -1;
+		}
+		return newID;
+	}
+
+    private int GenerateUniqueID(HashSet<int> usedIDs)
+    {
+        int newID = Random.Range(1, 10000); // 適切な範囲で新しいIDを生成
+        while (usedIDs.Contains(newID))
+        {
+            newID = Random.Range(1, 10000);
+        }
+        return newID;
+    }
+
 
 }
