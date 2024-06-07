@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class BomBigBan_Online : BomExplode_Online
 {
-    protected bool XZ_Explosion(int i, int j){
+    protected bool XZ_Explosion(int i, int j)
+	{
         Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z+j);
         bool bRet = IsWall(v3Temp);
         if(bRet){

@@ -158,7 +158,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
             collisionDirection.z = collisionDirectionTemp.z;
         }
         // Bomオブジェクトに方向を伝える
-        collision.transform.GetComponent<Bom_Base>().SetMoveDirection(collisionDirection);
+        collision.transform.GetComponent<Bom_Base>().SetMoveDirection(collisionDirection * 1.5F);
     }
 
     public void OnCollisionExit(Collision col) {

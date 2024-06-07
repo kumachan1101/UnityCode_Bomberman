@@ -18,12 +18,12 @@ using PlayerBomName;
 
 		protected MaterialManager cMaterialMng;
 
-		protected BomControl cBomControl;
+		//protected BomControl cBomControl;
         //private List<GameObject> ExplosionList = new List<GameObject>();
         // Start is called before the first frame update
         private Vector3 moveDirection = Vector3.zero;
-		private Vector3 previousPosition;
-        private float moveSpeed = 3f; // 動く速さ
+		//private Vector3 previousPosition;
+        private float moveSpeed = 1.5f; // 動く速さ
         protected bool isMoving = false; // 移動中フラグ
         public int iExplosionNum;
         protected object lockObject = new object(); // ロックオブジェクト
@@ -47,7 +47,7 @@ using PlayerBomName;
         // Start is called before the first frame update
         void Start()
         {
-			previousPosition = transform.position;
+			//previousPosition = transform.position;
 			// インスタンス生成直後にマテリアルを設定している事もあり、Awakeのタイミングではまだマテリアルが取得できない。
 			// 初回描画のタイミングであれば取得可能であるため、ここでマテリアルを設定している
 			GetComponent<Renderer>().material = cMaterialMng.GetMaterialOfType(sMaterialKind);
@@ -70,8 +70,8 @@ using PlayerBomName;
             if (isMoving)
             {
                 transform.position += moveDirection * moveSpeed * Time.deltaTime * 2;
+				CheckForCollision();
             }
-			previousPosition = transform.position;
         }
 
         protected virtual bool IsWall(Vector3 v3Temp){
@@ -175,6 +175,35 @@ using PlayerBomName;
             CancelInvoke();
         }
 
+		void CheckForCollision()
+		{
+			// 移動方向にレイを飛ばして衝突を検知
+			RaycastHit hit;
+			if (Physics.Raycast(transform.position, moveDirection, out hit, 1f))
+			{
+				// 衝突したオブジェクトの名前によって処理を分岐する
+				switch (hit.transform.name)
+				{
+					case "Broken(Clone)":
+					case "FixedWall(Clone)":
+					case "Wall(Clone)":
+					case "Bom(Clone)":
+					case "Bombigban(Clone)":
+					case "BomExplode(Clone)":
+						// 衝突を検知したら座標を補正して移動を止める
+						transform.position = cLibrary.GetPos(transform.position);
+						isMoving = false; // 移動停止
+						break;
+					default:
+						// 上記の条件に該当しない場合は何もしない
+						return;
+				}
+			}
+		}
+
+/*
+update関数の中でCheckForCollisionをコールして衝突検知する。
+OnCollisionEnterでの検知では、タイミングが遅く、オブジェクトの中に入り込んだときに検知してしまい、手前で止まらない。
 		private void OnCollisionEnter(Collision collision){
             switch (collision.transform.name)
             {
@@ -189,10 +218,11 @@ using PlayerBomName;
                     return;
             }
             // 衝突を検知したら座標を補正して移動を止める
-            transform.position = cLibrary.GetPos(previousPosition);
+            transform.position = cLibrary.GetPos(transform.position);
+			//transform.position = previousPosition;
             isMoving = false; // 移動停止
 		}
-
+*/
         void OnTriggerEnter(Collider other)
         {
             switch (other.transform.name)
