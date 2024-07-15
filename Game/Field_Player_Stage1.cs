@@ -1,36 +1,43 @@
 using UnityEngine;
 using UnityEngine.UI;
-public class Field_CpuMode_Stage1 : Field_CpuMode {
+public class Field_Player_Stage1 : Field_Player_CpuMode {
 
-    protected Vector3[] v3PlayerPos1 = new Vector3[]
-    {
-        new Vector3(1, 1, 1),
-        new Vector3(GameManager.xmax-2, 1, GameManager.zmax-2),
-        new Vector3(1, 1, GameManager.zmax-2),
-        new Vector3(GameManager.xmax-2, 1, 1)
-    };
-
-    protected override int GetIndex(){
+    protected Vector3[] v3PlayerPos1;
+    public override int GetIndex(){
         return 1;
     }
 
-    protected override void SpawnPlayerObjects(int playerCount)
+    public override void SetPlayerPositions()
     {
-        m_playerCount = playerCount;
-        for (int i = 1; i <= playerCount; i++)
+        // GameManager.xmax と GameManager.zmax の値がここで取得可能であると仮定
+        int xmax = GameManager.xmax;
+        int zmax = GameManager.zmax;
+
+        v3PlayerPos1 = new Vector3[]
+        {
+            new Vector3(2, 0.5f, 2),
+            new Vector3(xmax - 3, 0.5f, zmax - 3),
+            new Vector3(2, 0.5f, zmax - 3),
+            new Vector3(xmax - 3, 0.5f, 2)
+        };
+    }
+    public override void SpawnPlayerObjects(int playercnt)
+    {
+        //m_playerCount = GetArrayLength(GetIndex());;
+		SetPlayerNum(playercnt-1);
+        for (int i = 1; i <= playercnt; i++)
         {
             string canvasName = "Canvas" + i;
             GameObject gCanvas = LoadResource(canvasName);
             Vector3 v3PwrGage = new Vector3(0, 0, 0);
             gCanvas.transform.position = v3PwrGage;
 
-            if (i != 1)
-            {
+            string PlayerName = "Player" + i;
+
+            if (i != 1){
                 Slider cSlider = gCanvas.GetComponentInChildren<Slider>(); // Canvasの子要素からSliderを取得します。
                 SetPower(cSlider);
             }
-
-            string PlayerName = "Player" + i;
             GameObject gPlayer = LoadResource(PlayerName);
             SetupPlayer(gPlayer, i, gCanvas);
         }
@@ -44,7 +51,7 @@ public class Field_CpuMode_Stage1 : Field_CpuMode {
     }
 
 
-    protected override string GetBomMaterial(Vector3 target, int index)
+    public override string GetBomMaterial(Vector3 target, int index)
     {
         target.y += 1;
 
@@ -60,7 +67,6 @@ public class Field_CpuMode_Stage1 : Field_CpuMode {
 
         return "InvalidMaterial";
     }
-
 
 
 

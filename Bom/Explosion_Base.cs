@@ -2,7 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 public class Explosion_Base : MonoBehaviourPunCallbacks
 {
-    private Field_Base cField;
+    private Field_Block_Base cField;
     protected bool bField = false;
     private SoundManager soundManager;
 
@@ -29,10 +29,10 @@ public class Explosion_Base : MonoBehaviourPunCallbacks
     void hide(){
         
         transform.position = new Vector3(transform.position.x, transform.position.y-1, transform.position.z);
-        cField = GameObject.Find("Field").GetComponent<Field_Base>();
+        cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
         bool bRet = cField.IsMatchObjMove(transform.position);
         if(bRet){
-            Destroy(gameObject);
+            DestroySync(gameObject);
         }
         else{
             cField.UpdateGroundExplosion(this.gameObject);
@@ -64,12 +64,6 @@ public class Explosion_Base : MonoBehaviourPunCallbacks
         }
         switch (other.transform.name)
         {
-            case "Bom(Clone)":
-            case "Bombigban(Clone)":
-            case "BomExplode(Clone)":
-                //GameObject collidedObject = other.gameObject;
-                //collidedObject.GetComponent<Bom_Base>().CancelInvokeAndCallExplosion();
-                break;
             case "FixedWall(Clone)":
                 DestroySync(gameObject);
                 break;

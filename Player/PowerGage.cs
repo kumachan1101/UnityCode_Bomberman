@@ -1,63 +1,56 @@
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
-namespace PowerGageName
+public class PowerGage : MonoBehaviourPunCallbacks
 {
-    public class PowerGage : MonoBehaviourPunCallbacks
-    {
-        public Slider cSlider;
+	public Slider cSlider;
 
-        public void SetDamage(int iDamage){
-            SetDamage_RPC(iDamage);
-        }
+	public void SetDamage(int iDamage){
+		SetDamage_RPC(iDamage);
+	}
 
-        protected virtual void SetDamage_RPC(int iDamage){
-			if(false == GetComponent<PhotonView>().IsMine){
-				return;
-			}
-            photonView.RPC(nameof(SyncSetDamage),RpcTarget.All, iDamage);
-        }
+	protected virtual void SetDamage_RPC(int iDamage){
+		if(false == GetComponent<PhotonView>().IsMine){
+			return;
+		}
+		photonView.RPC(nameof(SyncSetDamage),RpcTarget.All, iDamage);
+	}
 
-        [PunRPC]
-        public void SyncSetDamage(int iDamage){
-            cSlider.value -= iDamage;
-        }
+	[PunRPC]
+	public void SyncSetDamage(int iDamage){
+		cSlider.value -= iDamage;
+	}
 
+	public void HeartUp(int iHeart){
+		HeartUp_RPC(iHeart);
+	}
 
+	protected virtual void HeartUp_RPC(int iHeart){
+		if(false == GetComponent<PhotonView>().IsMine){
+			return;
+		}
 
-        public void HeartUp(int iHeart){
-            HeartUp_RPC(iHeart);
-        }
+		photonView.RPC(nameof(SyncHeartUp),RpcTarget.All, iHeart);
+	}
 
-        protected virtual void HeartUp_RPC(int iHeart){
-			if(false == GetComponent<PhotonView>().IsMine){
-				return;
-			}
+	[PunRPC]
+	public void SyncHeartUp(int iHeart){
+		cSlider.value += iHeart;
+	}
 
-            photonView.RPC(nameof(SyncHeartUp),RpcTarget.All, iHeart);
-        }
+	public void init(Color cColor, Vector3 v3){
+		Debug.Log("init");
+		cSlider.GetComponent<RectTransform>().position = v3;
+		GameObject gFill = cSlider.transform.Find("Fill Area/Fill").gameObject;
+		gFill.GetComponent<Image>().color = cColor;
+	}
 
-        [PunRPC]
-        public void SyncHeartUp(int iHeart){
-            cSlider.value += iHeart;
-        }
-
-
-
-        public void init(Color cColor, Vector3 v3){
-            Debug.Log("init");
-            cSlider.GetComponent<RectTransform>().position = v3;
-            GameObject gFill = cSlider.transform.Find("Fill Area/Fill").gameObject;
-            gFill.GetComponent<Image>().color = cColor;
-            //Debug.Log(grandChild);
-        }
-
-        public bool IsDead(){
-            if(cSlider.value <= 0){
-                return true;
-            }
-            return false;
-        }
-    }
-
+	public bool IsDead(){
+		if(cSlider.value <= 0){
+			return true;
+		}
+		return false;
+	}
 }
+
+

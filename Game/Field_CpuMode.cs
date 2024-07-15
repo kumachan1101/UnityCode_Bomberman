@@ -1,59 +1,22 @@
 using UnityEngine;
-using UnityEngine.UI;
-using System.Reflection;
 public class Field_CpuMode : Field_Base {
 
     private bool bFlag;
 
     private GameManager cGameManager;
 
-    void start(){
-        bFlag = false;
-        cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-    }
+	protected override void Init()
+	{
+		bFlag = false;
+		cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
 
-    protected override void CPUmodeInit(){
-        int playerCount = GetArrayLength(GetIndex());
-        GameObject gItemControl = GameObject.Find("ItemControl");
-		Library.Instance.SetMaster();
+		GetComponent<Field_Block_Base>().CreateField();
 
-        CreateBrokenBlock();
-        SpawnPlayerObjects(playerCount);
-
-        SetName("Player1(Clone)");
-        SetPlayerNum(playerCount-1);
-
-    }
-    protected void GetPlayerInfo(ref string canvasName, ref string playerName){
-		canvasName = "Canvas1";
-		playerName = "Player1";
-    }
-
-    protected virtual void GetCPUPlayerInfo(ref string canvasName, ref string playerName){
-    }
-
-
-    protected virtual void SetPower(Slider cSlider){
-    }
-
-    protected override void ClearBrokenList_RPC(){
-        ClearBrokenList();
-    }
-
-
-    protected override void InsBrokenBlock_RPC(int x, int y, int z){
-        InsBrokenBlock(x, y, z);
-    }
-
-
-    protected override void InsObjMove_RPC(int x, int y, int z, Direction randomDirection){
-        InsObjMove(x, y, z, randomDirection);
-    }
-
-
-    protected override void Rainbow_RPC(string sMaterialType){
-        Rainbow(sMaterialType);
-    }
+		Field_Player_Base fieldPlayerBase = GetComponent<Field_Player_Base>();
+		int playercnt = fieldPlayerBase.GetArrayLength(fieldPlayerBase.GetIndex());
+		fieldPlayerBase.SpawnPlayerObjects(playercnt);
+		fieldPlayerBase.SetName("Player1(Clone)");
+	}
 
     protected override void GameTransision()
     {
@@ -111,41 +74,8 @@ public class Field_CpuMode : Field_Base {
             cGameManager.GameOver();
             bFlag = true;
         }
-/*
-        // 各オブジェクトの数をログで出力します
-        int player1Count = CountObjectsWithName("Player1(Clone)");
-        int player2Count = CountObjectsWithName("Player2(Clone)");
-        int player3Count = CountObjectsWithName("Player3(Clone)");
-        int player4Count = CountObjectsWithName("Player4(Clone)");
-        int playerDummy1Count = CountObjectsWithName("PlayerDummy1");
-        int playerDummy2Count = CountObjectsWithName("PlayerDummy2");
-        int playerDummy3Count = CountObjectsWithName("PlayerDummy3");
-        int playerDummy4Count = CountObjectsWithName("PlayerDummy4");
-
-        Debug.Log("Player1(Clone)の数: " + player1Count);
-        Debug.Log("Player2(Clone)の数: " + player2Count);
-        Debug.Log("Player3(Clone)の数: " + player3Count);
-        Debug.Log("Player4(Clone)の数: " + player4Count);
-        Debug.Log("PlayerDummy1の数: " + playerDummy1Count);
-        Debug.Log("PlayerDummy2の数: " + playerDummy2Count);
-        Debug.Log("PlayerDummy3の数: " + playerDummy3Count);
-        Debug.Log("PlayerDummy4の数: " + playerDummy4Count);
-*/
     }
 
 
-
-    protected override string GetCanvasName(){
-        return "Canvas";
-    }
-
-    protected override string GetPlayerName(){
-        return "Player";
-    }
-
-    protected override Player_Base AddComponent(GameObject gPlayer){
-        Player_Base cPlayer = gPlayer.AddComponent<Player_CpuMode>();
-        return cPlayer;
-    }
 
 }

@@ -1,40 +1,25 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
 using Photon.Pun;
-using UnityEngine.UI;
-using PowerGageName;
-using PlayerActionName;
-using PlayerBomName;
 using System.Text.RegularExpressions;
 public class Player_Online : Player_Base
 {
     void Awake ()
     {
+		cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();	
+		cBomControl = GameObject.Find("BomControl").GetComponent<BomControl>();
         string myName = gameObject.name;
-
         Match match = Regex.Match(myName, @"\d+");
         string numberString = match.Value;
-        string newCanvasName = "CanvasOnline" + numberString + "(Clone)";
-        //Debug.Log(newCanvasName);
-        GameObject gCanvas = GameObject.Find(newCanvasName);
-        SetSlider(gCanvas);
-        SetViewID(GetComponent<PhotonView>().ViewID);
-        //Debug.Log("ViewID:"+iViewID);
+        SetPlayerSetting(GetComponent<PhotonView>().ViewID);
     }
 
-    void Update ()
-    {
-        if(false == GetComponent<PhotonView>().IsMine){
-            return;
-        }
-        UpdatePlayer();
+    protected override bool IsAvairable(){
+		return GetComponent<PhotonView>().IsMine;
     }
 
     public override void UpdateKey(){
         if (Input.GetKey(KeyCode.Return)) {
              if (pushFlag == false){
-                //Debug.Log($"{iViewID} is Return");
                 pushFlag = true;
                 DropBom();
                 //AttackExplosion();
@@ -44,26 +29,13 @@ public class Player_Online : Player_Base
             pushFlag = false;
         }
     }
-/*
-    public override void SetViewID(int iParamViewID){
-        //Debug.Log(iParamViewID);
-        iViewID = iParamViewID;
-        CreatePlayerBom();
-        cPlayerBom.SetViewID(iViewID);
-        cPlayerBom.SetMaterialType(MaterialType);
-
-        rigidBody = GetComponent<Rigidbody> ();
-        myTransform = transform;
-        animator = myTransform.Find ("PlayerModel").GetComponent<Animator> ();
-        cField = GetField();
-
-        CreatePlayerAction();
-        cPlayerAction.SetMaterialType(MaterialType);
-    }
-*/
 
     protected override void CreatePlayerAction(){
-        cPlayerAction = new PlayerAction(ref rigidBody, ref myTransform, ref animator, ref cField, iViewID);
+        cPlayerAction = new PlayerAction(ref rigidBody, ref myTransform);
     }
+
+	protected override void DestroySync(GameObject g){
+		PhotonNetwork.Destroy(g.GetComponent<PhotonView>());
+	}
 
 }

@@ -58,10 +58,6 @@ public class ItemControl: MonoBehaviourPunCallbacks
         ABILITY_RANGE = 40
     }
 
-    public virtual GameObject Create(ABILITY eItem){
-        return null;
-    }
-
     protected virtual void CreateItem_RPC(ABILITY eRand, Vector3 v3){
     }
 
@@ -97,7 +93,6 @@ public class ItemControl: MonoBehaviourPunCallbacks
             CreateItem_RPC((ABILITY)iRand, v3);
         }
     }
-/*
     public GameObject Create(ABILITY eItem){
         GameObject gItem = null;
         switch(eItem){
@@ -111,10 +106,7 @@ public class ItemControl: MonoBehaviourPunCallbacks
                 gItem= ItemBomExplodePrefab;
                 break;
             case ABILITY.ABILITY_BOM_BIGBAN:
-                int iRand = Random.Range(0, 5);
-                if(0 == iRand){
-                    gItem= ItemBomBigBanPrefab;
-                }
+                gItem= ItemBomBigBanPrefab;
                 break;
             case ABILITY.ABILITY_SPEED_UP:
                 gItem= ItemSpeedPrefab;
@@ -137,11 +129,12 @@ public class ItemControl: MonoBehaviourPunCallbacks
             case ABILITY.ABILITY_ADD_DUMMY:
                 gItem= ItemAddDummyPrefab;
                 break;
+
             default:
                 gItem = null;
                 break;
         }
         return gItem;
     }
-*/
+
 }

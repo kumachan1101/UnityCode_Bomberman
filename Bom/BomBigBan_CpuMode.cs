@@ -1,7 +1,17 @@
 using UnityEngine;
 
-public class BomBigBan_CpuMode : BomExplode_CpuMode
+public class BomBigBan_CpuMode : BomBigBan_Base
 {
+	protected override void init(){
+		cInsManager = gameObject.AddComponent<InstanceManager_CpuMode>();
+		cInsManager.SetPrefab(ExplosionPrefab);		
+	}
+
+	protected override bool IsExplosion(){
+		return true;
+	}
+
+/*
     protected bool XZ_Explosion(int i, int j)
     {
         Vector3 v3Temp = new Vector3(transform.position.x + i, transform.position.y, transform.position.z + j);
@@ -10,8 +20,12 @@ public class BomBigBan_CpuMode : BomExplode_CpuMode
         {
             return true;
         }
-        cLibrary.DeletePositionAndName(v3Temp, "Explosion");
-        GameObject explosion = Instantiate(ExplosionPrefab, v3Temp, Quaternion.identity);
+		GameObject gExplosion = cLibrary.IsPositionAndName(v3Temp, "Explosion");
+		if(null != gExplosion){
+			cInsManager.DestroyInstance(gExplosion);	
+		}
+
+        GameObject explosion = cInsManager.InstantiateInstance(v3Temp);
         return false;
     }
 
@@ -26,8 +40,12 @@ public class BomBigBan_CpuMode : BomExplode_CpuMode
         {
             Vector3 position = cLibrary.GetPos(transform.position);
             transform.position = position;
-            cLibrary.DeletePositionAndName(position, "Explosion");
-            Instantiate(ExplosionPrefab, position, Quaternion.identity);
+			GameObject gExplosion = cLibrary.IsPositionAndName(position, "Explosion");
+			if(null != gExplosion){
+				cInsManager.DestroyInstance(gExplosion);	
+			}
+
+            cInsManager.InstantiateInstance(position);
 
             // 上下左右の爆発処理
             for (int j = 1; j <= iExplosionNum; j++)
@@ -65,11 +83,11 @@ public class BomBigBan_CpuMode : BomExplode_CpuMode
                 }
             }
 
-            DestroySync(this.gameObject);
+            cInsManager.DestroyInstance(this.gameObject);
         }
     }
 }
-
+*/
 /*
 using UnityEngine;
 
@@ -81,7 +99,7 @@ public class BomBigBan_CpuMode : BomExplode_CpuMode
         if(bRet){
             return true;
         }
-        cLibrary.DeletePositionAndName(v3Temp, "Explosion");
+        cLibrary.IsPositionAndName(v3Temp, "Explosion");
         GameObject g = Instantiate(ExplosionPrefab);
         g.transform.position = v3Temp;
         return false;
@@ -97,7 +115,7 @@ public class BomBigBan_CpuMode : BomExplode_CpuMode
         {
             Vector3 v3 = cLibrary.GetPos(transform.position);
             transform.position = v3;
-            cLibrary.DeletePositionAndName(v3, "Explosion");
+            cLibrary.IsPositionAndName(v3, "Explosion");
             GameObject g = Instantiate(ExplosionPrefab);
             g.transform.position = v3;
 			bool bFlag1_1 = false;
@@ -183,6 +201,5 @@ public class BomBigBan_CpuMode : BomExplode_CpuMode
             DestroySync(this.gameObject);
         }
     }
-
-}
 */
+}

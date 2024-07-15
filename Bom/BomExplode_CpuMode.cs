@@ -1,16 +1,16 @@
 using UnityEngine;
 
-public class BomExplode_CpuMode : Bom_CpuMode
+public class BomExplode_CpuMode : BomExplode_Base
 {
-	protected override bool XorZ_Explosion(Vector3 v3Temp){
-		bool bRet = IsWall(v3Temp);
-		if(bRet){
-			return true;
-		}
-		cLibrary.DeletePositionAndName(v3Temp, "Explosion");
-		GameObject g = Instantiate_Explosion(v3Temp);
-		g.transform.position = v3Temp;
-		return false;
+
+	protected override void init(){
+		cInsManager = gameObject.AddComponent<InstanceManager_CpuMode>();
+		cInsManager.SetPrefab(ExplosionPrefab);		
 	}
+
+	protected override bool IsExplosion(){
+		return true;
+	}
+
 
 }

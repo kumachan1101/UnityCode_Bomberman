@@ -1,7 +1,15 @@
-using UnityEngine;
-
-public class BomBigBan_Online : BomExplode_Online
+using Photon.Pun;
+public class BomBigBan_Online : BomBigBan_Base
 {
+	protected override void init(){
+		cInsManager = gameObject.AddComponent<InstanceManager_Online>();
+        cInsManager.SetResource(sExplosion);
+	}
+
+	protected override bool IsExplosion(){
+		return GetComponent<PhotonView>().IsMine;
+	}
+/*
     protected bool XZ_Explosion(int i, int j)
 	{
         Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z+j);
@@ -10,8 +18,12 @@ public class BomBigBan_Online : BomExplode_Online
             return true;
         }
 
-        cLibrary.DeletePositionAndName(v3Temp, "Explosion");
-		GameObject g = Instantiate_Explosion(v3Temp);
+		GameObject gExplosion = cLibrary.IsPositionAndName(v3Temp, "Explosion");
+		if(null != gExplosion){
+			cInsManager.DestroyInstance(gExplosion);	
+		}
+
+		GameObject g = cInsManager.InstantiateInstance(v3Temp);
         g.transform.position = v3Temp;
         return false;
     }
@@ -26,8 +38,12 @@ public class BomBigBan_Online : BomExplode_Online
         {
             Vector3 v3 = cLibrary.GetPos(transform.position);
             transform.position = v3;
-            cLibrary.DeletePositionAndName(v3, "Explosion");
-			GameObject g = Instantiate_Explosion(v3);
+			GameObject gExplosion = cLibrary.IsPositionAndName(v3, "Explosion");
+			if(null != gExplosion){
+				cInsManager.DestroyInstance(gExplosion);	
+			}
+
+			GameObject g = cInsManager.InstantiateInstance(v3);
             g.transform.position = v3;
 			bool bFlag1_1 = false;
 			bool bFlag1_2 = false;
@@ -110,8 +126,8 @@ public class BomBigBan_Online : BomExplode_Online
                 }
             }
 
-            DestroySync(this.gameObject);
+            cInsManager.DestroyInstance(this.gameObject);
         }
     }
-
+*/
 }

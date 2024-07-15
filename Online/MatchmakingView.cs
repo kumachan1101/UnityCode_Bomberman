@@ -63,35 +63,55 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
         return false;
     }
 
-    public override void OnJoinedRoom() {
+
+	private int myJoinOrder = -1; // 自分の入室順番を記録する変数
+    public override void OnJoinedRoom()
+    {
+        myJoinOrder = GetMyJoinOrder();
         UpdateRoom();
-    }
-
-    private void UpdateRoom(){
-        // ルームへの参加が成功したら、UIを非表示にする
-        int playerCount = PhotonNetwork.PlayerList.Length; //ルームにいる人数を確認
-        string roomName = PhotonNetwork.CurrentRoom.Name;
-        //Debug.Log("roomName:"+roomName);
-        
-        foreach (var roomButton in roomButtonList) {
-            if(roomButton.RoomName == roomName){
-                //Debug.Log("roomButton_RoomName:"+roomButton.RoomName);
-                roomButton.SetPlayerCount(playerCount);
-                if(roomButton.GetIsMax(playerCount)){
-                    gameObject.SetActive(false);        
-                }
-            }
-        }
-        
-        PhotonNetwork.NickName = "PlayerOnline" + playerCount;
-
     }
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
     {
-        Debug.Log("OnPlayerEnteredRoom");
         UpdateRoom();
     }
+
+    private int GetMyJoinOrder()
+    {
+        int order = 0;
+        foreach (Photon.Realtime.Player player in PhotonNetwork.PlayerList)
+        {
+            if (player == PhotonNetwork.LocalPlayer)
+            {
+                break;
+            }
+            order++;
+        }
+        return order + 1; // 1-indexedとして返す
+    }
+
+
+	private void UpdateRoom() {
+		// ルームへの参加が成功したら、UIを非表示にする
+		int playerCount = PhotonNetwork.PlayerList.Length; // ルームにいる人数を確認
+		string roomName = PhotonNetwork.CurrentRoom.Name;
+		foreach (var roomButton in roomButtonList) {
+			if (roomButton.RoomName == roomName) {
+				roomButton.SetPlayerCount(playerCount);
+				if (roomButton.GetIsMax(playerCount)) {
+					GameObject gField = GameObject.Find("Field");
+					Field_Block_Base cField = gField.GetComponent<Field_Block_Base>();
+					cField.CreateField();
+
+					Field_Player_Base cFieldPlayer = gField.GetComponent<Field_Player_Base>();
+					cFieldPlayer.SpawnPlayerObjects(myJoinOrder);
+					cFieldPlayer.m_playerCount = playerCount;
+
+					gameObject.SetActive(false);
+				}
+			}
+		}
+	}
 
     public override void OnJoinRoomFailed(short returnCode, string message) {
         // ルームへの参加が失敗したら、再びルーム参加ボタンを押せるようにする

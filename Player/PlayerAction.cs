@@ -1,241 +1,158 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
+using UnityEngine;
+[System.Serializable]
 public class PlayerAction
 {
-	protected Vector3 LastV3;
-	protected Rigidbody rigidBody;
-	protected Transform myTransform;
-	protected Animator animator;
-	protected Field_Base cField;
-	private float gridSize = 0.005f; // マス目のサイズ
-	protected float moveSpeed;
-	//private int iViewID;
-	private bool canMove = true;
-	private Material cMaterial;
-	private float elapsedTime = 0f;
-	public bool pushBtnUp = false;
-	public bool pushBtnDown = false;
-	public bool pushBtnLeft = false;
-	public bool pushBtnRight = false;
-	public bool pushBtnEnter = false;
-	protected Library cLibrary;
+    public PlayerMovement playerMovement;
+    private PlayerInput playerInput;
+    protected PlayerMaterial playerMaterial;
 
+    protected Transform myTransform;
+    protected Field_Block_Base cField;
+    protected Field_Player_Base cField_Player;
+    protected Vector3 LastV3;
+    protected bool canMove = true;
+    protected Library_Base cLibrary;
 
-	public PlayerAction(ref Rigidbody rb, ref Transform tf, ref Animator ani, ref Field_Base fi, int iViewID){
-		rigidBody = rb;
-		myTransform = tf;
-		animator = ani;
-		cField = fi;
-		LastV3 = myTransform.position;
-		moveSpeed = 1.0f;
-	}
+    public PlayerAction(ref Rigidbody rb, ref Transform tf)
+    {
+        cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+        cField_Player = GameObject.Find("Field").GetComponent<Field_Player_Base>();
+        myTransform = tf;
 
-	public void SetMaterialType(string sParamMaterialType){
-		MaterialManager cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-		cMaterial = cMaterialMng.GetMaterialOfType(sParamMaterialType);
-	}
+        playerMovement = new PlayerMovement(rb, tf);
+        playerInput = new PlayerInput();
+        playerMaterial = new PlayerMaterial();
 
-	public void UpdateButton()
-	{
-		elapsedTime += Time.deltaTime;
+        LastV3 = myTransform.position;
+    }
 
-		if (pushBtnUp)
-		{
-			MoveUp();
-		}
-		else if (pushBtnDown)
-		{
-			MoveDown();
-		}
-		else if (pushBtnRight)
-		{
-			MoveRight();
-		}
-		else if (pushBtnLeft)
-		{
-			MoveLeft();
-		}
-		else if(pushBtnEnter)
-		{
-			DropBom();
-		}
-		else 
-		{
-			// No button pressed
-		} 
-	}
+    public void SetMaterialType(string sParamMaterialType)
+    {
+        playerMaterial.SetMaterialType(sParamMaterialType);
+    }
+/*
+    public void UpdateButton()
+    {
+        elapsedTime += Time.deltaTime;
 
+        playerInput.UpdateInput();
 
+        if (playerInput.pushBtnUp)
+        {
+            MoveUp();
+        }
+        else if (playerInput.pushBtnDown)
+        {
+            MoveDown();
+        }
+        else if (playerInput.pushBtnRight)
+        {
+            MoveRight();
+        }
+        else if (playerInput.pushBtnLeft)
+        {
+            MoveLeft();
+        }
+        else if (playerInput.pushBtnEnter)
+        {
+            DropBom();
+        }
+    }
+*/
+    public void UpdateMovement()
+    {
+        playerInput.UpdateInput();
+        UpdatePlayerMovement();
+		CanMove();
+    }
 
-	public void UpdateMovement()
-	{
-		//animator.SetBool ("Walking", false);
-		UpdatePlayerMovement();
+    public void MoveClear()
+    {
+        playerInput.ClearInput();
+        playerMovement.MoveClear();
+    }
 
-		if(null == cLibrary){
-			cLibrary = GameObject.Find("Library").GetComponent<Library>();
-		}
+    private GameObject GetPlayerGameObject()
+    {
+        string name = cField_Player.GetName();
+        GameObject gPlayer = GameObject.Find(name);
+        return gPlayer;
+    }
 
-		Vector3 v3 = cLibrary.GetPos(myTransform.position);
-		Vector3 v3_ground = new Vector3(v3.x, v3.y-1, v3.z);
-		
-		canMove = cField.IsMatch(v3_ground, cMaterial);
-		if(false == canMove){
-			canMove = cField.IsMatchObjMove(v3_ground);
-		}
-		//Debug.Log("canMove : " + canMove + " cMaterial :" + cMaterial + " v3 :"  + v3 + " v3_ground :" + v3_ground);
+    protected Player_Base GetPlayerComponent(GameObject gPlayer)
+    {
+        Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
+        return cPlayer;
+    }
 
-		if(canMove){
-			LastV3 = myTransform.position;
-		}
-		else{
-			myTransform.position = LastV3;                
-		}
+    public void PerformPlayerAction(Vector3 moveDirection, Action<PlayerInput> flagSetter)
+    {
+        //GameObject gPlayer = GetPlayerGameObject();
+        //Player_Base cPlayer = GetPlayerComponent(gPlayer);
+        MoveClear();
+        flagSetter(playerInput);
+        playerMovement.Move(moveDirection);
+    }
 
-	}
+    virtual public void MoveUp()
+    {
+        PerformPlayerAction(Vector3.forward, (input) => input.pushBtnUp = true);
+    }
 
-	public void MoveClear(Player_Base cPlayer)
-	{
-		PlayerAction cPlayerAction = cPlayer.GetPlayerAction();
-		cPlayerAction.pushBtnUp = false;
-		cPlayerAction.pushBtnDown = false;
-		cPlayerAction.pushBtnRight = false;
-		cPlayerAction.pushBtnLeft = false;
-		cPlayerAction.pushBtnEnter = false;
-		animator.SetBool ("Walking", false);
-	}
+    virtual public void MoveDown()
+    {
+        PerformPlayerAction(Vector3.back, (input) => input.pushBtnDown = true);
+    }
 
-	private GameObject GetPlayerGameObject(){
-		string name = cField.GetName();
-		GameObject gPlayer = GameObject.Find(name);
-		return gPlayer;
-	}
+    virtual public void MoveRight()
+    {
+        PerformPlayerAction(Vector3.right, (input) => input.pushBtnRight = true);
+    }
 
-	protected Player_Base GetPlayerComponent(GameObject gPlayer){
-		Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
-		return cPlayer;
-	}
+    virtual public void MoveLeft()
+    {
+        PerformPlayerAction(Vector3.left, (input) => input.pushBtnLeft = true);
+    }
+/*
+    public void DropBom()
+    {
+        PerformPlayerAction(Vector3.zero, (input) => input.pushBtnEnter = true);
 
-
-
-
-	public void PerformPlayerAction(Vector3 moveDirection, Action<PlayerAction> flagSetter)
-	{
-		GameObject gPlayer = GetPlayerGameObject();
-		Player_Base cPlayer = GetPlayerComponent(gPlayer);
-		MoveClear(cPlayer);
-
-		PlayerAction cPlayerAction = cPlayer.GetPlayerAction();
-
-		// フラグの設定を呼び出し元から受け取った関数で行う
-		flagSetter(cPlayerAction);
-
-		MovePlayer(gPlayer, moveDirection, 1.0F);
-	}
-	public virtual void MoveUp()
-	{
-		PerformPlayerAction(Vector3.forward, (cPlayerAction) => {
-			cPlayerAction.pushBtnUp = true;
-		});
-	}
-
-	public virtual void MoveDown()
-	{
-		PerformPlayerAction(Vector3.back, (cPlayerAction) => {
-			cPlayerAction.pushBtnDown = true;
-		});
-	}
-
-	public virtual void MoveRight()
-	{
-		PerformPlayerAction(Vector3.right, (cPlayerAction) => {
-			cPlayerAction.pushBtnRight = true;
-		});
-	}
-
-	public virtual void MoveLeft()
-	{
-		PerformPlayerAction(Vector3.left, (cPlayerAction) => {
-			cPlayerAction.pushBtnLeft = true;
-		});
-	}
-
-	public virtual void DropBom()
-	{
-		PerformPlayerAction(Vector3.zero, (cPlayerAction) => {
-			cPlayerAction.pushBtnEnter = true;
-		});
-		
-		GameObject gPlayer = GetPlayerGameObject();
-		Player_Base cPlayer = GetPlayerComponent(gPlayer);
-		cPlayer.DropBom();
-	}
-
-	public void MovePlayer(GameObject gPlayer, Vector3 direction, float in_moveSpeed)
-	{
-		
-		if(direction == Vector3.zero){
-			animator.SetBool("Walking", false);
-			return;
-		}
-		Transform cTransform = gPlayer.GetComponent<Transform>();
-		float moveDistance = in_moveSpeed * moveSpeed * Time.deltaTime;
-		cTransform.Translate(Vector3.forward * moveDistance);
-		Quaternion targetRotation = Quaternion.LookRotation(direction);
-		cTransform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
-
-		Animator cAnimator = cTransform.Find("PlayerModel").GetComponent<Animator>();
-		cAnimator.SetBool("Walking", true);
-	}
-	public void Move(Vector3 direction, float rotationY)
-	{
-		Vector3 newPosition = rigidBody.position + direction * gridSize * moveSpeed;
-		newPosition.x = Mathf.RoundToInt(newPosition.x / gridSize) * gridSize;
-		newPosition.z = Mathf.RoundToInt(newPosition.z / gridSize) * gridSize;
-		rigidBody.MovePosition(newPosition);
-
-		myTransform.rotation = Quaternion.Euler(0, rotationY, 0); // Y軸周りの回転を設定
-
-		animator.SetBool("Walking", true);
-	}
-
-	protected virtual void UpdatePlayerMovement()
-	{
-		// Keyboard input
-		if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
-		{
-			MoveUp();
-		}
-		else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
-		{
-			MoveDown();
-		}
-		else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
-		{
-			MoveLeft();
-		}
-		else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
-		{
-			MoveRight();
-		}
-
-		if (Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.W) ||
-			Input.GetKeyUp(KeyCode.RightArrow) || Input.GetKeyUp(KeyCode.D) ||
-			Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.A) ||
-			Input.GetKeyUp(KeyCode.DownArrow) || Input.GetKeyUp(KeyCode.S))
-		{
-
-			GameObject gPlayer = GetPlayerGameObject();
-			Player_Base cPlayer = GetPlayerComponent(gPlayer);
-			MoveClear(cPlayer);
-		}
-	}
-
-	public void SpeedUp(){
-		if(moveSpeed >= 5){
-			return;
-		}
-		moveSpeed += 0.5f;
-	}
+        GameObject gPlayer = GetPlayerGameObject();
+        Player_Base cPlayer = GetPlayerComponent(gPlayer);
+        cPlayer.DropBom();
+    }
+*/
+	protected virtual void CanMove(){}
 	
+
+     protected virtual void UpdatePlayerMovement()
+    {
+        if (playerInput.pushBtnUp)
+        {
+			MoveUp();
+        }
+        else if (playerInput.pushBtnDown)
+        {
+            MoveDown();
+        }
+        else if (playerInput.pushBtnLeft)
+        {
+            MoveLeft();
+        }
+        else if (playerInput.pushBtnRight)
+        {
+            MoveRight();
+        }
+		else{
+			MoveClear();
+		}
+    }
+ 
+    public void SpeedUp()
+    {
+		playerMovement.SpeedUp();
+    }
+
 }

@@ -1,24 +1,32 @@
 using UnityEngine;
 using UnityEngine.UI;
-public class Field_CpuMode_Stage2 : Field_CpuMode_Stage1 {
+public class Field_Player_Stage2 : Field_Player_CpuMode {
 
 
-    protected Vector3[] v3PlayerPos2 = new Vector3[]
-    {
-        new Vector3(1, 1, 1),
-        new Vector3(GameManager.xmax-2, 1, GameManager.zmax-2),
-        new Vector3(1, 1, GameManager.zmax-2),
-        new Vector3(GameManager.xmax-2, 1, 1)
-    };
+    protected Vector3[] v3PlayerPos2;
 
-    protected override int GetIndex(){
+    public override int GetIndex(){
         return 2;
     }
+    public override void SetPlayerPositions()
+    {
+        // GameManager.xmax と GameManager.zmax の値がここで取得可能であると仮定
+        int xmax = GameManager.xmax;
+        int zmax = GameManager.zmax;
 
-	protected override void SpawnPlayerObjects(int playerCount)
+        v3PlayerPos2 = new Vector3[]
+        {
+			new Vector3(2, 0.5f, 2),
+			new Vector3(GameManager.xmax-3, 0.5f, GameManager.zmax-3),
+			new Vector3(2, 0.5f, GameManager.zmax-3),
+			new Vector3(GameManager.xmax-3, 0.5f, 2)
+        };
+    }
+	public override void SpawnPlayerObjects(int playercnt)
 	{
-		m_playerCount = playerCount;
-		for (int i = 1; i <= playerCount; i++)
+		//m_playerCount = GetArrayLength(GetIndex());;
+		SetPlayerNum(playercnt-1);
+		for (int i = 1; i <= playercnt; i++)
 		{
 			string canvasName = "";
 			string playerName = "";
@@ -56,7 +64,9 @@ public class Field_CpuMode_Stage2 : Field_CpuMode_Stage1 {
 		cSlider.value = 10;
     }
 
-    protected override string GetBomMaterial(Vector3 target, int index)
+
+ 
+    public override string GetBomMaterial(Vector3 target, int index)
     {
         target.y += 1;
 
@@ -77,8 +87,6 @@ public class Field_CpuMode_Stage2 : Field_CpuMode_Stage1 {
 
         return "InvalidMaterial";
     }
-
- 
 
 
 }

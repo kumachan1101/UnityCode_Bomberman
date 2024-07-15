@@ -1,9 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using BomPosName;
 using Photon.Pun;
-using PlayerBomName;
 
 //namespace BomName{
     public class Bom_Base : MonoBehaviourPunCallbacks
@@ -12,9 +8,10 @@ using PlayerBomName;
 
         //protected Material cMaterialType;
 		protected string sMaterialKind;
-        protected Field_Base cField;
+		protected string sExplosion;
+        protected Field_Block_Base cField;
 
-        protected Library cLibrary;
+        protected Library_Base cLibrary;
 
 		protected MaterialManager cMaterialMng;
 
@@ -27,7 +24,7 @@ using PlayerBomName;
         protected bool isMoving = false; // 移動中フラグ
         public int iExplosionNum;
         protected object lockObject = new object(); // ロックオブジェクト
-
+		protected InstanceManager_Base cInsManager;
         // Playerクラスから方向を受け取るメソッド
         public void SetMoveDirection(Vector3 direction)
         {
@@ -40,19 +37,40 @@ using PlayerBomName;
         }
 
         void Awake(){
-            cField = GameObject.Find("Field").GetComponent<Field_Base>();
-            cLibrary = GameObject.Find("Library").GetComponent<Library>();
+            cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+            cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
 			cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+			
         }
+
+		protected virtual void init(){
+		}
+
         // Start is called before the first frame update
         void Start()
         {
 			//previousPosition = transform.position;
 			// インスタンス生成直後にマテリアルを設定している事もあり、Awakeのタイミングではまだマテリアルが取得できない。
 			// 初回描画のタイミングであれば取得可能であるため、ここでマテリアルを設定している
-			GetComponent<Renderer>().material = cMaterialMng.GetMaterialOfType(sMaterialKind);
-			string sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
+			//GetComponent<Renderer>().material = cMaterialMng.GetMaterialOfType(sMaterialKind);
+			Renderer renderer = GetComponent<Renderer>();
+			if (renderer == null)
+			{
+				renderer = GetComponentInChildren<Renderer>();
+			}
+			if (renderer != null)
+			{
+				MaterialManager materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+				Material newMaterial = materialManager.GetMaterialOfType(sMaterialKind);
+				renderer.material = newMaterial;
+			}
+			else
+			{
+				Debug.LogWarning("Renderer component not found on the game object or its children.");
+			}
+			sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
 			ExplosionPrefab = Resources.Load<GameObject>(sExplosion);
+			init();
             //DelayMethodを3秒後に呼び出す
             Invoke(nameof(Explosion), 3f);
         }
@@ -78,19 +96,23 @@ using PlayerBomName;
             bool bRet = cField.IsAllWall(v3Temp);
             return bRet;
         }
-
+/*
         protected virtual GameObject Instantiate_Explosion(Vector3 v3){
 			return null;
         }
-
+*/
 
         protected virtual bool XorZ_Explosion(Vector3 v3Temp){
             bool bRet = IsWall(v3Temp);
             if(bRet){
                 return true;
             }
-            cLibrary.DeletePositionAndName(v3Temp, "Explosion");
-            GameObject g = Instantiate_Explosion(v3Temp);
+			GameObject gExplosion = cLibrary.IsPositionAndName(v3Temp, "Explosion");
+			if(null != gExplosion){
+				cInsManager.DestroyInstance(gExplosion);	
+			}
+
+            GameObject g = cInsManager.InstantiateInstance(v3Temp);
 
             bRet = cField.IsBroken(v3Temp);
             if(bRet){
@@ -115,7 +137,7 @@ using PlayerBomName;
         }
 
 		protected virtual bool IsExplosion(){
-			return false;
+			return true;
 		}
 
         protected virtual void Explosion()
@@ -128,10 +150,13 @@ using PlayerBomName;
             {
                 Vector3 v3 = cLibrary.GetPos(transform.position);
                 transform.position = v3;
-                cLibrary.DeletePositionAndName(v3, "Explosion");
+                GameObject gExplosion = cLibrary.IsPositionAndName(v3, "Explosion");
+				if(null != gExplosion){
+					cInsManager.DestroyInstance(gExplosion);	
+				}
 
                 //中心の爆風は、アイテム効果で、地面に沈まないようにする→未実装
-                GameObject g = Instantiate_Explosion(v3);
+                GameObject g = cInsManager.InstantiateInstance(v3);
                 g.transform.position = v3;
 
                 //float x = g.transform.position.x;
@@ -163,11 +188,11 @@ using PlayerBomName;
                         break;
                     }
                 }
-                DestroySync(this.gameObject);
+                cInsManager.DestroyInstance(this.gameObject);
             }
         }
 
-		protected virtual void DestroySync(GameObject g){}
+		//protected virtual void DestroySync(GameObject g){}
 
         private void OnDestroy()
         {
@@ -175,6 +200,8 @@ using PlayerBomName;
             CancelInvoke();
         }
 
+		//update関数の中でCheckForCollisionをコールして衝突検知する。
+		//OnCollisionEnterでの検知では、タイミングが遅く、オブジェクトの中に入り込んだときに検知してしまい、手前で止まらない。
 		void CheckForCollision()
 		{
 			// 移動方向にレイを飛ばして衝突を検知
@@ -201,28 +228,6 @@ using PlayerBomName;
 			}
 		}
 
-/*
-update関数の中でCheckForCollisionをコールして衝突検知する。
-OnCollisionEnterでの検知では、タイミングが遅く、オブジェクトの中に入り込んだときに検知してしまい、手前で止まらない。
-		private void OnCollisionEnter(Collision collision){
-            switch (collision.transform.name)
-            {
-                case "Broken(Clone)":
-                case "FixedWall(Clone)":
-                case "Wall(Clone)":
-				case "Bom(Clone)":
-				case "Bombigban(Clone)":
-				case "BomExplode(Clone)":
-                    break;
-                default:
-                    return;
-            }
-            // 衝突を検知したら座標を補正して移動を止める
-            transform.position = cLibrary.GetPos(transform.position);
-			//transform.position = previousPosition;
-            isMoving = false; // 移動停止
-		}
-*/
         void OnTriggerEnter(Collider other)
         {
             switch (other.transform.name)

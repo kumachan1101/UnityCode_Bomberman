@@ -31,7 +31,8 @@ public class SoundManager : MonoBehaviour
         // 効果音を再生
         if (clipToPlay != null)
         {
-            AudioSource.PlayClipAtPoint(clipToPlay, Camera.main.transform.position);
+            //AudioSource.PlayClipAtPoint(clipToPlay, Camera.main.transform.position);
+			
         }
     }
 }

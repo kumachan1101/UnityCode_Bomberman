@@ -1,136 +1,102 @@
-using BomKind;
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using BomPosName;
-namespace PlayerBomName
+
+public class PlayerBom
 {
-    public class PlayerBom{
-        private int iBomNum;
-        private int iUsedBomNum;
-        private int iExplosionNum;
-        private BomKind.BOM_KIND eBomKind;
+    private BomConfiguration bomConfiguration;
+    private BomStatus bomStatus;
+    private BomManagement bomManagement;
 
-        private int iViewID;
-
-        private bool bBomKick;
-        private bool bBomAttack;
-        private bool bWall;
-        private List<GameObject> BomList = new List<GameObject>();
-
-        private string sMaterialType;
-
-        //private List<BomPos> BomList = new List<BomPos>();
-
-        public PlayerBom(){
-            iBomNum = 3;
-            iExplosionNum = 3;
-            eBomKind = BomKind.BOM_KIND.BOM_KIND_NOTHING;
-            bBomKick = false;
-            bWall = false;
-        }
-
-        public string GetMaterialType(){
-            return sMaterialType;
-        }
-        public void SetMaterialType(string sParamMaterialType){
-            sMaterialType = sParamMaterialType;
-        }
-
-        public void SetViewID(int iParamViewID){
-            iViewID = iParamViewID;
-        }
-
-        public int GetExplosionNum(){
-            return iExplosionNum;
-        }
-
-        public void ExplosionUp(){
-            iExplosionNum++;
-        }
-
-        public void BomUp(){
-            iBomNum++;
-        }
-
-        public void BomKick(){
-            bBomKick = true;
-        }
-
-        public bool GetBomKick(){
-            return bBomKick;
-        }
-
-        public void BomAttack(){
-            bBomAttack = true;
-        }
-
-
-        public bool GetBomAttack(){
-            return bBomAttack;
-        }
-
-        public void Wall(){
-            bWall = true;
-        }
-
-        public bool GetBrokenthrough(){
-            return bWall;
-        }
-
-        public void SetBomKind(BomKind.BOM_KIND ePramBomKind){
-            eBomKind = ePramBomKind;
-        }
-
-        public BomKind.BOM_KIND GetBomKind(){
-            return eBomKind;
-        }
-
-        private int GetBomNum(){
-            int iBomNum = GetBomViewIDNum(iViewID);
-            return iBomNum;
-        }
-
-        public bool isAbalableBom(Vector3 v3){
-            if(iBomNum <= GetBomNum()){
-                return false;
-            }
-
-            if(IsBom(v3)){
-               return false;
-            }
-
-            return true;
-        }
-
-
-        private bool IsBom(Vector3 v3){
-            foreach (GameObject gBom in BomList) {
-                if(null != gBom){
-                    if(gBom.transform.position == v3){
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public int GetBomViewIDNum(int iViewID){
-            int iLen = 0;
-
-            foreach (GameObject gBom in BomList) {
-                if(null != gBom /*&& iViewID == gBom.GetComponent<Bom>().GetViewID()*/){
-                    iLen++;
-                }
-            }
-            return iLen;
-        }
-
-        public void AddBom(GameObject gBom){
-            BomList.Add(gBom);
-            //Debug.Log(BomList.Count);
-        }
-
+    public PlayerBom()
+    {
+        bomConfiguration = new BomConfiguration();
+        bomStatus = new BomStatus();
+        bomManagement = new BomManagement();
     }
 
+    public string GetMaterialType()
+    {
+        return bomConfiguration.GetMaterialType();
+    }
+
+    public void SetMaterialType(string materialType)
+    {
+        bomConfiguration.SetMaterialType(materialType);
+    }
+
+    public void IncreaseExplosion()
+    {
+        bomConfiguration.IncreaseExplosion();
+    }
+
+    public void IncreaseBom()
+    {
+        bomStatus.IncreaseBom();
+    }
+
+    public void EnableKick()
+    {
+        bomStatus.EnableKick();
+    }
+
+    public void EnableAttack()
+    {
+        bomStatus.EnableAttack();
+    }
+
+    public void EnableBreakthrough()
+    {
+        bomStatus.EnableBreakthrough();
+    }
+
+    public int GetExplosionNum()
+    {
+        return bomConfiguration.GetExplosionNum();
+    }
+
+    public bool CanKick()
+    {
+        return bomStatus.CanKick();
+    }
+
+    public bool CanAttack()
+    {
+        return bomStatus.CanAttack();
+    }
+
+    public bool CanBreakthrough()
+    {
+        return bomStatus.CanBreakthrough();
+    }
+
+    public void AddBom(GameObject bom)
+    {
+        bomManagement.AddBom(bom);
+    }
+
+    public bool IsBomAvailable(Vector3 position)
+    {
+        return bomManagement.IsBomAvailable(position, bomStatus.GetBomNum());
+    }
+
+    public BOM_KIND GetBomKind()
+    {
+        return bomConfiguration.GetBomKind();
+    }
+
+    public void SetBomKind(BOM_KIND bomKind)
+    {
+        bomConfiguration.SetBomKind(bomKind);
+    }
+
+	public BomConfiguration GetBomConfiguration(){
+		return bomConfiguration;
+	}
+
+	public BomStatus GetBomStatus(){
+		return bomStatus;
+	}
+
+	public BomManagement GetBomManagement(){
+		return bomManagement;
+	}
 }

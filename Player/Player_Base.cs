@@ -1,30 +1,30 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
 using Photon.Pun;
-using UnityEngine.UI;
-using PowerGageName;
-using PlayerActionName;
-using PlayerBomName;
-using System.Collections.Generic;
 
 public class Player_Base : MonoBehaviourPunCallbacks
 {
 
     public string MaterialType;
-    public int playerNumber = 1;
     protected Rigidbody rigidBody;
     protected Transform myTransform;
     protected Animator animator;
     protected Field_Base cField;
     protected bool pushFlag = false;
-    public int iViewID = 9999;
-    public PowerGageName.PowerGage cPowerGage;
-    protected PlayerBomName.PlayerBom cPlayerBom;
-    protected PlayerAction cPlayerAction;
-    protected Library cLibrary;
-    public virtual void SetSlider(GameObject gCanvas){
+    public int iViewID = -1;
+    public PowerGage cPowerGage;
+    protected PlayerBom cPlayerBom;
+    public PlayerAction cPlayerAction;
+    protected Library_Base cLibrary;
+
+	protected BomControl cBomControl;
+
+	protected JoystickController cJoystickController;
+    public void SetSlider(GameObject gCanvas){
 		cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage>();
+		//Debug.Log(cPowerGage);
+		if(cPowerGage == null){
+			//Debug.Log("cPowerGage is null");
+		}
 	}
 
     protected virtual bool IsAvairable(){
@@ -32,42 +32,48 @@ public class Player_Base : MonoBehaviourPunCallbacks
     }
 
     public virtual void UpdateKey(){}
-
+/*
     protected virtual void DropBom_BomControl(GameObject gBomControl, Vector3 v3, int iViewID){
         Vector3 direction = myTransform.forward;
         gBomControl.GetComponent<BomControl>().DropBom(ref cPlayerBom, v3, iViewID, direction);
 	}
+*/
 
-
-    protected virtual Player_Base GetComponent(){
+    protected Player_Base GetComponent(){
 		return this.gameObject.GetComponent<Player_Base>();
     }
 
-    protected virtual Field_Base GetField(){
+    protected Field_Base GetField(){
 		return GameObject.Find("Field").GetComponent<Field_Base>();
     }
 
     protected virtual void CreatePlayerAction(){}
 
-    public virtual void SetViewID(int iParamViewID){
+    public virtual void SetPlayerSetting(int iParamViewID){
         iViewID = iParamViewID;
         CreatePlayerBom();
-        cPlayerBom.SetViewID(iViewID);
+		
         cPlayerBom.SetMaterialType(MaterialType);
 
         rigidBody = GetComponent<Rigidbody> ();
+
         myTransform = transform;
-        animator = myTransform.Find ("PlayerModel").GetComponent<Animator> ();
+        //animator = myTransform.Find ("PlayerModel").GetComponent<Animator> ();
+		animator = GetComponent<Animator> ();
         cField = GetField();
 
         CreatePlayerAction();
         cPlayerAction.SetMaterialType(MaterialType);
+
+		GameObject joystickPlayer = GameObject.Find("JoystickPlayer");
+		cJoystickController = joystickPlayer.GetComponent<JoystickController>();
+
 	}
 
     // Update is called once per frame
     void Update ()
     {
-        if(false == IsAvairable()){
+        if(false == IsAvairable() || null == cPlayerAction){
             return;
         }
         UpdatePlayer();
@@ -76,18 +82,28 @@ public class Player_Base : MonoBehaviourPunCallbacks
     protected void UpdatePlayer(){
         cPlayerAction.UpdateMovement();
         UpdateKey();
-        cPlayerAction.UpdateButton();
+        UpdateJoyStick();
     }
 
+	private void UpdateJoyStick(){
+		Vector3 v3 = cJoystickController.GetMoveVector();
+        if (v3 == Vector3.zero)
+        {
+            return;
+        }
+		cPlayerAction.playerMovement.Move(v3);
+	}
 
     public void DropBom(){
-        if(null == cLibrary){
-            cLibrary = GameObject.Find("Library").GetComponent<Library>();
+		
+        if(null == cLibrary || null == cBomControl){
+			return;
         }
+		
         Vector3 v3 = cLibrary.GetPos(transform.position);
-        if(cPlayerBom.isAbalableBom(v3)){
-            GameObject gBomControl = GameObject.Find("BomControl");
-            DropBom_BomControl(gBomControl, v3, iViewID);
+        if(cPlayerBom.IsBomAvailable(v3)){
+			Vector3 direction = myTransform.forward;
+			cBomControl.DropBom(ref cPlayerBom, v3, direction);
         }
     }
 
@@ -95,8 +111,8 @@ public class Player_Base : MonoBehaviourPunCallbacks
         //Vector3 v3 = GetPos();
         //Vector3 direction = myTransform.forward;
         //DropBomと同じように実装しよう。
-        GameObject gBomControl = GameObject.Find("BomControl");
-        gBomControl.GetComponent<BomControl>().CancelInvokeAndCallExplosion();
+        //gBomControl = GameObject.Find("BomControl");
+        cBomControl.CancelInvokeAndCallExplosion();
     }
 
     public void OnTriggerEnter (Collider other)
@@ -107,19 +123,18 @@ public class Player_Base : MonoBehaviourPunCallbacks
             if(MaterialType != materialName){
                 int iDamage = other.GetComponent<Explosion_Base>().GetDamage();
                 Player_Base cPlayer = GetComponent();
-                //Debug.Log(cPlayer);
+				//Debug.Log(cPlayer);
                 cPlayer.cPowerGage.SetDamage(iDamage);
     
                 if(cPlayer.cPowerGage.IsDead()){
                     string tag = this.gameObject.tag;
-                    //Dead(tag);
-                    Destroy(this.gameObject);
+                    DestroySync(this.gameObject);
                 }
             }
         }
     }
 
-
+	protected virtual void DestroySync(GameObject g){}
 
     private void OnCollisionEnter(Collision collision){
         switch (collision.transform.name){
@@ -130,8 +145,6 @@ public class Player_Base : MonoBehaviourPunCallbacks
                 // ここに処理を記述
                 break;
             case "Ground(Clone)":
-                //Debug.Log("OnCollisionEnter:Ground");
-                return;
             default:
                 return;
         }
@@ -180,6 +193,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
     }
 
     public void Wall(){
+/*
         if(iViewID != GetComponent<PhotonView>().ViewID){
             return;
         }
@@ -188,7 +202,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
 
         photonView.RPC(nameof(SetIsTrigger), RpcTarget.All, true);
         GetComponent<Collider>().isTrigger = false;        
-
+*/
     }
 
     [PunRPC]
@@ -197,6 +211,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
     }
 
     public void HeartUp(int iHeart){
+		//Debug.Log(gameObject);
         cPowerGage.HeartUp(iHeart);
     }
 

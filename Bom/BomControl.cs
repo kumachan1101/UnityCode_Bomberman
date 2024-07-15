@@ -5,18 +5,19 @@ public class BomControl : MonoBehaviourPunCallbacks
 {
     public GameObject BomPrefab;
     protected GameObject tempBom;
-    protected GameObject gItemControl;
     protected ItemControl cItemControl;
-    protected GameObject gField;
-    protected Field_Base cField;
     private SoundManager soundManager;
 
-    protected Library cLibrary;
+    protected virtual Bom_Base AddComponent_Bom(GameObject gBom){
+        return null;
+    }
 
     public virtual void Awake(){
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
-        cLibrary = GameObject.Find("Library").GetComponent<Library>();
+		cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
+
 		ReadBomResource();
+		CustomTypes.Register();
     }
 
 	protected void ReadBomResource(){
@@ -36,9 +37,6 @@ public class BomControl : MonoBehaviourPunCallbacks
 		Destroy(cBom);
 	}
 
-    protected virtual Bom_Base AddComponent_Bom(GameObject gBom){
-        return null;
-    }
     protected virtual Bom_Base AddComponent_BomExplode(GameObject gBom){
         return null;
     }
@@ -48,47 +46,48 @@ public class BomControl : MonoBehaviourPunCallbacks
 
     void Update()
     {
-        if(null == gField){
-            gField = GameObject.Find("Field");
-            if(null != gField){
-                cField = gField.GetComponent<Field_Base>();
-            }
-        }
-        if(null == gItemControl){
-            gItemControl = GameObject.Find("ItemControl");
-            if(null != gItemControl){
-                cItemControl = gItemControl.GetComponent<ItemControl>();
-            }
-        }
     }
    
  
-    public void DropBom(ref PlayerBomName.PlayerBom cPlayerBom, Vector3 v3, int iViewID,  Vector3 direction){
-        if(null != cItemControl){
-            if(cItemControl.IsItem(v3)){
-                return;
-            }
-        }
-        if(null != cLibrary){
-            if(cLibrary.CheckPositionAndName(v3, "Explosion")){
-                return;
-            }
-        }
+    public void DropBom(ref PlayerBom cPlayerBom, Vector3 v3, Vector3 direction){
+        if(null == cItemControl){
+			return;
+		}
+		if(cItemControl.IsItem(v3)){
+			return;
+		}
+		if(Library_Base.CheckPositionAndName(v3, "Explosion")){
+			return;
+		}
         
-        BomKind.BOM_KIND eBomKind = cPlayerBom.GetBomKind();
+        BOM_KIND eBomKind = cPlayerBom.GetBomKind();
         int iExplosionNum = cPlayerBom.GetExplosionNum();
-        bool bBomKick = cPlayerBom.GetBomKick();
+        bool bBomKick = cPlayerBom.CanKick();
         string sMaterialType = cPlayerBom.GetMaterialType();
-        bool bBomAttack = cPlayerBom.GetBomAttack();;
-        MakeBom_RPC(v3, eBomKind,iViewID, iExplosionNum,  bBomKick, sMaterialType, bBomAttack, direction);
+        bool bBomAttack = cPlayerBom.CanAttack();;
+
+		BomParameters bomParams = new BomParameters
+		{
+			position = v3,
+			bomKind = eBomKind,
+			viewID = 0,
+			explosionNum = iExplosionNum,
+			bomKick = bBomKick,
+			materialType = sMaterialType,
+			bomAttack = bBomAttack,
+			direction = direction
+		};
+
+        //MakeBom_RPC(v3, eBomKind,iViewID, iExplosionNum,  bBomKick, sMaterialType, bBomAttack, direction);
+		MakeBom_RPC(bomParams);
         cPlayerBom.AddBom(tempBom);
 
         soundManager.PlaySoundEffect("DROPBOMB");
 
     }
 
-    protected virtual void MakeBom_RPC(Vector3 v3, BomKind.BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType, bool bBomAttack, Vector3 direction){
-    }
+	protected virtual void MakeBom_RPC(BomParameters bomParams){}
+    //protected virtual void MakeBom_RPC(Vector3 v3, BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType, bool bBomAttack, Vector3 direction){}
 
     public void CancelInvokeAndCallExplosion(){
         if(null != tempBom){

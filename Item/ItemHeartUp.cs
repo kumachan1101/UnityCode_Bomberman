@@ -1,10 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using PlayerActionName;
 public class ItemHeartUp : Item{
     public override void Reflection(string objname){
-        Player_Base cPlayer = GetcPlayerFromObject(objname);
+        Player_Base cPlayer = Library_Base.GetcPlayerFromObject(objname);
         if(null != cPlayer){
             cPlayer.HeartUp(5);
         }

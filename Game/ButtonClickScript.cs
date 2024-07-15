@@ -9,12 +9,25 @@ public class ButtonClickScript : MonoBehaviourPunCallbacks
     {
         //PhotonNetwork.LeaveRoom();
 
+		DestroyAllPhotonViews();
+
         PhotonNetwork.Disconnect();
         //DestroyAllObjects();
         PhotonNetwork.LoadLevel("GameTitle");
         //SceneManager.LoadScene("GameTitle");
     }
 
+    public void DestroyAllPhotonViews()
+    {
+        foreach (PhotonView view in FindObjectsOfType<PhotonView>())
+        {
+            if (view.IsMine)
+            {
+                PhotonNetwork.Destroy(view);
+            }
+        }
+    }
+/*
     private void DestroyAllObjects()
     {
         // ルートオブジェクトを取得し、それぞれを削除します。
@@ -28,6 +41,6 @@ public class ButtonClickScript : MonoBehaviourPunCallbacks
             }
         }
     }
-
+*/
 
 }
