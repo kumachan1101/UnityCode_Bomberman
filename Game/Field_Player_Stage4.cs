@@ -43,8 +43,8 @@ public class Field_Player_Stage4 : Field_Player_Stage2 {
     }
 
     protected override void SetPower(Slider cSlider){
-        cSlider.maxValue = 20;
-		cSlider.value = 20;
+        cSlider.maxValue = 16;
+		cSlider.value = 16;
     }
 
     public override string GetBomMaterial(Vector3 target, int index)

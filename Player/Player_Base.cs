@@ -19,6 +19,23 @@ public class Player_Base : MonoBehaviourPunCallbacks
 	protected BomControl cBomControl;
 
 	protected JoystickController cJoystickController;
+
+    void Awake ()
+    {
+		InitComponent();
+
+		GameObject gField = GameObject.Find("Field");
+		Field_Player_Base fieldPlayerBase = gField.GetComponent<Field_Player_Base>();
+		//fieldPlayerBase.AddPlayerCnt(); 
+		SetPlayerSetting(fieldPlayerBase.GetPlayerCnt());
+
+	}
+
+	protected void InitComponent(){
+		cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();	
+		cBomControl = GameObject.Find("BomControl").GetComponent<BomControl>();
+	}
+
     public void SetSlider(GameObject gCanvas){
 		cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage>();
 		//Debug.Log(cPowerGage);
@@ -48,7 +65,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
     }
 
     protected virtual void CreatePlayerAction(){}
-
+/*
     public virtual void SetPlayerSetting(int iParamViewID){
         iViewID = iParamViewID;
         CreatePlayerBom();
@@ -59,7 +76,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
 
         myTransform = transform;
         //animator = myTransform.Find ("PlayerModel").GetComponent<Animator> ();
-		animator = GetComponent<Animator> ();
+		//animator = GetComponent<Animator> ();
         cField = GetField();
 
         CreatePlayerAction();
@@ -69,6 +86,71 @@ public class Player_Base : MonoBehaviourPunCallbacks
 		cJoystickController = joystickPlayer.GetComponent<JoystickController>();
 
 	}
+*/
+
+	public virtual void SetPlayerSetting(int iParamViewID)
+	{
+		//Debug.Log(iParamViewID);
+		SetViewID(iParamViewID);
+		InitializeMaterialType();
+		InitializePlayerBom();
+		InitializeRigidbody();
+		InitializeTransform();
+		InitializeAnimator();
+		InitializeField();
+		InitializePlayerAction();
+		FindJoystickPlayer();
+	}
+
+	protected void SetViewID(int viewID)
+	{
+		iViewID = viewID;
+	}
+
+	protected void InitializeMaterialType()
+	{
+		MaterialManager materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+		MaterialType = materialManager.GetBomMaterialByPlayerName(this.gameObject.name);
+	}
+
+	protected void InitializePlayerBom()
+	{
+		CreatePlayerBom();
+		cPlayerBom.SetMaterialType(MaterialType);
+	}
+
+	protected void InitializeRigidbody()
+	{
+		rigidBody = GetComponent<Rigidbody>();
+	}
+
+	protected void InitializeTransform()
+	{
+		myTransform = transform;
+	}
+
+	protected void InitializeAnimator()
+	{
+		animator = GetComponent<Animator>();
+	}
+
+	protected void InitializeField()
+	{
+		cField = GetField();
+	}
+
+	protected void InitializePlayerAction()
+	{
+		CreatePlayerAction();
+		cPlayerAction.SetMaterialType(MaterialType);
+	}
+
+	protected void FindJoystickPlayer()
+	{
+		GameObject joystickPlayer = GameObject.Find("JoystickPlayer");
+		cJoystickController = joystickPlayer.GetComponent<JoystickController>();
+	}
+
 
     // Update is called once per frame
     void Update ()
@@ -124,6 +206,9 @@ public class Player_Base : MonoBehaviourPunCallbacks
                 int iDamage = other.GetComponent<Explosion_Base>().GetDamage();
                 Player_Base cPlayer = GetComponent();
 				//Debug.Log(cPlayer);
+				if(cPlayer == null || cPlayer.cPowerGage == null){
+					return;
+				}
                 cPlayer.cPowerGage.SetDamage(iDamage);
     
                 if(cPlayer.cPowerGage.IsDead()){

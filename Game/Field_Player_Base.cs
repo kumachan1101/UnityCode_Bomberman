@@ -5,8 +5,18 @@ using System.Collections;
 public class Field_Player_Base : Field_Base {
     protected string PlayerName;
 
-    private int CuurentPlayerNum; //プレイヤー自身を除く他プレイヤーの数
-    public int m_playerCount; //やられたプレイヤー含む全プレイヤー数
+    [SerializeField]private int m_playerCount; //やられたプレイヤー含む全プレイヤー数
+
+	public void SetPlayerCnt(int iPlayerCnt){
+		m_playerCount = iPlayerCnt;
+	}
+	public void AddPlayerCnt(){
+		m_playerCount++;
+	}
+	public int GetPlayerCnt(){
+		return m_playerCount;
+	}
+
     public virtual int GetIndex(){
         return 0;
     }
@@ -20,45 +30,50 @@ public class Field_Player_Base : Field_Base {
     }
 
     public virtual void AddDummyPlayer(int playercnt, Vector3 v3){
-        string canvasName = GetCanvasName() + playercnt;
-        GameObject gCanvas = LoadResource(canvasName);
-        Vector3 v3PwrGage = new Vector3(0, 0, 0);
-        gCanvas.transform.position = v3PwrGage;
-
-        GameObject gPlayer = LoadResource(GetPlayerName() + playercnt);
-        gPlayer.name = "PlayerDummy" + playercnt;
-        gPlayer.tag = "Player_DummyMode";
-        gPlayer.transform.position = v3;
+		bool bIsMine = PreAddDummyPlayer();
+		if(false == bIsMine){
+			return;
+		}
+		string canvasName = "";
+		string playerName = "";
+        GetPlayerNames(playercnt, ref canvasName, ref playerName);
+		GameObject gCanvas = InstantiateCanvas(canvasName);
+        GameObject gPlayer = InstantiatePlayer(playerName, v3);
+		if(null == gCanvas || null == gPlayer){
+			return;
+		}
 
         // gPlayerにアタッチされているPlayerスクリプトを取得
         Player_Base playerComponent = gPlayer.GetComponent<Player_Base>();
-        if (playerComponent != null)
-        {
-            // Playerスクリプトを削除
-			// このタイミングですぐ消えるわけではないため、直後のコンポーネントを取得してもPlayerスクリプトが取得できてしまう。
-			// 取得されてしまったPlayerスクリプトにスライダーを設定してしまうと、Destroyが動作したタイミングでスライダーが消える。
-			StartCoroutine(DestroyComponentAndWait(playerComponent, gCanvas, gPlayer));
-            //Destroy(playerComponent);
-        }
-
+		//オンラインで破棄しないといけない
+		PlayerDestroy(gPlayer);
         //CPUモードに切り替え
-		m_playerCount++;
-        Player_Base cPlayer = AddComponent(gPlayer);
-        cPlayer.MaterialType = "BomMaterial"+playercnt;
-		//Debug.Log(gameObject.GetComponent<Field_Player_Base>());
-        cPlayer.SetPlayerSetting(m_playerCount);
+        Player_Base cPlayer = AddComponent_RPC(gPlayer);
+
+		// Playerスクリプトを削除
+		// このタイミングですぐ消えるわけではないため、直後のコンポーネントを取得してもPlayerスクリプトが取得できてしまう。
+		// 取得されてしまったPlayerスクリプトにスライダーを設定してしまうと、Destroyが動作したタイミングでスライダーが消える。
+		StartCoroutine(DestroyComponentAndWait(playerComponent, gCanvas, gPlayer));
     }
 
-    private IEnumerator DestroyComponentAndWait(Player_Base component, GameObject gCanvas, GameObject gPlayer)
+	protected virtual bool PreAddDummyPlayer(){return false;}
+
+	public virtual void ChangeName_RPC(GameObject gObject, string name) {}
+
+	protected virtual void ChangeName(GameObject gPlayer){}
+
+	protected virtual void PlayerDestroy(GameObject gPlayer){}
+
+	
+    protected IEnumerator DestroyComponentAndWait(Player_Base component, GameObject gCanvas, GameObject gPlayer)
     {
         if (component != null)
         {
-            Destroy(component);
             yield return new WaitForEndOfFrame(); // 現在のフレームの終了まで待つ
             // 次のフレームの開始時に削除を確認
             if (component == null)
             {
-		        SetupSlider_RPC(gCanvas, gPlayer,m_playerCount);
+		        SetupSlider_RPC(gCanvas, gPlayer,GetPlayerCnt());
             }
         }
     }
@@ -77,12 +92,29 @@ public class Field_Player_Base : Field_Base {
     protected virtual string GetPlayerName(){
         return "";
     }
-    protected virtual Player_Base AddComponent(GameObject gPlayer){
+    protected virtual Player_Base AddComponent_RPC(GameObject gPlayer){
         return null;
     }
 
 	public virtual void SetPlayerPositions(){}
-    public virtual void SpawnPlayerObjects(int iPlayerNo){}
+    public virtual void SpawnPlayerObjects(int iPlayerNo){
+		string canvasName = "";
+		string playerName = "";
+		GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
+		SetName(playerName+"(Clone)");
+		
+		GameObject gCanvas = InstantiateCanvas(canvasName);
+		GameObject gPlayer = InstantiatePlayer(playerName, GetPlayerPosition(GetIndex(),iPlayerNo-1));
+		if(null == gCanvas || null == gPlayer){
+			return;
+		}
+		SetupSlider_RPC(gCanvas, gPlayer, iPlayerNo);
+	}
+
+    protected virtual GameObject InstantiateCanvas(string canvasName){return null;}
+    protected virtual GameObject InstantiatePlayer(string playerName, Vector3 position){return null;}
+    protected virtual void GetPlayerNames(int iPlayerNo, ref string canvasName, ref string playerName){}
+	//protected virtual void GetPlayerDummyNames(int iPlayerNo, ref string canvasName, ref string playerName){}
 
     public void SetName(string namepara){
         PlayerName = namepara;
@@ -91,15 +123,6 @@ public class Field_Player_Base : Field_Base {
     public string GetName(){
         return PlayerName;
     }
-
-    public void SetPlayerNum(int num){
-        CuurentPlayerNum = num;
-    }
-    public int GetPlayerNum(){
-        return CuurentPlayerNum;
-    }
-
-
     public int GetArrayLength(int arrayIndex)
     {
         // 変数名を構築
@@ -129,10 +152,15 @@ public class Field_Player_Base : Field_Base {
 		newPosition.y = newPosition.y - (iPlayerNo - 1) * 20;
 		sliderRectTransform.anchoredPosition = newPosition; // 新しい座標を設定します。
 		
+		SetPower(slider);
+
 		Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
 		//Debug.Log(cPlayer);
 		cPlayer.SetSlider(gCanvas);
-}
+	}
+
+
+
 
     protected GameObject LoadResource(string loadname){
         // Resourcesフォルダ内のPlayer1プレハブを読み込む
@@ -140,15 +168,9 @@ public class Field_Player_Base : Field_Base {
         return Instantiate(playerPrefab);
 
     }
-    protected void SetupPlayer(GameObject gPlayer, int i, GameObject gCanvas)
-    {
-		m_playerCount = i;
-        gPlayer.transform.position = GetPlayerPosition(GetIndex(),i-1);
-        Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
-		//cPlayer.MaterialType = "BomMaterial" +i;
-        cPlayer.SetPlayerSetting(i); // カウンタiを使用する
-        SetupSlider_RPC(gCanvas, gPlayer,m_playerCount);
-    }
+
+
+
     public Vector3 GetPlayerPosition(int arrayIndex, int elementIndex)
     {
         // 変数名を構築

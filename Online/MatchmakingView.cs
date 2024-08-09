@@ -102,10 +102,11 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
 					GameObject gField = GameObject.Find("Field");
 					Field_Block_Base cField = gField.GetComponent<Field_Block_Base>();
 					cField.CreateField();
+					cField.SetupStage();
 
 					Field_Player_Base cFieldPlayer = gField.GetComponent<Field_Player_Base>();
 					cFieldPlayer.SpawnPlayerObjects(myJoinOrder);
-					cFieldPlayer.m_playerCount = playerCount;
+					cFieldPlayer.SetPlayerCnt(playerCount);
 
 					gameObject.SetActive(false);
 				}

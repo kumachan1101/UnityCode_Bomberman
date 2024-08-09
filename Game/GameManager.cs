@@ -8,13 +8,34 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
-    private static GameManager instance; // GameManagerのシングルトンインスタンス
+    //private static GameManager instance; // GameManagerのシングルトンインスタンス
 
     [SerializeField] private static int iStage;
 
     public static int xmax;
     public static int zmax;
     private GameObject currentCanvas;
+
+    private static GameManager instance = null;
+
+    private void Awake()
+    {
+        // シングルトンパターンで、既存のインスタンスがある場合は自分自身を破棄
+        if (instance == null)
+        {
+            // このインスタンスを保存し、DontDestroyOnLoadで破棄されないようにする
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+	        iStage = 1;
+    	    SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+        else
+        {
+            // 既に存在するインスタンスがある場合、このGameObjectを破棄
+            Destroy(gameObject);
+        }
+    }
+/*
     public static GameManager Instance
     {
         get
@@ -43,7 +64,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         SceneManager.sceneLoaded += OnSceneLoaded;
         instance = this;
     }
-
+*/
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
@@ -59,7 +80,16 @@ public class GameManager : MonoBehaviourPunCallbacks
                 break;
         }
     }
-
+	public void DestroyAllPhotonViews()
+	{
+		foreach (PhotonView view in FindObjectsOfType<PhotonView>())
+		{
+			if (view.IsMine)
+			{
+				PhotonNetwork.Destroy(view.gameObject);
+			}
+		}
+	}
 
     private void CreateStage(string scenename)
     {
@@ -71,7 +101,10 @@ public class GameManager : MonoBehaviourPunCallbacks
             GameObject prefab = (GameObject)Resources.Load(prefabName);
             gField = Instantiate(prefab);
             gField.name = "Field";
-        }
+		}
+		else if("GameTitle" == scenename){
+			DestroyAllPhotonViews();
+		}
 
         GameObject gGameEndCanvas = Instantiate(Resources.Load("GameEndCanvas") as GameObject);
         //GameObject gCanvas = Instantiate(Resources.Load("Canvas") as GameObject);
@@ -84,7 +117,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             if (currentCanvas == null)
             {
                 currentCanvas = Instantiate(Resources.Load("Canvas") as GameObject);
-                DontDestroyOnLoad(currentCanvas);
+                //DontDestroyOnLoad(currentCanvas);
                 GameObject mainCamera = GameObject.Find("Main Camera");
 
                 JoystickCameraController joystickController = mainCamera.GetComponent<JoystickCameraController>();
@@ -135,7 +168,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void GameWin(){
         int iStage = GameManager.NextStage();
-        if(iStage <= 5){
+        if(iStage < 5){
             Invoke("SwitchGameScene", 5f);
         }
         else{

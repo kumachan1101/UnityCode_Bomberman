@@ -4,7 +4,8 @@ public class BomBigBan_CpuMode : BomBigBan_Base
 {
 	protected override void init(){
 		cInsManager = gameObject.AddComponent<InstanceManager_CpuMode>();
-		cInsManager.SetPrefab(ExplosionPrefab);		
+		sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
+		base.init();
 	}
 
 	protected override bool IsExplosion(){

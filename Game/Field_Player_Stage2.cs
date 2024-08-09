@@ -22,10 +22,11 @@ public class Field_Player_Stage2 : Field_Player_CpuMode {
 			new Vector3(GameManager.xmax-3, 0.5f, 2)
         };
     }
+/*
 	public override void SpawnPlayerObjects(int playercnt)
 	{
 		//m_playerCount = GetArrayLength(GetIndex());;
-		SetPlayerNum(playercnt-1);
+		//SetPlayerNum(playercnt-1);
 		for (int i = 1; i <= playercnt; i++)
 		{
 			string canvasName = "";
@@ -44,24 +45,33 @@ public class Field_Player_Stage2 : Field_Player_CpuMode {
 			GameObject gCanvas = LoadResource(canvasName);
 			gCanvas.transform.position = new Vector3(0, 0, 0);
 
-			if (i != 1)
-			{
-				Slider cSlider = gCanvas.GetComponentInChildren<Slider>(); // Canvasの子要素からSliderを取得します。
-				SetPower(cSlider);
-			}
+			Slider cSlider = gCanvas.GetComponentInChildren<Slider>(); // Canvasの子要素からSliderを取得します。
+			SetPower(cSlider);
 
 			SetupPlayer(gPlayer, i, gCanvas);
 		}
 	}
+*/
 
+    protected override void GetPlayerNames(int iPlayerNo, ref string canvasName, ref string playerName)
+    {
+        if (iPlayerNo == 1)
+        {
+            GetPlayerInfo(ref canvasName, ref playerName);
+        }
+        else
+        {
+            GetCPUPlayerInfo(ref canvasName, ref playerName);
+        }
+    }
 
 	protected override void GetCPUPlayerInfo(ref string canvasName, ref string playerName){
 		canvasName = "Canvas2";
 		playerName = "Player2";
 	}
    protected override void SetPower(Slider cSlider){
-        cSlider.maxValue = 10;
-		cSlider.value = 10;
+        cSlider.maxValue = 12;
+		cSlider.value = 12;
     }
 
 

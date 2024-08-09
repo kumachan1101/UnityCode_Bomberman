@@ -29,6 +29,10 @@ public class PlayerAction
 
     public void SetMaterialType(string sParamMaterialType)
     {
+		if(sParamMaterialType == null){
+			Debug.Log("MaterialType is null");
+			return;
+		}
         playerMaterial.SetMaterialType(sParamMaterialType);
     }
 /*

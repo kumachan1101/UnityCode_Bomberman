@@ -16,6 +16,7 @@ public class Field_Base :MonoBehaviourPunCallbacks {
     void Update()
     {
         GameTransision();        
+		
     }
 
 }

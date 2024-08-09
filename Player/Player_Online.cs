@@ -5,11 +5,10 @@ public class Player_Online : Player_Base
 {
     void Awake ()
     {
-		cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();	
-		cBomControl = GameObject.Find("BomControl").GetComponent<BomControl>();
-        string myName = gameObject.name;
-        Match match = Regex.Match(myName, @"\d+");
-        string numberString = match.Value;
+		InitComponent();
+        //string myName = gameObject.name;
+        //Match match = Regex.Match(myName, @"\d+");
+        //string numberString = match.Value;
         SetPlayerSetting(GetComponent<PhotonView>().ViewID);
     }
 
@@ -35,7 +34,11 @@ public class Player_Online : Player_Base
     }
 
 	protected override void DestroySync(GameObject g){
-		PhotonNetwork.Destroy(g.GetComponent<PhotonView>());
+		PhotonView pv = g.GetComponent<PhotonView>();
+		if (pv != null && pv.IsMine)
+		{
+			PhotonNetwork.Destroy(pv.gameObject); // pvではなくpv.gameObjectを渡す
+		}
 	}
 
 }

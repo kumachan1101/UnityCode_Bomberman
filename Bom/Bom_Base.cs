@@ -7,7 +7,7 @@ using Photon.Pun;
         public GameObject ExplosionPrefab;
 
         //protected Material cMaterialType;
-		protected string sMaterialKind;
+		public string sMaterialKind;
 		protected string sExplosion;
         protected Field_Block_Base cField;
 
@@ -44,6 +44,9 @@ using Photon.Pun;
         }
 
 		protected virtual void init(){
+			//sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
+			ExplosionPrefab = Resources.Load<GameObject>(sExplosion);
+			cInsManager.SetPrefab(ExplosionPrefab);		
 		}
 
         // Start is called before the first frame update
@@ -68,8 +71,6 @@ using Photon.Pun;
 			{
 				Debug.LogWarning("Renderer component not found on the game object or its children.");
 			}
-			sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
-			ExplosionPrefab = Resources.Load<GameObject>(sExplosion);
 			init();
             //DelayMethodを3秒後に呼び出す
             Invoke(nameof(Explosion), 3f);
@@ -103,24 +104,31 @@ using Photon.Pun;
 */
 
         protected virtual bool XorZ_Explosion(Vector3 v3Temp){
+			//sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
+			//ExplosionPrefab = Resources.Load<GameObject>(sExplosion);
+			//cInsManager.SetPrefab(ExplosionPrefab);
+
             bool bRet = IsWall(v3Temp);
             if(bRet){
-                return true;
+                return false;
             }
 			GameObject gExplosion = cLibrary.IsPositionAndName(v3Temp, "Explosion");
 			if(null != gExplosion){
-				cInsManager.DestroyInstance(gExplosion);	
+				cInsManager.DestroyInstancePool(gExplosion);	
 			}
 
-            GameObject g = cInsManager.InstantiateInstance(v3Temp);
+            GameObject g = cInsManager.InstantiateInstancePool(v3Temp);
+			if(null == g){
+				return false;
+			}
 
             bRet = cField.IsBroken(v3Temp);
             if(bRet){
                 g.transform.position = v3Temp;
-                return true;
+                return false;
             }
             g.transform.position = v3Temp;
-            return false;
+            return true;
         }
 
 
@@ -152,24 +160,27 @@ using Photon.Pun;
                 transform.position = v3;
                 GameObject gExplosion = cLibrary.IsPositionAndName(v3, "Explosion");
 				if(null != gExplosion){
-					cInsManager.DestroyInstance(gExplosion);	
+					cInsManager.DestroyInstancePool(gExplosion);	
 				}
 
                 //中心の爆風は、アイテム効果で、地面に沈まないようにする→未実装
-                GameObject g = cInsManager.InstantiateInstance(v3);
+                GameObject g = cInsManager.InstantiateInstancePool(v3);
+				if(g == null){
+					return;
+				}
                 g.transform.position = v3;
 
                 //float x = g.transform.position.x;
                 for (int i = 1; i <= iExplosionNum; i++) 
                 {
-                    if(X_Explosion(i*(-1))){
+                    if(false == X_Explosion(i*(-1))){
                         break;
                     }
                 }
 
                 for (int i = 1; i <= iExplosionNum; i++) 
                 {
-                    if(X_Explosion(i)){
+                    if(false == X_Explosion(i)){
                         break;
                     }
                 }
@@ -177,14 +188,14 @@ using Photon.Pun;
                 //float z = g.transform.position.z;
                 for (int i = 1; i <= iExplosionNum; i++) 
                 {
-                    if(Z_Explosion(i*(-1))){
+                    if(false == Z_Explosion(i*(-1))){
                         break;
                     }
                 }
 
                 for (int i = 1; i <= iExplosionNum; i++) 
                 {
-                    if(Z_Explosion(i)){
+                    if(false == Z_Explosion(i)){
                         break;
                     }
                 }

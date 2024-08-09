@@ -14,7 +14,12 @@ public class Field_CpuMode : Field_Base {
 
 		Field_Player_Base fieldPlayerBase = GetComponent<Field_Player_Base>();
 		int playercnt = fieldPlayerBase.GetArrayLength(fieldPlayerBase.GetIndex());
-		fieldPlayerBase.SpawnPlayerObjects(playercnt);
+        for (int i = 1; i <= playercnt; i++)
+        {
+			fieldPlayerBase.SpawnPlayerObjects(i);
+			fieldPlayerBase.SetPlayerCnt(i); 
+		}
+		//ローカルプレイでは、操作するプレイヤーの名前を設定して、この設定した名前で検索してオブジェクトを特定
 		fieldPlayerBase.SetName("Player1(Clone)");
 	}
 

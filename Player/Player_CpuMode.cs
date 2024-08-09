@@ -2,11 +2,6 @@
 public class Player_CpuMode : Player_Base
 {
 
-	void Awake() {
-		cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();	
-		cBomControl = GameObject.Find("BomControl").GetComponent<BomControl>();
-	}
-
     public override void UpdateKey(){
         DropBom();
     }

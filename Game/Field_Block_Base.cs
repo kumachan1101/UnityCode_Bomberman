@@ -31,6 +31,52 @@ public class Field_Block_Base : Field_Base{
 
     protected virtual void Rainbow_RPC(string sMaterialType){}
 
+    [SerializeField]protected ObjectPooler_Base objectPooler;
+
+    void Start()
+    {
+		objectPooler = GetComponent<ObjectPooler_Base>();
+		SetupStage();
+
+        cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
+		CreateFixedBlock();
+    }
+
+
+    public void SetupStage()
+    {
+        objectPooler.pools.Clear();
+        ConfigurePools();
+        objectPooler.InitializePool(); // プールを再生成
+    }
+
+    protected virtual void ConfigurePools(){
+        AddPool(ExplosionOnlineTypes.Explosion1, 250);
+        AddPool(ExplosionOnlineTypes.Explosion2, 250);
+	}
+
+    protected void AddPool(string tag, int size)
+    {
+        GameObject prefab = Resources.Load<GameObject>(tag);
+        ObjectPooler_Base.Pool newPool = new ObjectPooler_Base.Pool { tag = tag, prefab = prefab, size = size };
+        objectPooler.pools.Add(newPool);
+    }
+
+
+    // DequeueObject メソッドを公開
+    public GameObject DequeueObject(string tag)
+    {
+        return objectPooler.DequeueObject(tag);
+    }
+
+    // EnqueueObject メソッドを公開
+    public void EnqueueObject(GameObject obj)
+    {
+		string tag = GetExplosionType(obj.name);
+        objectPooler.EnqueueObject(tag, obj);
+    }
+
+    public virtual string GetExplosionType(string input){return "";}
 
     void Awake(){
         FixedWallPrefab = Resources.Load<GameObject>("FixedWall");
@@ -40,11 +86,6 @@ public class Field_Block_Base : Field_Base{
 		ObjMovePrefab = Resources.Load<GameObject>("ObjMove");
     }
 
-    void Start()
-    {
-        cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
-		CreateFixedBlock();
-    }
 
 
 
@@ -187,7 +228,7 @@ public class Field_Block_Base : Field_Base{
 		GameManager.SetFieldRange(20,20);
 	}
 
-    private void CreateFixedBlock(){
+    protected void CreateFixedBlock(){
 		SetFieldRange();
 		GetComponent<Field_Player_Base>().SetPlayerPositions();
 		
@@ -218,7 +259,7 @@ public class Field_Block_Base : Field_Base{
                     g2.transform.position = new Vector3(x, y2, z);
                     FixedWallList.Add(g2);
                 }
-                CreateGroundExplode(new Vector3(x, 0, z));
+                //CreateGroundExplode(new Vector3(x, 0, z));
                 /*
                 else if(x % 2 == 0 && z % 2 == 0){
                     GameObject g2 = Instantiate(WallPrefab);
@@ -240,6 +281,16 @@ public class Field_Block_Base : Field_Base{
         }
     }
 
+	protected virtual void DestroySync(GameObject g){
+		if (g == null)
+		{
+			Debug.LogWarning("Instance is null, cannot enqueue.");
+			return;
+		}
+		EnqueueObject(g);
+	}
+
+
     public void UpdateGroundExplosion(GameObject gObj)
     {
         lock (lockObject)
@@ -254,7 +305,7 @@ public class Field_Block_Base : Field_Base{
                     Renderer renderer = obj.GetComponent<Renderer>();
                     if (renderer.material.name == cMaterial.name)
                     {
-                        Destroy(gObj);
+						DestroySync(gObj);
                         return;
                     }
                     else
@@ -269,7 +320,7 @@ public class Field_Block_Base : Field_Base{
             if (objToRemove != null)
             {
                 ExplosionList.Remove(objToRemove);
-                Destroy(objToRemove);
+				DestroySync(objToRemove);
             }
 
             ExplosionList.Add(gObj);
@@ -363,7 +414,7 @@ public class Field_Block_Base : Field_Base{
 
 
     
- 
+ /*
     [PunRPC]
     public void Rainbow(string sMaterialType){
 
@@ -405,5 +456,64 @@ public class Field_Block_Base : Field_Base{
         }
         
     }
+*/
+
+   [PunRPC]
+    public void Rainbow(string sMaterialType){
+
+        MaterialManager cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+        string StrExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialType);
+
+        List<GameObject> objectsToRemove = new List<GameObject>();
+        List<GameObject> newExplosionList = new List<GameObject>(); // 新しいリストを作成
+
+        foreach (GameObject obj in ExplosionList)
+        {
+            if (obj != null)
+            {
+                Vector3 v3 = obj.transform.position;
+
+				//GameObject gObj = DequeueObject(StrExplosion);
+                Renderer renderer = obj.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    Material newMaterial = cMaterialMng.GetMaterialOfTypeExplosion(StrExplosion);
+                    renderer.material = newMaterial;
+                }
+
+				Explosion_Base cExplosion = obj.GetComponent<Explosion_Base>();
+				cExplosion.SetPosition_RPC(v3);
+
+                //gObj.transform.position = v3;
+
+                // 新しいリストに追加
+                //newExplosionList.Add(gObj);
+
+                //objectsToRemove.Add(obj);
+            }
+        }
+/*
+        // 元のリストから削除
+        foreach (GameObject objToRemove in objectsToRemove)
+        {
+            ExplosionList.Remove(objToRemove);
+            DestroySync(objToRemove);
+        }
+
+        
+        foreach (GameObject objToAdd in newExplosionList)
+        {
+            objToAdd.GetComponent<Explosion_Base>().FieldValid();
+            AddExplosion(objToAdd);
+        }
+*/        
+    }
+	protected virtual void InsPoolExplosion_RPC(){
+	}
+
+	[PunRPC]
+	protected virtual void InsPoolExplosion(){
+	}
+
 
 }

@@ -30,9 +30,17 @@ public class BomBigBan_Base : Bom_Base
         {
             return false; // Stop explosion in this direction
         }
+		GameObject gExplosion = cLibrary.IsPositionAndName(v3Temp, "Explosion");
+		if(null != gExplosion){
+			cInsManager.DestroyInstancePool(gExplosion);
+		}
 
         // Instantiate explosion object at the position
-        GameObject g = cInsManager.InstantiateInstance(v3Temp);
+        GameObject g = cInsManager.InstantiateInstancePool(v3Temp);
+		if(null == g){
+			return false;
+		}
+
         g.transform.position = v3Temp;
         return true;
     }

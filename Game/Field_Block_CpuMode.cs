@@ -4,15 +4,9 @@ using System.Reflection;
 public class Field_Block_CpuMode : Field_Block_Base {
     private GameManager cGameManager;
 
-    void start(){
-        cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-    }
 
-/*
-	protected override void DestroySync(GameObject g){
-		Destroy(g);
-	}
-*/
+
+
     protected override void ClearBrokenList_RPC(){
         ClearBrokenList();
     }
@@ -30,6 +24,34 @@ public class Field_Block_CpuMode : Field_Block_Base {
 
     protected override void Rainbow_RPC(string sMaterialType){
         Rainbow(sMaterialType);
+    }
+
+	protected override void InsPoolExplosion_RPC(){
+		//string sMaterialType = GetComponent<Field_Player_Base>().GetExplosionMaterialType(GetComponent<Field_Player_Base>().GetIndex());
+	}
+
+    public override string GetExplosionType(string input)
+    {
+        if (input.Contains(ExplosionTypes.Explosion1))
+        {
+            return ExplosionTypes.Explosion1;
+        }
+        else if (input.Contains(ExplosionTypes.Explosion2))
+        {
+            return ExplosionTypes.Explosion2;
+        }
+        else if (input.Contains(ExplosionTypes.Explosion3))
+        {
+            return ExplosionTypes.Explosion3;
+        }
+        else if (input.Contains(ExplosionTypes.Explosion4))
+        {
+            return ExplosionTypes.Explosion4;
+        }
+        else
+        {
+            return null;
+        }
     }
 
 

@@ -21,29 +21,35 @@ public class Field_Player_Stage1 : Field_Player_CpuMode {
             new Vector3(xmax - 3, 0.5f, 2)
         };
     }
+
+/*
     public override void SpawnPlayerObjects(int playercnt)
     {
         //m_playerCount = GetArrayLength(GetIndex());;
-		SetPlayerNum(playercnt-1);
+		//SetPlayerNum(playercnt-1);
         for (int i = 1; i <= playercnt; i++)
         {
             string canvasName = "Canvas" + i;
             GameObject gCanvas = LoadResource(canvasName);
-            Vector3 v3PwrGage = new Vector3(0, 0, 0);
-            gCanvas.transform.position = v3PwrGage;
+            //Vector3 v3PwrGage = new Vector3(0, 0, 0);
+            //gCanvas.transform.position = v3PwrGage;
+			Slider cSlider = gCanvas.GetComponentInChildren<Slider>(); // Canvasの子要素からSliderを取得します。
+			SetPower(cSlider);
 
             string PlayerName = "Player" + i;
-
-            if (i != 1){
-                Slider cSlider = gCanvas.GetComponentInChildren<Slider>(); // Canvasの子要素からSliderを取得します。
-                SetPower(cSlider);
-            }
             GameObject gPlayer = LoadResource(PlayerName);
             SetupPlayer(gPlayer, i, gCanvas);
         }
     }
+*/
+  
 
 
+    protected override void GetPlayerNames(int iPlayerNo, ref string canvasName, ref string playerName)
+    {
+        canvasName = "Canvas" + iPlayerNo;
+        playerName = "Player" + iPlayerNo;
+    }
 
     protected override void SetPower(Slider cSlider){
         cSlider.maxValue = 10;
@@ -67,7 +73,6 @@ public class Field_Player_Stage1 : Field_Player_CpuMode {
 
         return "InvalidMaterial";
     }
-
 
 
 

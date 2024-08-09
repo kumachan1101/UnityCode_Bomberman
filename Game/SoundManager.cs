@@ -6,6 +6,24 @@ public class SoundManager : MonoBehaviour
     public AudioClip sGetItem;
     public AudioClip sExploison;
 
+    private static SoundManager instance = null;
+
+    private void Awake()
+    {
+        // シングルトンパターンで、既存のインスタンスがある場合は自分自身を破棄
+        if (instance == null)
+        {
+            // このインスタンスを保存し、DontDestroyOnLoadで破棄されないようにする
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            // 既に存在するインスタンスがある場合、このGameObjectを破棄
+            Destroy(gameObject);
+        }
+    }
+
     // 効果音を再生するメソッド
     public void PlaySoundEffect(string effectName)
     {

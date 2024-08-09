@@ -17,16 +17,16 @@ public class ButtonClickScript : MonoBehaviourPunCallbacks
         //SceneManager.LoadScene("GameTitle");
     }
 
-    public void DestroyAllPhotonViews()
-    {
-        foreach (PhotonView view in FindObjectsOfType<PhotonView>())
-        {
-            if (view.IsMine)
-            {
-                PhotonNetwork.Destroy(view);
-            }
-        }
-    }
+	public void DestroyAllPhotonViews()
+	{
+		foreach (PhotonView view in FindObjectsOfType<PhotonView>())
+		{
+			if (view.IsMine)
+			{
+				PhotonNetwork.Destroy(view.gameObject);
+			}
+		}
+	}
 /*
     private void DestroyAllObjects()
     {

@@ -33,8 +33,8 @@ public class Field_Player_Stage3 : Field_Player_Stage2 {
     }
 
     protected override void SetPower(Slider cSlider){
-        cSlider.maxValue = 15;
-		cSlider.value = 15;
+        cSlider.maxValue = 14;
+		cSlider.value = 14;
     }
 
 
