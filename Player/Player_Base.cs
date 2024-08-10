@@ -49,13 +49,6 @@ public class Player_Base : MonoBehaviourPunCallbacks
     }
 
     public virtual void UpdateKey(){}
-/*
-    protected virtual void DropBom_BomControl(GameObject gBomControl, Vector3 v3, int iViewID){
-        Vector3 direction = myTransform.forward;
-        gBomControl.GetComponent<BomControl>().DropBom(ref cPlayerBom, v3, iViewID, direction);
-	}
-*/
-
     protected Player_Base GetComponent(){
 		return this.gameObject.GetComponent<Player_Base>();
     }
@@ -65,28 +58,6 @@ public class Player_Base : MonoBehaviourPunCallbacks
     }
 
     protected virtual void CreatePlayerAction(){}
-/*
-    public virtual void SetPlayerSetting(int iParamViewID){
-        iViewID = iParamViewID;
-        CreatePlayerBom();
-		
-        cPlayerBom.SetMaterialType(MaterialType);
-
-        rigidBody = GetComponent<Rigidbody> ();
-
-        myTransform = transform;
-        //animator = myTransform.Find ("PlayerModel").GetComponent<Animator> ();
-		//animator = GetComponent<Animator> ();
-        cField = GetField();
-
-        CreatePlayerAction();
-        cPlayerAction.SetMaterialType(MaterialType);
-
-		GameObject joystickPlayer = GameObject.Find("JoystickPlayer");
-		cJoystickController = joystickPlayer.GetComponent<JoystickController>();
-
-	}
-*/
 
 	public virtual void SetPlayerSetting(int iParamViewID)
 	{
@@ -181,8 +152,11 @@ public class Player_Base : MonoBehaviourPunCallbacks
         if(null == cLibrary || null == cBomControl){
 			return;
         }
-		
-        Vector3 v3 = cLibrary.GetPos(transform.position);
+		if(Library_Base.IsPositionOutOfBounds(transform.position)){
+			return;
+		}
+
+        Vector3 v3 = Library_Base.GetPos(transform.position);
         if(cPlayerBom.IsBomAvailable(v3)){
 			Vector3 direction = myTransform.forward;
 			cBomControl.DropBom(ref cPlayerBom, v3, direction);

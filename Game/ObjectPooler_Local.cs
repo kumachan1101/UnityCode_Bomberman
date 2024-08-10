@@ -6,7 +6,7 @@ public class ObjectPooler_Local : ObjectPooler_Base
     protected override GameObject CreateObject(GameObject prefab)
     {
         // ローカルでオブジェクトをインスタンス化
-        return Instantiate(prefab, new Vector3(0, 100, 0), Quaternion.identity);
+        return Instantiate(prefab, new Vector3(0, -2, 0), Quaternion.identity);
     }
 
     public override void SetObjectActive_RPC(GameObject gObj, bool isActive)
@@ -33,6 +33,7 @@ public class ObjectPooler_Local : ObjectPooler_Base
     }
     public override void EnqueueObject(string tag, GameObject obj)
     {
+		//Debug.Log(tag);
         if (!prefabByTag.ContainsKey(tag))
         {
             Debug.LogWarning("Pool with tag \"" + tag + "\" doesn't exist.");
@@ -44,7 +45,7 @@ public class ObjectPooler_Local : ObjectPooler_Base
             obj.transform.position = new Vector3(0, -2, 0); // オブジェクトの位置を変更
             SetObjectActive_RPC(obj, false);
             objectPoolQueue.Enqueue(obj); // キューにエンキュー
-            Debug.Log("Enqueue: " + objectPoolQueue.Count);
+            //Debug.Log("Enqueue: " + objectPoolQueue.Count);
         }
         else
         {

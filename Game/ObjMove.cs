@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ObjMove : MonoBehaviour
@@ -9,17 +7,6 @@ public class ObjMove : MonoBehaviour
 
     public void SetMoveDirection(Vector3 v3){
         moveDirection = v3;
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        //Debug.Log(other.tag);
-        
-        // 衝突中の物体があるかを確認
-        if (IsTagMatch("Player", other.tag)) 
-        {
-            //other.gameObject.GetComponent<Explosion_Base>().StopInvoke();
-        }
     }
 
     void OnTriggerStay(Collider other)

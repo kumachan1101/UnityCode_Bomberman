@@ -10,10 +10,8 @@ public class InstanceManager_CpuMode : InstanceManager_Base
 
 		if (explosion != null)
 		{
-			// 取得したオブジェクトの位置を設定
-			//explosion.transform.position = position;
 			Explosion_Base cExplosion = explosion.GetComponent<Explosion_Base>();
-			cExplosion.SetPosition_RPC(position);
+			cExplosion.SetPosition(position);
 
 			explosion.GetComponent<Explosion_Base>().ReqHide();
 		}

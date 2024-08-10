@@ -18,16 +18,14 @@ public class PlayerAction_CpuMode : PlayerAction
             cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
         }
 
-        Vector3 v3 = cLibrary.GetPos(myTransform.position);
+        Vector3 v3 = Library_Base.GetPos(myTransform.position);
         Vector3 v3_ground = new Vector3(v3.x, v3.y - 1, v3.z);
         canMove = cField.IsMatch(v3_ground, playerMaterial.GetMaterial());
-		//Debug.Log(canMove);
-		/*
-        if (!canMove)
-        {
-            canMove = cField.IsMatchObjMove(v3_ground);
-        }
-		*/
+
+		if(Library_Base.IsPositionOutOfBounds(v3)){
+			canMove = false;
+		}
+
         if (canMove)
         {
             LastV3 = myTransform.position;

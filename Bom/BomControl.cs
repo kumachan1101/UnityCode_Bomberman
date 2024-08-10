@@ -8,9 +8,20 @@ public class BomControl : MonoBehaviourPunCallbacks
     protected ItemControl cItemControl;
     private SoundManager soundManager;
 
-    protected virtual Bom_Base AddComponent_Bom(GameObject gBom){
-        return null;
+
+    protected Bom_Base AddComponent_BomExplode(GameObject gBom){
+        Bom_Base cBom = gBom.AddComponent<BomExplode_Base>();
+        return cBom;
     }
+    protected Bom_Base AddComponent_BomBigBan(GameObject gBom){
+        Bom_Base cBom = gBom.AddComponent<BomBigBan_Base>();
+        return cBom;
+    }
+    protected Bom_Base AddComponent_Bom(GameObject gBom){
+        Bom_Base cBom = gBom.AddComponent<Bom_Base>();
+        return cBom;
+    }
+
 
     public virtual void Awake(){
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
@@ -22,27 +33,12 @@ public class BomControl : MonoBehaviourPunCallbacks
 
 	protected void ReadBomResource(){
 		BomPrefab = Resources.Load<GameObject>("Bom");
-/*
-		DeleteComponent_Bom(BomPrefab);
-		AddComponent_Bom(BomPrefab);
-		DeleteComponent_Bom(BomExplodePrefab);
-		AddComponent_BomExplode(BomExplodePrefab);
-		DeleteComponent_Bom(BomBigBanPrefab);
-		AddComponent_BomBigBan(BomBigBanPrefab);
-*/
 	}
 
 	protected void DeleteComponent_Bom(GameObject gBom){
 		Bom_Base cBom = gBom.AddComponent<Bom_Base>();
 		Destroy(cBom);
 	}
-
-    protected virtual Bom_Base AddComponent_BomExplode(GameObject gBom){
-        return null;
-    }
-    protected virtual Bom_Base AddComponent_BomBigBan(GameObject gBom){
-        return null;
-    }
 
     void Update()
     {
@@ -78,7 +74,6 @@ public class BomControl : MonoBehaviourPunCallbacks
 			direction = direction
 		};
 
-        //MakeBom_RPC(v3, eBomKind,iViewID, iExplosionNum,  bBomKick, sMaterialType, bBomAttack, direction);
 		MakeBom_RPC(bomParams);
         cPlayerBom.AddBom(tempBom);
 
@@ -87,7 +82,6 @@ public class BomControl : MonoBehaviourPunCallbacks
     }
 
 	protected virtual void MakeBom_RPC(BomParameters bomParams){}
-    //protected virtual void MakeBom_RPC(Vector3 v3, BOM_KIND eBomKind, int iViewID, int iExplosionNum, bool bBomKick, string sMaterialType, bool bBomAttack, Vector3 direction){}
 
     public void CancelInvokeAndCallExplosion(){
         if(null != tempBom){

@@ -16,14 +16,6 @@ public static class ExplosionTypes
     public const string Explosion4 = "Explosion4";
 }
 
-public static class ExplosionOnlineTypes
-{
-    public const string Explosion1 = "ExplosionOnline1";
-    public const string Explosion2 = "ExplosionOnline2";
-    public const string Explosion3 = "ExplosionOnline3";
-    public const string Explosion4 = "ExplosionOnline4";
-}
-
 
 public class MaterialManager : MonoBehaviour
 {
@@ -102,23 +94,6 @@ public class MaterialManager : MonoBehaviour
         }
     }
 
-    public string GetMaterialOfExplosionOnline(string type)
-    {
-        switch (type)
-        {
-            case MaterialTypes.BomMaterial1:
-                return ExplosionOnlineTypes.Explosion1;
-            case MaterialTypes.BomMaterial2:
-                return ExplosionOnlineTypes.Explosion2;
-            case MaterialTypes.BomMaterial3:
-                return ExplosionOnlineTypes.Explosion3;
-            case MaterialTypes.BomMaterial4:
-                return ExplosionOnlineTypes.Explosion4;
-            default:
-                Debug.LogError("Invalid material type: " + type);
-                return null;
-        }
-    }
 
     public string GetBomMaterialByPlayerName(string playerName)
     {

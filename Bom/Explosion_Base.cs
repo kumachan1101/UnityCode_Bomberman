@@ -1,8 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
 
-[RequireComponent(typeof(PhotonView))]
-//[RequireComponent(typeof(PhotonTransformView))]
 public class Explosion_Base : MonoBehaviourPunCallbacks
 {
     protected Field_Block_Base cField;
@@ -16,14 +14,6 @@ public class Explosion_Base : MonoBehaviourPunCallbacks
 
     void Awake(){
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
-        // PhotonTransformView コンポーネントを取得
-		/*
-        transformView = GetComponent<PhotonTransformView>();
-
-        if (transformView != null)
-        {
-        }
-		*/
     }
 
     // Start is called before the first frame update
@@ -43,8 +33,7 @@ public class Explosion_Base : MonoBehaviourPunCallbacks
 	}
 
     void hide(){
-        SetPosition_RPC(new Vector3(transform.position.x, transform.position.y-1, transform.position.z));
-        //transform.position = new Vector3(transform.position.x, transform.position.y-1, transform.position.z);
+        SetPosition(new Vector3(transform.position.x, transform.position.y-1, transform.position.z));
 		if(null == cField){
 			cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
 		}
@@ -57,7 +46,7 @@ public class Explosion_Base : MonoBehaviourPunCallbacks
 				cField.UpdateGroundExplosion(this.gameObject);
 			}
 			else{
-				Debug.Log("hide no active");
+				//Debug.Log("hide no active");
 			}
             
         }
@@ -78,8 +67,8 @@ public class Explosion_Base : MonoBehaviourPunCallbacks
 
 
 
-	protected virtual bool IsSync(){
-		return false;
+	protected bool IsSync(){
+		return true;
 	}
 
     // Update is called once per frame
@@ -90,8 +79,6 @@ public class Explosion_Base : MonoBehaviourPunCallbacks
     public int GetDamage(){
         return 1;
     }
-
-	
 
     private void OnTriggerEnter(Collider other)
     {
@@ -108,12 +95,9 @@ public class Explosion_Base : MonoBehaviourPunCallbacks
         }
     }
 
-	public virtual void SetPosition_RPC(Vector3 position){}
 
-	[PunRPC]
 	public void SetPosition(Vector3 position)
 	{
-		//Debug.Log("SetPosition called with position: " + position);
 		transform.position = position;
 	}
 

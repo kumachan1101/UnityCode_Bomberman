@@ -52,7 +52,7 @@ public class BomBigBan_Base : Bom_Base
             return;
         }
 
-        Vector3 basePosition = cLibrary.GetPos(transform.position);
+        Vector3 basePosition = Library_Base.GetPos(transform.position);
         transform.position = basePosition;
 
         // Reset processed coordinates

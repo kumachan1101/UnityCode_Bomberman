@@ -1,11 +1,6 @@
 ﻿using UnityEngine;
 public class Player : Player_Base
 {
-/*
-    public override void SetSlider(GameObject gCanvas){
-        cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage>();
-    }
-*/
     public override void UpdateKey(){
         if (Input.GetKey(KeyCode.Return)) {
              if (pushFlag == false){

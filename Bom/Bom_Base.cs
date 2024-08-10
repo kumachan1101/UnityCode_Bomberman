@@ -6,7 +6,7 @@ using Photon.Pun;
     {
         public GameObject ExplosionPrefab;
 
-        //protected Material cMaterialType;
+        protected Material cMaterialType;
 		public string sMaterialKind;
 		protected string sExplosion;
         protected Field_Block_Base cField;
@@ -44,7 +44,8 @@ using Photon.Pun;
         }
 
 		protected virtual void init(){
-			//sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
+			cInsManager = gameObject.AddComponent<InstanceManager_CpuMode>();
+			sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
 			ExplosionPrefab = Resources.Load<GameObject>(sExplosion);
 			cInsManager.SetPrefab(ExplosionPrefab);		
 		}
@@ -86,6 +87,10 @@ using Photon.Pun;
         // Update is called once per frame
         void Update()
         {
+			if(GameManager.xmax <= transform.position.x || GameManager.zmax <= transform.position.z || 0 > transform.position.x || 0 > transform.position.z){
+				return;
+			}
+
             if (isMoving)
             {
                 transform.position += moveDirection * moveSpeed * Time.deltaTime * 2;
@@ -97,16 +102,7 @@ using Photon.Pun;
             bool bRet = cField.IsAllWall(v3Temp);
             return bRet;
         }
-/*
-        protected virtual GameObject Instantiate_Explosion(Vector3 v3){
-			return null;
-        }
-*/
-
         protected virtual bool XorZ_Explosion(Vector3 v3Temp){
-			//sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
-			//ExplosionPrefab = Resources.Load<GameObject>(sExplosion);
-			//cInsManager.SetPrefab(ExplosionPrefab);
 
             bool bRet = IsWall(v3Temp);
             if(bRet){
@@ -145,6 +141,9 @@ using Photon.Pun;
         }
 
 		protected virtual bool IsExplosion(){
+			if(null == cInsManager){
+				return false;
+			}
 			return true;
 		}
 
@@ -156,7 +155,7 @@ using Photon.Pun;
 
             lock (lockObject)
             {
-                Vector3 v3 = cLibrary.GetPos(transform.position);
+                Vector3 v3 = Library_Base.GetPos(transform.position);
                 transform.position = v3;
                 GameObject gExplosion = cLibrary.IsPositionAndName(v3, "Explosion");
 				if(null != gExplosion){
@@ -202,9 +201,6 @@ using Photon.Pun;
                 cInsManager.DestroyInstance(this.gameObject);
             }
         }
-
-		//protected virtual void DestroySync(GameObject g){}
-
         private void OnDestroy()
         {
             // Destroy時に登録したInvokeをすべてキャンセル
@@ -229,7 +225,7 @@ using Photon.Pun;
 					case "Bombigban(Clone)":
 					case "BomExplode(Clone)":
 						// 衝突を検知したら座標を補正して移動を止める
-						transform.position = cLibrary.GetPos(transform.position);
+						transform.position = Library_Base.GetPos(transform.position);
 						isMoving = false; // 移動停止
 						break;
 					default:

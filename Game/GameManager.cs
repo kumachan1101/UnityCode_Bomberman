@@ -35,36 +35,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             Destroy(gameObject);
         }
     }
-/*
-    public static GameManager Instance
-    {
-        get
-        {
-            // インスタンスがまだ作成されていない場合は、新しいGameManagerを作成します。
-            if (instance == null)
-            {
-                GameObject gameObject = new GameObject("GameManager");
-                instance = gameObject.AddComponent<GameManager>();
-            }
-            return instance;
-        }
-    }
 
-    private void Awake()
-    {
-        // 既にGameManagerのインスタンスが存在する場合、新しいインスタンスを破棄します。
-        if (instance != null && instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        DontDestroyOnLoad(gameObject);
-        iStage = 1;
-        SceneManager.sceneLoaded += OnSceneLoaded;
-        instance = this;
-    }
-*/
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {

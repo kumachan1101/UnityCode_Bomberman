@@ -23,28 +23,6 @@ public class PlayerMovement
 		playerAnimation.SetWalking(true);
 	}
 
-
-/*
-    public void MovePlayer(Vector3 direction, float in_moveSpeed)
-    {
-        if (direction == Vector3.zero)
-        {
-			//playerAnimation.SetWalking(false);
-            return;
-        }
-
-        float moveDistance = in_moveSpeed * moveSpeed * Time.deltaTime;
-        myTransform.Translate(direction  * moveDistance);
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
-        myTransform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
-
-		Animator cAnimator = myTransform.Find("PlayerModel").GetComponent<Animator>();
-		cAnimator.SetBool("Walking", true);
-
-
-		//playerAnimation.SetWalking(true);
-    }
-*/
     public void MoveClear()
     {
 		playerAnimation.SetWalking(false);

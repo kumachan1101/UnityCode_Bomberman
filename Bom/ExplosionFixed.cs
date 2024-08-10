@@ -5,9 +5,7 @@ public class ExplosionFixed : Explosion_Base
     void Start()
     {
         if(bField){
-            //cField.AddExplosion(this.gameObject);
             return;
         }
-        //Invoke(nameof(hide), 1f);
     }
 }

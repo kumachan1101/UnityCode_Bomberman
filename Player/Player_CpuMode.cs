@@ -22,13 +22,4 @@ public class Player_CpuMode : Player_Base
 		Destroy(g);
 	}
 
-/*
-    public override void SetSlider(GameObject gCanvas){
-		Debug.Log("SetSlider");
-        // ベースクラスを取得するすれば、派生クラスのスクリプトは取得可能であるため、1か所にまとめること
-        cPowerGage = gCanvas.transform.Find("Slider").GetComponent<PowerGage_CpuMode>();
-		
-    }
-*/
-
 }

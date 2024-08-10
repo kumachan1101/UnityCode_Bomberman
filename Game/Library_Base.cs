@@ -140,7 +140,7 @@ public class Library_Base : MonoBehaviourPunCallbacks{
         }
         return g;
     }
-    public Vector3 GetPos(Vector3 position)
+    static public Vector3 GetPos(Vector3 position)
     {
         float x = Mathf.Round(position.x);
         float y = 1;
@@ -360,6 +360,36 @@ public class Library_Base : MonoBehaviourPunCallbacks{
         obj.transform.rotation = rotation;
         obj.GetComponent<ObjMove>().SetMoveDirection(moveDirection);
     }
+
+
+    /// <summary>
+    /// 指定した座標に既にGameObjectが存在するかを判定します。
+    /// </summary>
+    /// <param name="position">確認する座標</param>
+    /// <returns>その座標にGameObjectが存在する場合はtrue、存在しない場合はfalseを返します。</returns>
+    public static bool IsGameObjectAtPosition(Vector3 position)
+    {
+        // 指定した座標に存在するすべてのコライダーを取得
+        Collider[] colliders = Physics.OverlapSphere(position, 0.25f);
+
+        // コライダーが1つ以上存在すればtrueを返す
+        if (colliders.Length > 0)
+        {
+            return true;
+        }
+
+        // 存在しなければfalseを返す
+        return false;
+    }
+
+	public static bool IsPositionOutOfBounds(Vector3 v3)
+	{
+		if (GameManager.xmax - 2 <= v3.x || GameManager.zmax - 2 <= v3.z || 2 > v3.x || 2 > v3.z)
+		{
+			return true;
+		}
+		return false;
+	}
 
 
 }

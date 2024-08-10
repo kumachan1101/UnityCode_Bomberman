@@ -35,35 +35,6 @@ public class PlayerAction
 		}
         playerMaterial.SetMaterialType(sParamMaterialType);
     }
-/*
-    public void UpdateButton()
-    {
-        elapsedTime += Time.deltaTime;
-
-        playerInput.UpdateInput();
-
-        if (playerInput.pushBtnUp)
-        {
-            MoveUp();
-        }
-        else if (playerInput.pushBtnDown)
-        {
-            MoveDown();
-        }
-        else if (playerInput.pushBtnRight)
-        {
-            MoveRight();
-        }
-        else if (playerInput.pushBtnLeft)
-        {
-            MoveLeft();
-        }
-        else if (playerInput.pushBtnEnter)
-        {
-            DropBom();
-        }
-    }
-*/
     public void UpdateMovement()
     {
         playerInput.UpdateInput();
@@ -92,8 +63,6 @@ public class PlayerAction
 
     public void PerformPlayerAction(Vector3 moveDirection, Action<PlayerInput> flagSetter)
     {
-        //GameObject gPlayer = GetPlayerGameObject();
-        //Player_Base cPlayer = GetPlayerComponent(gPlayer);
         MoveClear();
         flagSetter(playerInput);
         playerMovement.Move(moveDirection);
@@ -118,17 +87,8 @@ public class PlayerAction
     {
         PerformPlayerAction(Vector3.left, (input) => input.pushBtnLeft = true);
     }
-/*
-    public void DropBom()
-    {
-        PerformPlayerAction(Vector3.zero, (input) => input.pushBtnEnter = true);
-
-        GameObject gPlayer = GetPlayerGameObject();
-        Player_Base cPlayer = GetPlayerComponent(gPlayer);
-        cPlayer.DropBom();
-    }
-*/
-	protected virtual void CanMove(){}
+	protected virtual void CanMove(){
+	}
 	
 
      protected virtual void UpdatePlayerMovement()
