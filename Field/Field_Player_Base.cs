@@ -2,7 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Reflection;
 using System.Collections;
-public class Field_Player_Base : Field_Base {
+using Photon.Pun;
+
+public class Field_Player_Base : MonoBehaviourPunCallbacks {
     protected string PlayerName;
 
     [SerializeField]private int m_playerCount; //やられたプレイヤー含む全プレイヤー数

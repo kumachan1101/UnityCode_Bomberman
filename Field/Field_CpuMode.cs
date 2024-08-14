@@ -1,11 +1,23 @@
 using UnityEngine;
-public class Field_CpuMode : Field_Base {
+using Photon.Pun;
+public class Field_CpuMode :MonoBehaviourPunCallbacks{
 
     private bool bFlag;
 
     private GameManager cGameManager;
 
-	protected override void Init()
+
+    void Start()
+    {
+        Init();
+    }
+
+    void Update()
+    {
+        GameTransision();        
+		
+    }
+	protected void Init()
 	{
 		bFlag = false;
 		cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -23,7 +35,7 @@ public class Field_CpuMode : Field_Base {
 		fieldPlayerBase.SetName("Player1(Clone)");
 	}
 
-    protected override void GameTransision()
+    protected void GameTransision()
     {
         bool hasPlayer1 = false;
         bool hasPlayerDummy1 = false;

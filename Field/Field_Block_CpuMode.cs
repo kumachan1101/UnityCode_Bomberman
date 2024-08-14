@@ -17,7 +17,7 @@ public class Field_Block_CpuMode : Field_Block_Base {
     }
 
 
-    protected override void Rainbow_RPC(string sMaterialType){
+    public override void Rainbow_RPC(string sMaterialType){
         Rainbow(sMaterialType);
     }
 

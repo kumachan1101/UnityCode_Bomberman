@@ -8,7 +8,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
     protected Rigidbody rigidBody;
     protected Transform myTransform;
     protected Animator animator;
-    protected Field_Base cField;
+    //protected Field_Base cField;
     protected bool pushFlag = false;
     public int iViewID = -1;
     public PowerGage cPowerGage;
@@ -53,10 +53,6 @@ public class Player_Base : MonoBehaviourPunCallbacks
 		return this.gameObject.GetComponent<Player_Base>();
     }
 
-    protected Field_Base GetField(){
-		return GameObject.Find("Field").GetComponent<Field_Base>();
-    }
-
     protected virtual void CreatePlayerAction(){}
 
 	public virtual void SetPlayerSetting(int iParamViewID)
@@ -68,7 +64,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
 		InitializeRigidbody();
 		InitializeTransform();
 		InitializeAnimator();
-		InitializeField();
+		//InitializeField();
 		InitializePlayerAction();
 		FindJoystickPlayer();
 	}
@@ -107,7 +103,7 @@ public class Player_Base : MonoBehaviourPunCallbacks
 
 	protected void InitializeField()
 	{
-		cField = GetField();
+		//cField = GetField();
 	}
 
 	protected void InitializePlayerAction()

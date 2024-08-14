@@ -31,12 +31,13 @@ public class Field_Block_Online : Field_Block_Base {
         photonView.RPC(nameof(InsObjMove), RpcTarget.All, x, y, z, randomDirection);
     }
 
-    protected override void Rainbow_RPC(string sMaterialType){
+    public override void Rainbow_RPC(string sMaterialType){
 		if(false == GetComponent<PhotonView>().IsMine){
 			return;
 		}
         photonView.RPC(nameof(Rainbow), RpcTarget.All, sMaterialType);
     }
+
 
 
 }

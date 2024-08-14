@@ -6,9 +6,9 @@ public class Field_Block_Stage1 : Field_Block_CpuMode {
 
     protected override void ConfigurePools()
     {
-        AddPool(ExplosionTypes.Explosion1, 500);
-        AddPool(ExplosionTypes.Explosion2, 500);
-        AddPool(ExplosionTypes.Explosion3, 500);
-        AddPool(ExplosionTypes.Explosion4, 500);
+        explosionManager.AddPool(ExplosionTypes.Explosion1, 500);
+        explosionManager.AddPool(ExplosionTypes.Explosion2, 500);
+        explosionManager.AddPool(ExplosionTypes.Explosion3, 500);
+        explosionManager.AddPool(ExplosionTypes.Explosion4, 500);
     }
 }
