@@ -6,11 +6,11 @@ public class PlayerAnimation
 
     public PlayerAnimation(Transform myTransform)
     {
-		animator = myTransform.GetComponent<Animator>();
+		  animator = myTransform.GetComponent<Animator>();
     }
 
     public void SetWalking(bool isWalking)
     {
-		animator.SetBool("Move", isWalking);
+		  animator.SetBool("Move", isWalking);
     }
 }

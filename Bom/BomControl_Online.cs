@@ -3,6 +3,22 @@ using Photon.Pun;
 
 public class BomControl_Online : BomControl
 {
+
+    protected override Bom_Base AddComponent_Bom(GameObject gBom){
+        Bom_Base cBom = gBom.AddComponent<Bom_Online>();
+        return cBom;
+    }
+
+    protected override Bom_Base AddComponent_BomExplode(GameObject gBom){
+        Bom_Base cBom = gBom.AddComponent<BomExplode_Online>();
+        return cBom;
+    }
+    protected override Bom_Base AddComponent_BomBigBan(GameObject gBom){
+        Bom_Base cBom = gBom.AddComponent<BomBigBan_Online>();
+        return cBom;
+    }
+
+
 	protected override void MakeBom_RPC(BomParameters bomParams){
 		tempBom = PhotonNetwork.Instantiate("Bom", bomParams.position, Quaternion.identity);
 		bomParams.viewID = tempBom.GetComponent<PhotonView>().ViewID;
@@ -74,6 +90,5 @@ public class BomControl_Online : BomControl
 			}
 		}
 	}
-
 
 }

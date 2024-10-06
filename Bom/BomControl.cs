@@ -9,17 +9,14 @@ public class BomControl : MonoBehaviourPunCallbacks
     private SoundManager soundManager;
 
 
-    protected Bom_Base AddComponent_BomExplode(GameObject gBom){
-        Bom_Base cBom = gBom.AddComponent<BomExplode_Base>();
-        return cBom;
+    protected virtual Bom_Base AddComponent_BomExplode(GameObject gBom){
+        return null;
     }
-    protected Bom_Base AddComponent_BomBigBan(GameObject gBom){
-        Bom_Base cBom = gBom.AddComponent<BomBigBan_Base>();
-        return cBom;
+    protected virtual Bom_Base AddComponent_BomBigBan(GameObject gBom){
+        return null;
     }
-    protected Bom_Base AddComponent_Bom(GameObject gBom){
-        Bom_Base cBom = gBom.AddComponent<Bom_Base>();
-        return cBom;
+    protected virtual Bom_Base AddComponent_Bom(GameObject gBom){
+        return null;
     }
 
 

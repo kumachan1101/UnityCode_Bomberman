@@ -93,6 +93,15 @@ public class ItemControl: MonoBehaviourPunCallbacks
             CreateItem_RPC((ABILITY)iRand, v3);
         }
     }
+    [PunRPC]
+    public void CreateItem(ABILITY eRand, Vector3 v3){
+        GameObject gItem = Create(eRand);
+        if(gItem != null){
+            GameObject g = Instantiate(gItem);
+            g.transform.position = v3;
+        }
+    }
+
     public GameObject Create(ABILITY eItem){
         GameObject gItem = null;
         switch(eItem){
@@ -136,5 +145,6 @@ public class ItemControl: MonoBehaviourPunCallbacks
         }
         return gItem;
     }
+
 
 }

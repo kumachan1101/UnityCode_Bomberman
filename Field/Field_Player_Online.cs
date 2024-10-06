@@ -31,10 +31,12 @@ public class Field_Player_Online : Field_Player_Base {
 
 
 	protected override void PlayerDestroy(GameObject gPlayer){
-		OnlinePlayerDestroy(gPlayer.GetComponent<PhotonView>().ViewID);
+		photonView.RPC(nameof(OnlinePlayerDestroy), RpcTarget.All, gPlayer.GetComponent<PhotonView>().ViewID);
+		//OnlinePlayerDestroy(gPlayer.GetComponent<PhotonView>().ViewID);
 	}
 
-	private void OnlinePlayerDestroy(int iViewIDPlayer)
+	[PunRPC]
+	public void OnlinePlayerDestroy(int iViewIDPlayer)
 	{
 		PhotonView ViewPlayer = PhotonView.Find(iViewIDPlayer);
 		if (ViewPlayer == null)

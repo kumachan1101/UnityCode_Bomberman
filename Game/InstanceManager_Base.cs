@@ -1,16 +1,57 @@
 using UnityEngine;
-
-public abstract class InstanceManager_Base : MonoBehaviour
+using Photon.Pun;
+public class InstanceManager_Base : MonoBehaviour
 {
     protected GameObject prefab;
     protected string resource;
 
-    // 抽象メソッド：生成および破棄方法を定義
-	public abstract GameObject InstantiateInstance(Vector3 position);
-	public abstract void DestroyInstance(GameObject instance);
+    public GameObject InstantiateInstance(Vector3 position)
+    {
+        if (prefab == null)
+        {
+            Debug.LogError("Prefab is not set.");
+            return null;
+        }
+        GameObject instance = Instantiate(prefab, position, Quaternion.identity);
+        return instance;
+    }
 
+    public void DestroyInstance(GameObject instance)
+    {
+        /*
+        PhotonView pv = instance.GetComponent<PhotonView>();
+        if (pv != null && pv.IsMine) {
+            PhotonNetwork.Destroy(instance); // ネットワーク全体で削除
+        } else {
+            Destroy(instance); // ローカルのみで削除
+        }
+        */
+        // オンライン生成した場合も、PhotonNetwork.Destroyではなく、以下Destroyで削除してしまっている。
+        if(null != instance){
+            Destroy(instance); // ローカルのみで削除
+        }
+        
+    }
 
-	public abstract GameObject InstantiateInstancePool(Vector3 position);
+	//public abstract GameObject InstantiateInstancePool(Vector3 position);
+    public GameObject InstantiateInstancePool(Vector3 position)
+	{
+		// Field_Block_Base 経由でデキューしてオブジェクトを取得
+		GameObject explosion = cField.DequeueObect(prefab.name);
+
+		if (explosion != null)
+		{
+			Explosion_Base cExplosion = explosion.GetComponent<Explosion_Base>();
+			cExplosion.SetPosition(position);
+
+			explosion.GetComponent<Explosion_Base>().ReqHide();
+		}
+		else
+		{
+			Debug.LogWarning("Explosion pool is empty or not found.");
+		}
+        return explosion;
+    }
 
     public void DestroyInstancePool(GameObject instance)
     {

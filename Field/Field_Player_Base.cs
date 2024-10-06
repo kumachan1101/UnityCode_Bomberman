@@ -9,16 +9,6 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
 
     [SerializeField]private int m_playerCount; //やられたプレイヤー含む全プレイヤー数
 
-	public void SetPlayerCnt(int iPlayerCnt){
-		m_playerCount = iPlayerCnt;
-	}
-	public void AddPlayerCnt(){
-		m_playerCount++;
-	}
-	public int GetPlayerCnt(){
-		return m_playerCount;
-	}
-
     public virtual int GetIndex(){
         return 0;
     }
@@ -60,13 +50,18 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
 
 	protected virtual bool PreAddDummyPlayer(){return false;}
 
-	public virtual void ChangeName_RPC(GameObject gObject, string name) {}
-
-	protected virtual void ChangeName(GameObject gPlayer){}
-
 	protected virtual void PlayerDestroy(GameObject gPlayer){}
 
-	
+
+    protected IEnumerator DestroyComponentAndWait(Player_Base component, GameObject gCanvas, GameObject gPlayer)
+    {
+        // コンポーネントがnullになるまで待機
+        yield return new WaitUntil(() => component == null);
+
+        // コンポーネントがnullになった後に実行する処理
+        SetupSlider_RPC(gCanvas, gPlayer, GetPlayerCnt());
+    }
+/*
     protected IEnumerator DestroyComponentAndWait(Player_Base component, GameObject gCanvas, GameObject gPlayer)
     {
         if (component != null)
@@ -79,11 +74,7 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
             }
         }
     }
-    protected void GetPlayerInfo(ref string canvasName, ref string playerName){
-		canvasName = "Canvas1";
-		playerName = "Player1";
-    }
-
+*/
 
 	public virtual void SetupSlider_RPC(GameObject gCanvas, GameObject gPlayer,int iPlayerNo){}
 
@@ -196,5 +187,18 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
     }
 
 
+	public void SetPlayerCnt(int iPlayerCnt){
+		m_playerCount = iPlayerCnt;
+	}
+	public void AddPlayerCnt(){
+		m_playerCount++;
+	}
+	public int GetPlayerCnt(){
+		return m_playerCount;
+	}
+    protected void GetPlayerInfo(ref string canvasName, ref string playerName){
+		canvasName = "Canvas1";
+		playerName = "Player1";
+    }
 
 }

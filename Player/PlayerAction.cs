@@ -27,65 +27,25 @@ public class PlayerAction
         LastV3 = myTransform.position;
     }
 
-    public void SetMaterialType(string sParamMaterialType)
-    {
-		if(sParamMaterialType == null){
-			Debug.Log("MaterialType is null");
-			return;
-		}
-        playerMaterial.SetMaterialType(sParamMaterialType);
-    }
-    public void UpdateMovement()
-    {
-        playerInput.UpdateInput();
-        UpdatePlayerMovement();
-		CanMove();
-    }
-
-    public void MoveClear()
-    {
-        playerInput.ClearInput();
-        playerMovement.MoveClear();
-    }
-
-    private GameObject GetPlayerGameObject()
-    {
-        string name = cField_Player.GetName();
-        GameObject gPlayer = GameObject.Find(name);
-        return gPlayer;
-    }
-
-    protected Player_Base GetPlayerComponent(GameObject gPlayer)
-    {
-        Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
-        return cPlayer;
-    }
-
-    public void PerformPlayerAction(Vector3 moveDirection, Action<PlayerInput> flagSetter)
-    {
-        MoveClear();
-        flagSetter(playerInput);
-        playerMovement.Move(moveDirection);
-    }
 
     virtual public void MoveUp()
     {
-        PerformPlayerAction(Vector3.forward, (input) => input.pushBtnUp = true);
+        PerformPlayerAction(Vector3.forward);
     }
 
     virtual public void MoveDown()
     {
-        PerformPlayerAction(Vector3.back, (input) => input.pushBtnDown = true);
+        PerformPlayerAction(Vector3.back);
     }
 
     virtual public void MoveRight()
     {
-        PerformPlayerAction(Vector3.right, (input) => input.pushBtnRight = true);
+        PerformPlayerAction(Vector3.right);
     }
 
     virtual public void MoveLeft()
     {
-        PerformPlayerAction(Vector3.left, (input) => input.pushBtnLeft = true);
+        PerformPlayerAction(Vector3.left);
     }
 	protected virtual void CanMove(){
 	}
@@ -113,10 +73,51 @@ public class PlayerAction
 			MoveClear();
 		}
     }
+    public void SetMaterialType(string sParamMaterialType)
+    {
+		if(sParamMaterialType == null){
+			Debug.Log("MaterialType is null");
+			return;
+		}
+        playerMaterial.SetMaterialType(sParamMaterialType);
+    }
+    public void UpdateMovement()
+    {
+        playerInput.UpdateInput();
+        UpdatePlayerMovement();
+		CanMove();
+    }
+
+    public void MoveClear()
+    {
+        playerInput.ClearInput();
+        playerMovement.MoveClear();
+    }
+
+    public void PerformPlayerAction(Vector3 moveDirection)
+    {
+        MoveClear();
+        playerMovement.Move(moveDirection);
+    }
+
  
     public void SpeedUp()
     {
 		playerMovement.SpeedUp();
     }
+
+    private GameObject GetPlayerGameObject()
+    {
+        string name = cField_Player.GetName();
+        GameObject gPlayer = GameObject.Find(name);
+        return gPlayer;
+    }
+
+    protected Player_Base GetPlayerComponent(GameObject gPlayer)
+    {
+        Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
+        return cPlayer;
+    }
+
 
 }

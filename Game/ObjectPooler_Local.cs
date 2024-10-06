@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 public class ObjectPooler_Local : ObjectPooler_Base
 {
-
+/*
     protected override GameObject CreateObject(GameObject prefab)
     {
         // ローカルでオブジェクトをインスタンス化
@@ -26,7 +26,7 @@ public class ObjectPooler_Local : ObjectPooler_Base
             for (int i = 0; i < pool.size; i++)
             {
                 GameObject obj = CreateObject(pool.prefab);
-				SetObjectActive_RPC(obj, false);
+				//SetObjectActive_RPC(obj, false);
                 objectPoolQueue.Enqueue(obj);
             }
         }
@@ -40,10 +40,10 @@ public class ObjectPooler_Local : ObjectPooler_Base
             return;
         }
 
-        if (obj != null/* && obj.activeInHierarchy*/)
+        if (obj != null && obj.activeInHierarchy)
         {
             obj.transform.position = new Vector3(0, -2, 0); // オブジェクトの位置を変更
-            SetObjectActive_RPC(obj, false);
+            //SetObjectActive_RPC(obj, false);
             objectPoolQueue.Enqueue(obj); // キューにエンキュー
             //Debug.Log("Enqueue: " + objectPoolQueue.Count);
         }
@@ -60,7 +60,7 @@ public class ObjectPooler_Local : ObjectPooler_Base
             if (!obj.activeInHierarchy && prefabByTag.ContainsKey(tag))
             {
                 objectPoolQueue.Dequeue();
-				SetObjectActive_RPC(obj, true);
+				//SetObjectActive_RPC(obj, true);
 
                 Renderer renderer = obj.GetComponent<Renderer>();
                 if (renderer != null)
@@ -76,4 +76,5 @@ public class ObjectPooler_Local : ObjectPooler_Base
         Debug.LogWarning("No available objects with tag \"" + tag + "\".");
         return null;
     }
+*/
 }

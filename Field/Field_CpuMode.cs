@@ -21,7 +21,7 @@ public class Field_CpuMode :MonoBehaviourPunCallbacks{
 	{
 		bFlag = false;
 		cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-
+/*
 		GetComponent<Field_Block_Base>().CreateField();
 
 		Field_Player_Base fieldPlayerBase = GetComponent<Field_Player_Base>();
@@ -33,6 +33,7 @@ public class Field_CpuMode :MonoBehaviourPunCallbacks{
 		}
 		//ローカルプレイでは、操作するプレイヤーの名前を設定して、この設定した名前で検索してオブジェクトを特定
 		fieldPlayerBase.SetName("Player1(Clone)");
+*/
 	}
 
     protected void GameTransision()

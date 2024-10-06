@@ -1,6 +1,5 @@
 
 public class Field_Block_CpuMode : Field_Block_Base {
-    private GameManager cGameManager;
 
     protected override void ClearBrokenList_RPC(){
         ClearBrokenList();

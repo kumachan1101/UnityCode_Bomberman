@@ -174,15 +174,11 @@ public class Player_Base : MonoBehaviourPunCallbacks
             string materialName = other.GetComponent<Renderer>().material.name.Replace(" (Instance)", "");
             if(MaterialType != materialName){
                 int iDamage = other.GetComponent<Explosion_Base>().GetDamage();
-                Player_Base cPlayer = GetComponent();
-				//Debug.Log(cPlayer);
-				if(cPlayer == null || cPlayer.cPowerGage == null){
-					return;
-				}
-                cPlayer.cPowerGage.SetDamage(iDamage);
-    
-                if(cPlayer.cPowerGage.IsDead()){
-                    string tag = this.gameObject.tag;
+                if(cPowerGage == null){
+                    return;
+                }
+                cPowerGage.SetDamage(iDamage);
+                if(cPowerGage.IsDead()){
                     DestroySync(this.gameObject);
                 }
             }

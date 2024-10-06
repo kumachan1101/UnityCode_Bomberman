@@ -2,27 +2,7 @@ using UnityEngine;
 
 public class InstanceManager_CpuMode : InstanceManager_Base
 {
-
-    public override GameObject InstantiateInstancePool(Vector3 position)
-	{
-		// Field_Block_Base 経由でデキューしてオブジェクトを取得
-		GameObject explosion = cField.DequeueObject(prefab.name);
-
-		if (explosion != null)
-		{
-			Explosion_Base cExplosion = explosion.GetComponent<Explosion_Base>();
-			cExplosion.SetPosition(position);
-
-			explosion.GetComponent<Explosion_Base>().ReqHide();
-		}
-		else
-		{
-			Debug.LogWarning("Explosion pool is empty or not found.");
-		}
-        return explosion;
-    }
-
-
+/*
     public override GameObject InstantiateInstance(Vector3 position)
     {
         if (prefab == null)
@@ -41,6 +21,6 @@ public class InstanceManager_CpuMode : InstanceManager_Base
             Destroy(instance);
         }
     }
-
+*/
 
 }

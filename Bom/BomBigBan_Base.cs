@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class BomBigBan_Base : Bom_Base
 {
-    private HashSet<Vector2Int> processedCoordinates = new HashSet<Vector2Int>();
+    protected HashSet<Vector2Int> processedCoordinates = new HashSet<Vector2Int>();
 
     protected bool XZ_Explosion(Vector3 basePosition, int x, int z)
     {
@@ -45,51 +45,4 @@ public class BomBigBan_Base : Bom_Base
         return true;
     }
 
-    protected override void Explosion()
-    {
-        if (!IsExplosion())
-        {
-            return;
-        }
-
-        Vector3 basePosition = Library_Base.GetPos(transform.position);
-        transform.position = basePosition;
-
-        // Reset processed coordinates
-        processedCoordinates.Clear();
-
-        // Explode in X and Z directions (positive and negative)
-
-        for (int i = 0; i <= iExplosionNum; i++)
-        {
-            for (int j = 0; j <= iExplosionNum; j++)
-            {
-				XZ_Explosion(basePosition, i, j);
-            }
-        }
-        for (int i = 0; i <= iExplosionNum; i++)
-        {
-            for (int j = 0; j <= iExplosionNum; j++)
-            {
-                XZ_Explosion(basePosition, i, -j);
-            }
-        }
-        for (int i = 0; i <= iExplosionNum; i++)
-        {
-            for (int j = 0; j <= iExplosionNum; j++)
-            {
-				XZ_Explosion(basePosition, -i, j);
-            }
-        }
-        for (int i = 0; i <= iExplosionNum; i++)
-        {
-            for (int j = 0; j <= iExplosionNum; j++)
-            {
-                XZ_Explosion(basePosition, -i, -j);
-            }
-        }
-
-        // Destroy the bomb object after explosion
-        cInsManager.DestroyInstance(this.gameObject);
-    }
 }

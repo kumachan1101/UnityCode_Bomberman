@@ -1,6 +1,19 @@
 using UnityEngine;
 public class Field_Player_CpuMode : Field_Player_Base {
 
+	public void Start()
+	{
+		int playercnt = GetArrayLength(GetIndex());
+        for (int i = 1; i <= playercnt; i++)
+        {
+			SpawnPlayerObjects(i);
+			SetPlayerCnt(i); 
+		}
+		//ローカルプレイでは、操作するプレイヤーの名前を設定して、この設定した名前で検索してオブジェクトを特定
+		SetName("Player1(Clone)");
+	}
+
+
 	protected override bool PreAddDummyPlayer(){
 		AddPlayerCnt();
 		return true;

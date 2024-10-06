@@ -37,7 +37,7 @@ public class Player_Online : Player_Base
 		PhotonView pv = g.GetComponent<PhotonView>();
 		if (pv != null && pv.IsMine)
 		{
-			PhotonNetwork.Destroy(pv.gameObject); // pvではなくpv.gameObjectを渡す
+			PhotonNetwork.Destroy(g);
 		}
 	}
 

@@ -41,6 +41,7 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
 
         cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
         CreateFixedBlock();
+        CreateField();
 
     }
 
@@ -53,8 +54,8 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
 
     virtual protected void ConfigurePools()
     {
-        explosionManager.AddPool(ExplosionTypes.Explosion1, 1000);
-        explosionManager.AddPool(ExplosionTypes.Explosion2, 1000);
+        explosionManager.AddPool(ExplosionTypes.Explosion1, 5000);
+        explosionManager.AddPool(ExplosionTypes.Explosion2, 5000);
         // 他のExplosionタイプが必要であれば追加
     }
 
@@ -187,25 +188,6 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
 
     }
 
-    protected void CreateGroundBlock(int x, int y, int z)
-    {
-        GameObject g = Instantiate(GroundPrefab);
-        g.transform.position = new Vector3(x, y, z);
-        GroundList.Add(g);
-    }
-
-    public static bool IsFixedWallPosition(int x, int y, int z)
-    {
-        if (x % 2 == 0 && z % 2 == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
     public bool IsAllWall(Vector3 v3){
         bool isWall = cLibrary.IsObjectAtPosition(WallList, v3);
         bool isFixedWall = cLibrary.IsObjectAtPosition(FixedWallList, v3);
@@ -243,7 +225,7 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
         explosionManager.UpdateGroundExplosion(gObj);
     }
 
-    public GameObject DequeueObject(string tag)
+    public GameObject DequeueObect(string tag)
     {
         return explosionManager.DequeueObject(tag);
     }

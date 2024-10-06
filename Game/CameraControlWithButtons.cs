@@ -8,15 +8,20 @@ public class CameraControlWithButtons : MonoBehaviour
     public Button downButton; // 下ボタンの参照
     public float moveSpeed = 5f; // カメラの移動速度
 
+    private bool bSetting;
     private bool isUpButtonPressed = false;
     private bool isDownButtonPressed = false;
 
     void Start()
     {
+        bSetting = false;
 		GetInstance();
     }
 
 	private void GetInstance(){
+        if(bSetting){
+            return;
+        }
 		if(null == upButton || null == downButton){
 			return;
 		}
@@ -40,7 +45,8 @@ public class CameraControlWithButtons : MonoBehaviour
         EventTrigger.Entry downButtonPointerUpEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
         downButtonPointerUpEntry.callback.AddListener((data) => { isDownButtonPressed = false; });
         downButtonEventTrigger.triggers.Add(downButtonPointerUpEntry);
-
+        
+        //bSetting = true;
 	}
 
     void Update()
