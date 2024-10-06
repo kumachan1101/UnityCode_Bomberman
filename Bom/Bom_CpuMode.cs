@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Bom_CpuMpde : Bom_Base
+public class Bom_CpuMode : Bom_Base
 {
      protected override bool IsExplosion(){
         if(null == cInsManager){

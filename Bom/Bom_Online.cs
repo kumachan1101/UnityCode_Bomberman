@@ -22,7 +22,7 @@ public class Bom_Online : Bom_Base
         if (!IsExplosion()) return;
 
         Vector3 v3 = Library_Base.GetPos(transform.position);
-        photonView.RPC(nameof(Explosion_RPC), RpcTarget.All, v3);
+        cPhotonView.RPC(nameof(Explosion_RPC), RpcTarget.All, v3);
     }
 
     [PunRPC]

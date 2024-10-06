@@ -11,7 +11,7 @@ public class BomControl_CpuMode : BomControl
         return cBom;
     }
     protected override Bom_Base AddComponent_Bom(GameObject gBom){
-        Bom_Base cBom = gBom.AddComponent<Bom_CpuMpde>();
+        Bom_Base cBom = gBom.AddComponent<Bom_CpuMode>();
         return cBom;
     }
 
