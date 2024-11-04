@@ -3,7 +3,7 @@ using Photon.Pun;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-public class Library_Base : MonoBehaviourPunCallbacks{
+public class Library_Base : MonoBehaviour{
 
     private static Library_Base instance; // GameManagerのシングルトンインスタンス
     public static Library_Base Instance
@@ -31,7 +31,7 @@ public class Library_Base : MonoBehaviourPunCallbacks{
         DontDestroyOnLoad(gameObject);
         instance = this;
     }
-   public int CountObjectsWithName(string name)
+   public static int CountObjectsWithName(string name)
    {
         int count = 0;
         GameObject[] objects = GameObject.FindObjectsOfType<GameObject>();
@@ -45,6 +45,23 @@ public class Library_Base : MonoBehaviourPunCallbacks{
         return count;
     }
 
+    public static int GetPlayerCnt()
+    {
+        // シーン内のすべてのGameObjectを取得
+        GameObject[] allPlayers = GameObject.FindObjectsOfType<GameObject>();
+
+        // Playerで始まるGameObjectのカウント
+        int playerCount = 0;
+        foreach (GameObject player in allPlayers)
+        {
+            if (player.name.StartsWith("Player"))
+            {
+                playerCount++;
+            }
+        }
+
+        return playerCount;
+    }
 
     // 指定した座標と名称が一致し、かつアクティブであるオブジェクトが存在するかをチェックする関数
     public static bool CheckPositionAndName(Vector3 targetPosition, string targetName)
@@ -201,22 +218,27 @@ public class Library_Base : MonoBehaviourPunCallbacks{
         return cPlayerBom;
     }
 
-    public static BomConfiguration GetBomConfigurationFromObject(string objname)
+    public static BomConfigurationBase GetBomConfigurationFromObject(string objname, BomConfigurationType configType)
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
         PlayerBom cPlayerBom = null; // PlayerBomコンポーネントの参照を初期化
-		BomConfiguration cBomConfiguration = null;
-        Player_Base cPlayer = GetcPlayerFromObject(objname);
+        BomConfigurationBase cBomConfiguration = null;
+        Player_Base cPlayer = GetcPlayerFromObject(objname); // プレイヤー取得
+
         if (cPlayer != null)
         {
-            cPlayerBom = cPlayer.GetPlayerBom();
+            cPlayerBom = cPlayer.GetPlayerBom(); // プレイヤーのボムコンフィグを取得
         }
-		if(cPlayerBom != null){
-			cBomConfiguration = cPlayerBom.GetBomConfiguration();
-		}
+
+        if (cPlayerBom != null)
+        {
+            // BomConfigurationType に基づいて派生クラスを取得
+            cBomConfiguration = cPlayerBom.GetBomConfiguration();
+        }
 
         return cBomConfiguration;
     }
+
 
 
     public static BomStatus GetBomStatusFromObject(string objname)
@@ -308,7 +330,11 @@ public class Library_Base : MonoBehaviourPunCallbacks{
         }
 
         GameObject gPlayer = FindPlayerObject(name);
-		return gPlayer.GetComponent<Player_Base>();
+        Player_Base cPlayer = null;
+        if(null != gPlayer){
+            cPlayer = gPlayer.GetComponent<Player_Base>();
+        }
+		return cPlayer;
     }
 
     public static GameObject FindPlayerObject(string name)

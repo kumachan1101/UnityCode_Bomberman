@@ -1,13 +1,7 @@
-
-public class ItemBomUp : Item{
-    
-    public override void Reflection(string objname){
-        BomStatus cBomStatus = Library_Base.GetBomStatusFromObject(objname);
-        if(null != cBomStatus){
-            cBomStatus.IncreaseBom();
-        }
-
+public class ItemBomUp : ItemBomStatus
+{
+    protected override BomStatusType GetBomStatusType()
+    {
+        return BomStatusType.BomUp;
     }
-
-
 }

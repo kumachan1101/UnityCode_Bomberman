@@ -1,9 +1,9 @@
-﻿using System;
+﻿
 using UnityEngine;
 [System.Serializable]
 public class PlayerAction
 {
-    public PlayerMovement playerMovement;
+    [SerializeField]protected PlayerMovement playerMovement;
     private PlayerInput playerInput;
     protected PlayerMaterial playerMaterial;
 
@@ -100,7 +100,9 @@ public class PlayerAction
         playerMovement.Move(moveDirection);
     }
 
- 
+    public void Move(Vector3 moveDirection){
+        playerMovement.Move(moveDirection);
+    }
     public void SpeedUp()
     {
 		playerMovement.SpeedUp();

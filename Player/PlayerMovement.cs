@@ -4,7 +4,7 @@ public class PlayerMovement
 {
     private Rigidbody rigidBody;
     private Transform myTransform;
-    public float moveSpeed = 3.0f;
+    [SerializeField]private float moveSpeed = 3.0f;
     private PlayerAnimation playerAnimation;
 
     public PlayerMovement(Rigidbody rb, Transform tf)

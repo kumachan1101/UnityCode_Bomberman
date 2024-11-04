@@ -1,6 +1,13 @@
+using System.Xml.Serialization;
 using UnityEngine;
-
-public class BomStatus
+public enum BomStatusType
+{
+    BomAttack,
+    BomKick,
+    BomUp,
+    BomStatusInvalid
+}
+public abstract class BomStatus
 {
     private int bomNum;
     private bool canKick;
@@ -9,11 +16,17 @@ public class BomStatus
 
     public BomStatus()
     {
+        SetDefault();
+    }
+
+    public void SetDefault(){
         bomNum = 3;
         canKick = false;
         canAttack = false;
         canBreakthrough = false;
     }
+
+    public abstract void Request(BomStatus cBomStatus);
 
     public int GetBomNum()
     {

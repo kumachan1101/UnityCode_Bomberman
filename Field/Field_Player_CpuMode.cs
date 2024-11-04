@@ -3,16 +3,29 @@ public class Field_Player_CpuMode : Field_Player_Base {
 
 	public void Start()
 	{
+
 		int playercnt = GetArrayLength(GetIndex());
+		/*
         for (int i = 1; i <= playercnt; i++)
         {
 			SpawnPlayerObjects(i);
 			SetPlayerCnt(i); 
 		}
+		*/
+		// SetPlayerCntで毎回人数を設定することでスライダーの座標位置を変えている。。
+		SetPlayerCnt(1); 
+		SpawnPlayerObjects(1);
+        for (int i = 2; i <= playercnt; i++)
+        {
+			SetPlayerCnt(i); 
+			SpawnPlayerObjects(Random.Range(2, 5));
+		}
+
 		//ローカルプレイでは、操作するプレイヤーの名前を設定して、この設定した名前で検索してオブジェクトを特定
 		SetName("Player1(Clone)");
 	}
 
+    protected virtual void init(){}
 
 	protected override bool PreAddDummyPlayer(){
 		AddPlayerCnt();

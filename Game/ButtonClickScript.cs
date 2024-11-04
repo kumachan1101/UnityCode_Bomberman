@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
 
-public class ButtonClickScript : MonoBehaviourPunCallbacks
+public class ButtonClickScript : MonoBehaviour
 {
 
     public void LoadGameScene()

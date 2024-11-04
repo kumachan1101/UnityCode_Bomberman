@@ -12,29 +12,36 @@ public class PlayerAction_CpuMode : PlayerAction
 	}
 
 
-	protected override void CanMove(){
-        if (cLibrary == null)
-        {
-            cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
-        }
+	protected override void CanMove()
+	{
+		if (cLibrary == null)
+		{
+			cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
+		}
 
-        Vector3 v3 = Library_Base.GetPos(myTransform.position);
-        Vector3 v3_ground = new Vector3(v3.x, v3.y - 1, v3.z);
-        canMove = cField.IsMatch(v3_ground, playerMaterial.GetMaterial());
+		Vector3 currentPos = Library_Base.GetPos(myTransform.position);
+		Vector3 forwardDirection = myTransform.forward; // 進行方向を取得
+		Vector3 nextPos = currentPos + forwardDirection; // 進もうとしている位置
 
-		if(Library_Base.IsPositionOutOfBounds(v3)){
+		// 現在位置の地面に爆風があるかどうかではなく、進行先の地面に爆風があるかをチェック
+		Vector3 nextGroundPos = new Vector3(nextPos.x, nextPos.y - 1, nextPos.z);
+		canMove = cField.IsMatch(nextGroundPos, playerMaterial.GetMaterial());
+
+		// 範囲外に出ようとしていないか確認
+		if (Library_Base.IsPositionOutOfBounds(nextPos))
+		{
 			canMove = false;
 		}
 
-        if (canMove)
-        {
-            LastV3 = myTransform.position;
-        }
-        else
-        {
-            myTransform.position = LastV3;
-        }
-
+		// 移動可能なら進む、移動不可なら元の位置に戻す
+		if (canMove)
+		{
+			LastV3 = myTransform.position;
+		}
+		else
+		{
+			myTransform.position = LastV3; // 元の位置に戻す
+		}
 	}
 
 	protected override void UpdatePlayerMovement()

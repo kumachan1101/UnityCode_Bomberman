@@ -101,7 +101,10 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
 				if (roomButton.GetIsMax(playerCount)) {
 					GameObject gField = GameObject.Find("Field");
 					Field_Block_Base cField = gField.GetComponent<Field_Block_Base>();
-					cField.CreateField();
+                    // マスタークライアントのみがこの処理を行う
+                    if (!PhotonNetwork.IsMasterClient) {
+    					cField.CreateField();
+                    }
 					cField.SetupStage();
 
 					Field_Player_Base cFieldPlayer = gField.GetComponent<Field_Player_Base>();

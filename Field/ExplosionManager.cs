@@ -3,7 +3,7 @@ using UnityEngine;
 using Photon.Pun;
 using System.Collections;
 
-public class ExplosionManager : MonoBehaviourPunCallbacks
+public class ExplosionManager : MonoBehaviour
 {
     public List<GameObject> ExplosionList = new List<GameObject>();
 

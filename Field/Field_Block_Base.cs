@@ -254,7 +254,7 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
                 }
 
                 Explosion_Base cExplosion = obj.GetComponent<Explosion_Base>();
-                cExplosion.SetPosition(obj.transform.position);
+                //cExplosion.SetPosition(obj.transform.position);
             }
         }
     }

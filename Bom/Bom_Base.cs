@@ -1,5 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
+using Photon.Pun.Demo.Asteroids;
 
 public class Bom_Base : MonoBehaviourPunCallbacks
 {
@@ -19,18 +20,24 @@ public class Bom_Base : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     private Vector3 moveDirection = Vector3.zero;
     //private Vector3 previousPosition;
-    private float moveSpeed = 1.5f; // 動く速さ
-    protected bool isMoving = false; // 移動中フラグ
+    //private float moveSpeed = 1.5f; // 動く速さ
+    //protected bool isMoving = false; // 移動中フラグ
     public int iExplosionNum;
-    protected object lockObject = new object(); // ロックオブジェクト
+    //protected object lockObject = new object(); // ロックオブジェクト
     protected InstanceManager_Base cInsManager;
 
     protected PhotonView cPhotonView;
     // Playerクラスから方向を受け取るメソッド
+
+    protected Bom_Base_MoveManager moveManager;
+    protected Bom_Base_ExplosionManager explosionManager;
+    protected Bom_Base_MaterialHandler materialHandler;
+    protected Bom_Base_CollisionManager collisionManager;
+
     public void SetMoveDirection(Vector3 direction)
     {
-        moveDirection =direction;
-        //moveDirection = direction.normalized; // 方向を正規化することで、速度を一定に保つ
+        //moveDirection =direction;
+        moveManager.SetMoveDirection(direction);
     }
     
     public void SetMaterialKind(string sParamMaterial){
@@ -42,22 +49,21 @@ public class Bom_Base : MonoBehaviourPunCallbacks
         cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
         cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
         cPhotonView = GetComponent<PhotonView>();
+        moveManager = gameObject.AddComponent<Bom_Base_MoveManager>();
     }
 
     protected virtual void init(){
         cInsManager = gameObject.AddComponent<InstanceManager_Base>();
         sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
         ExplosionPrefab = Resources.Load<GameObject>(sExplosion);
-        cInsManager.SetPrefab(ExplosionPrefab);		
+        cInsManager.SetPrefab(ExplosionPrefab);	
+
     }
 
-    // Start is called before the first frame update
     void Start()
     {
-        //previousPosition = transform.position;
         // インスタンス生成直後にマテリアルを設定している事もあり、Awakeのタイミングではまだマテリアルが取得できない。
         // 初回描画のタイミングであれば取得可能であるため、ここでマテリアルを設定している
-        //GetComponent<Renderer>().material = cMaterialMng.GetMaterialOfType(sMaterialKind);
         Renderer renderer = GetComponent<Renderer>();
         if (renderer == null)
         {
@@ -88,21 +94,39 @@ public class Bom_Base : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void Update()
     {
-        if(GameManager.xmax <= transform.position.x || GameManager.zmax <= transform.position.z || 0 > transform.position.x || 0 > transform.position.z){
-            return;
-        }
-
+/*
         if (isMoving)
         {
             transform.position += moveDirection * moveSpeed * Time.deltaTime * 2;
             CheckForCollision();
         }
+*/
+        moveManager.Move(transform);
     }
 
     protected virtual bool IsWall(Vector3 v3Temp){
         bool bRet = cField.IsAllWall(v3Temp);
         return bRet;
     }
+
+
+    // ブロックが壊れているかどうかの判定をするかどうかを派生クラスで制御
+    protected virtual bool ShouldCheckIsBroken()
+    {
+        return true; // デフォルトでは判定を行う
+    }
+
+    protected virtual bool IsExplosion(){
+        return false;
+    }
+    protected virtual void Explosion(){}
+
+    private void OnDestroy()
+    {
+        // Destroy時に登録したInvokeをすべてキャンセル
+        CancelInvoke();
+    }
+/*
     protected virtual bool XorZ_Explosion(Vector3 v3Temp)
     {
         // 壁の判定
@@ -136,13 +160,6 @@ public class Bom_Base : MonoBehaviourPunCallbacks
         g.transform.position = v3Temp;
         return true;
     }
-
-    // ブロックが壊れているかどうかの判定をするかどうかを派生クラスで制御
-    protected virtual bool ShouldCheckIsBroken()
-    {
-        return true; // デフォルトでは判定を行う
-    }
-
     protected virtual bool X_Explosion(int i){
         Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z);
         bool bRet = XorZ_Explosion(v3Temp);
@@ -154,14 +171,11 @@ public class Bom_Base : MonoBehaviourPunCallbacks
         bool bRet = XorZ_Explosion(v3Temp);
         return bRet;
     }
-
-    protected virtual bool IsExplosion(){
-        return false;
-    }
-    protected virtual void Explosion(){}
-
     protected void HandleExplosion(Vector3 v3)
     {
+        if(null == cInsManager){
+            return;
+        }
         transform.position = v3;
         GameObject gExplosion = cLibrary.IsPositionAndName(v3, "Explosion");
         if (gExplosion != null)
@@ -198,14 +212,138 @@ public class Bom_Base : MonoBehaviourPunCallbacks
 
         cInsManager.DestroyInstance(this.gameObject);
     }
-
-
-    private void OnDestroy()
+    */
+    protected void HandleExplosion(Vector3 initialPosition)
     {
-        // Destroy時に登録したInvokeをすべてキャンセル
-        CancelInvoke();
+        if (cInsManager == null)
+        {
+            return;
+        }
+
+        // 初期位置に移動
+        transform.position = initialPosition;
+
+        // 既存の爆風がある場合は破棄
+        GameObject existingExplosion = cLibrary.IsPositionAndName(initialPosition, "Explosion");
+        if (existingExplosion != null)
+        {
+            cInsManager.DestroyInstancePool(existingExplosion);
+        }
+
+        // 爆風のインスタンスを生成
+        GameObject initialExplosion = cInsManager.InstantiateInstancePool(initialPosition);
+        if (initialExplosion == null)
+        {
+            return; // インスタンス生成失敗時は処理を終了
+        }
+        initialExplosion.transform.position = initialPosition;
+
+        // X方向の爆風を生成
+        for (int i = 1; i <= iExplosionNum; i++)
+        {
+            Vector3 xNegativeDirection = new Vector3(transform.position.x - i, transform.position.y, transform.position.z); // X方向の負の方向
+            if (ExplosionResult.Stop == CreateExplosionAndCheckContinuation(xNegativeDirection)) break; // X方向の負の方向
+        }
+
+        for (int i = 1; i <= iExplosionNum; i++)
+        {
+            Vector3 xPositiveDirection = new Vector3(transform.position.x + i, transform.position.y, transform.position.z); // X方向の正の方向
+            if (ExplosionResult.Stop == CreateExplosionAndCheckContinuation(xPositiveDirection)) break; // X方向の正の方向
+        }
+
+        // Z方向の爆風を生成
+        for (int i = 1; i <= iExplosionNum; i++)
+        {
+            Vector3 zNegativeDirection = new Vector3(transform.position.x, transform.position.y, transform.position.z - i); // Z方向の負の方向
+            if (ExplosionResult.Stop == CreateExplosionAndCheckContinuation(zNegativeDirection)) break; // Z方向の負の方向
+        }
+
+        for (int i = 1; i <= iExplosionNum; i++)
+        {
+            Vector3 zPositiveDirection = new Vector3(transform.position.x, transform.position.y, transform.position.z + i); // Z方向の正の方向
+            if (ExplosionResult.Stop == CreateExplosionAndCheckContinuation(zPositiveDirection)) break; // Z方向の正の方向
+        }
+
+        // このオブジェクトの破棄
+        cInsManager.DestroyInstance(this.gameObject);
     }
 
+    public enum ExplosionResult
+    {
+        Continue,
+        Stop
+    }
+
+    protected virtual ExplosionResult CreateExplosionAndCheckContinuation(Vector3 explosionPosition)
+    {
+        // 爆風生成の異常チェック（壁の判定、既存爆風の破棄）
+        if (!IsExplosionCreationValid(explosionPosition))
+        {
+            return ExplosionResult.Stop;
+        }
+
+        DestroyExistingExplosion(explosionPosition);
+
+        // 爆風生成処理（失敗時に Stop を返す）
+        if (!CreateExplosion(explosionPosition))
+        {
+            return ExplosionResult.Stop;
+        }
+
+        // 継続判定
+        return CanContinueExplosion(explosionPosition) ? ExplosionResult.Continue : ExplosionResult.Stop;
+    }
+
+    /// <summary>
+    /// 爆風生成が有効かどうかをチェックする
+    /// 壁や既存爆風の確認を行い、生成が無効な場合は false を返す
+    /// </summary>
+    protected virtual bool IsExplosionCreationValid(Vector3 position)
+    {
+        if (IsWall(position))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void DestroyExistingExplosion(Vector3 position)
+    {
+        GameObject existingExplosion = cLibrary.IsPositionAndName(position, "Explosion");
+        if (existingExplosion != null)
+        {
+            cInsManager.DestroyInstancePool(existingExplosion);
+        }
+    }
+    /// <summary>
+    /// 爆風を生成し、成功したかどうかを返す
+    /// </summary>
+    protected virtual bool CreateExplosion(Vector3 position)
+    {
+        GameObject newExplosion = cInsManager.InstantiateInstancePool(position);
+        if (newExplosion == null)
+        {
+            return false;
+        }
+
+        newExplosion.transform.position = position;
+        return true;
+    }
+
+    /// <summary>
+    /// 爆風を継続するかどうかを判定する
+    /// ブロックが破壊可能な場合は継続を止める
+    /// </summary>
+    protected virtual bool CanContinueExplosion(Vector3 position)
+    {
+        if(ShouldCheckIsBroken() && cField.IsBroken(position)){
+            return false;
+        }
+        return true;
+    }
+
+/*
     //update関数の中でCheckForCollisionをコールして衝突検知する。
     //OnCollisionEnterでの検知では、タイミングが遅く、オブジェクトの中に入り込んだときに検知してしまい、手前で止まらない。
     void CheckForCollision()
@@ -233,7 +371,7 @@ public class Bom_Base : MonoBehaviourPunCallbacks
             }
         }
     }
-
+*/
     void OnTriggerEnter(Collider other)
     {
         switch (other.transform.name)
@@ -256,7 +394,7 @@ public class Bom_Base : MonoBehaviourPunCallbacks
         GetComponent<SphereCollider>().isTrigger = false;
         
     }
-
+/*
     public void AbailableBomKick(){
         isMoving = true;
     }
@@ -265,6 +403,14 @@ public class Bom_Base : MonoBehaviourPunCallbacks
         isMoving = true;
         SetMoveDirection(direction);
     }
+*/
+    public void AbailableBomKick()
+    {
+        moveManager.AbailableBomKick();
+    }
 
-
+    public void AbailableBomAttack(Vector3 direction)
+    {
+        moveManager.AbailableBomAttack(direction);
+    }
 }

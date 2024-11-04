@@ -42,39 +42,19 @@ public class BomControl : MonoBehaviourPunCallbacks
     }
    
  
-    public void DropBom(ref PlayerBom cPlayerBom, Vector3 v3, Vector3 direction){
+    public GameObject DropBom(BomParameters bomParams){
         if(null == cItemControl){
-			return;
+			return null;
 		}
-		if(cItemControl.IsItem(v3)){
-			return;
+		if(cItemControl.IsItem(bomParams.position)){
+			return null;
 		}
-		if(Library_Base.CheckPositionAndName(v3, "Explosion")){
-			return;
+		if(Library_Base.CheckPositionAndName(bomParams.position, "Explosion")){
+			return null;
 		}
-        
-        BOM_KIND eBomKind = cPlayerBom.GetBomKind();
-        int iExplosionNum = cPlayerBom.GetExplosionNum();
-        bool bBomKick = cPlayerBom.CanKick();
-        string sMaterialType = cPlayerBom.GetMaterialType();
-        bool bBomAttack = cPlayerBom.CanAttack();;
-
-		BomParameters bomParams = new BomParameters
-		{
-			position = v3,
-			bomKind = eBomKind,
-			viewID = 0,
-			explosionNum = iExplosionNum,
-			bomKick = bBomKick,
-			materialType = sMaterialType,
-			bomAttack = bBomAttack,
-			direction = direction
-		};
-
 		MakeBom_RPC(bomParams);
-        cPlayerBom.AddBom(tempBom);
-
         soundManager.PlaySoundEffect("DROPBOMB");
+        return tempBom;
 
     }
 

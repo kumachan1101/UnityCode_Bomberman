@@ -1,6 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
-public class Field_CpuMode :MonoBehaviourPunCallbacks{
+public class Field_CpuMode :MonoBehaviour{
 
     private bool bFlag;
 

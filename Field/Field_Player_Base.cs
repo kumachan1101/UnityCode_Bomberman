@@ -8,6 +8,7 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
     protected string PlayerName;
 
     [SerializeField]private int m_playerCount; //やられたプレイヤー含む全プレイヤー数
+    [SerializeField]private int m_dummyplayerCount;
 
     public virtual int GetIndex(){
         return 0;
@@ -60,6 +61,8 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
 
         // コンポーネントがnullになった後に実行する処理
         SetupSlider_RPC(gCanvas, gPlayer, GetPlayerCnt());
+        //SetupSlider_RPC(gCanvas, gPlayer, Library_Base.GetPlayerCnt());
+        
     }
 /*
     protected IEnumerator DestroyComponentAndWait(Player_Base component, GameObject gCanvas, GameObject gPlayer)
@@ -101,7 +104,9 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
 		if(null == gCanvas || null == gPlayer){
 			return;
 		}
-		SetupSlider_RPC(gCanvas, gPlayer, iPlayerNo);
+		//SetupSlider_RPC(gCanvas, gPlayer, iPlayerNo);
+        SetupSlider_RPC(gCanvas, gPlayer, GetPlayerCnt());
+        
 	}
 
     protected virtual GameObject InstantiateCanvas(string canvasName){return null;}

@@ -99,9 +99,8 @@ public class Field_Player_Online : Field_Player_Base {
 			Debug.Log("GameObject Error");
 			return;
 		}
-		//Player_Base cPlayer = AddComponent(gPlayer);
-		//SetPlayerCnt(PhotonNetwork.PlayerList.Length);
-		OnlineSetupSliderCommon(gCanvas, gPlayer, iPlayerNo);
+		//OnlineSetupSliderCommon(gCanvas, gPlayer, iPlayerNo);
+		SetupSliderCommon(gCanvas, gPlayer, iPlayerNo);
 	}
 
 

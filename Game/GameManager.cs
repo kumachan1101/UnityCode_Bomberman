@@ -1,3 +1,132 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Photon.Pun;
+
+public class GameManager : MonoBehaviour
+{
+    private static GameManager instance = null;
+    private BaseScreenManager currentScreenManager;
+
+    [SerializeField] private int iStage;
+
+    public static int xmax;
+    public static int zmax;
+
+    [SerializeField] private int maxStage;
+
+
+    public static GameManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<GameManager>();
+                DontDestroyOnLoad(instance.gameObject);
+            }
+            return instance;
+        }
+    }
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    void Start()
+    {
+        // Resourceフォルダにあるステージ数を取得
+        maxStage = GetMaxStage();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        CancelInvoke("SwitchGameScene"); 
+        CancelInvoke("SwitchGameOver");
+
+        // すでに存在するScreenManagerを削除
+        if (currentScreenManager != null)
+        {
+            Destroy(currentScreenManager);
+        }
+
+        switch (scene.name)
+        {
+            case "GameScene":
+                currentScreenManager = gameObject.AddComponent<GameSceneScreenManager>();
+                break;
+            case "GameOnline":
+                currentScreenManager = gameObject.AddComponent<GameOnlineScreenManager>();
+                break;
+            case "GameTitle":
+                currentScreenManager = gameObject.AddComponent<GameTitleScreenManager>();
+                break;
+            default:
+                Debug.Log("未定義のシーンです: " + scene.name);
+                return;
+        }
+
+        currentScreenManager.InitializeScreen();
+    }
+
+    private int GetMaxStage()
+    {
+        return 100;
+    }
+
+    public void GameWin()
+    {
+        int stage = NextStage();
+        if (stage <= maxStage)
+        {
+            Invoke("SwitchGameScene", 5f);
+        }
+        else
+        {
+            GameOver();
+        }
+    }
+
+    public void GameOver()
+    {
+        iStage = 1;
+        Invoke("SwitchGameOver", 5f);
+    }
+
+    public void SwitchGameScene()
+    {
+        SceneManager.LoadScene("GameScene");
+    }
+
+    public void SwitchGameOver()
+    {
+        SceneManager.LoadScene("GameTitle");
+    }
+
+    public int NextStage()
+    {
+        iStage += 1;
+        return iStage;
+    }
+
+    public static void SetFieldRange(int x, int z)
+    {
+        xmax = x * 2;
+        zmax = z * 2;
+    }
+}
+
+
+/*
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,14 +139,14 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     //private static GameManager instance; // GameManagerのシングルトンインスタンス
 
-    [SerializeField] private static int iStage;
+    [SerializeField] private int iStage;
 
     public static int xmax;
     public static int zmax;
     private GameObject currentCanvas;
 
     private static GameManager instance = null;
-
+    [SerializeField] private int maxStage;
     private void Awake()
     {
         // シングルトンパターンで、既存のインスタンスがある場合は自分自身を破棄
@@ -39,7 +168,10 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-		HandleCanvasForScene(scene.name);
+        CancelInvoke("SwitchGameScene"); 
+        CancelInvoke("SwitchGameOver");
+
+        HandleCanvasForScene(scene.name); 
         switch (scene.name)
         {
             case "GameScene":
@@ -51,6 +183,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                 break;
         }
     }
+
 	public void DestroyAllPhotonViews()
 	{
 		foreach (PhotonView view in FindObjectsOfType<PhotonView>())
@@ -67,7 +200,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         //Debug.Log(prefabName);
         
         if("GameScene" == scenename){
-            string prefabName = "Field" + iStage;
+            //string prefabName = "Field" + iStage;
+            string prefabName = "Field100";
             GameObject gField = default;
             GameObject prefab = (GameObject)Resources.Load(prefabName);
             gField = Instantiate(prefab);
@@ -119,6 +253,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     void Start()
     {
+        // Resourceフォルダにあるステージ数を取得
+        maxStage = GetMaxStage();
     }
 
     // Update is called once per frame
@@ -132,14 +268,33 @@ public class GameManager : MonoBehaviourPunCallbacks
         return iStage;
     }
 
-    static public int NextStage(){
+    public int NextStage(){
         iStage += 1;
         return iStage;
     }
 
+    // ステージ数をResourceフォルダ内から取得
+    private int GetMaxStage()
+    {
+/*
+        int stageCount = 0;
+        
+        // "Field" で始まるプレハブを探し、ステージ数をカウントする
+        while (Resources.Load<GameObject>("Field" + (stageCount + 1)) != null)
+        {
+            stageCount++;
+        }
+
+        return stageCount;
+*/
+/*
+        return 100;
+    }
+
     public void GameWin(){
-        int iStage = GameManager.NextStage();
-        if(iStage < 5){
+        int iStage = NextStage();
+        //if(iStage < 5){
+        if (iStage <= maxStage){
             Invoke("SwitchGameScene", 5f);
         }
         else{
@@ -168,4 +323,4 @@ public class GameManager : MonoBehaviourPunCallbacks
 	}
 
 }
-
+*/

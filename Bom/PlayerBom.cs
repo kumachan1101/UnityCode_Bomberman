@@ -2,14 +2,14 @@ using UnityEngine;
 
 public class PlayerBom
 {
-    private BomConfiguration bomConfiguration;
+    private BomConfigurationBase bomConfiguration;
     private BomStatus bomStatus;
     private BomManagement bomManagement;
 
     public PlayerBom()
     {
-        bomConfiguration = new BomConfiguration();
-        bomStatus = new BomStatus();
+        bomConfiguration = new DefaultBomConfiguration();
+        bomStatus = new BomStatus_BomDefault();
         bomManagement = new BomManagement();
     }
 
@@ -23,10 +23,6 @@ public class PlayerBom
         bomConfiguration.SetMaterialType(materialType);
     }
 
-    public void IncreaseExplosion()
-    {
-        bomConfiguration.IncreaseExplosion();
-    }
 
     public void IncreaseBom()
     {
@@ -83,14 +79,6 @@ public class PlayerBom
         return bomConfiguration.GetBomKind();
     }
 
-    public void SetBomKind(BOM_KIND bomKind)
-    {
-        bomConfiguration.SetBomKind(bomKind);
-    }
-
-	public BomConfiguration GetBomConfiguration(){
-		return bomConfiguration;
-	}
 
 	public BomStatus GetBomStatus(){
 		return bomStatus;
@@ -99,4 +87,115 @@ public class PlayerBom
 	public BomManagement GetBomManagement(){
 		return bomManagement;
 	}
+
+    public BomStatus CreateBomStatus(BomStatusType statusType)
+    {
+        BomStatus cBomStatus = null;
+        switch (statusType)
+        {
+            case BomStatusType.BomAttack:
+                cBomStatus = new BomStatus_BomAttack();
+                break;
+
+            case BomStatusType.BomKick:
+                cBomStatus = new BomStatus_BomKick();
+                break;
+
+            case BomStatusType.BomUp:
+                cBomStatus = new BomStatus_BomUp();
+                break;
+                
+            case BomStatusType.BomStatusInvalid:
+                cBomStatus = new BomStatus_BomDefault();
+                break;
+        }
+
+        return cBomStatus;
+        
+    }
+
+    public BomConfigurationBase CreateBomConfiguration(BomConfigurationType configType)
+    {
+        BomConfigurationBase bomConfiguration;
+        switch (configType)
+        {
+            case BomConfigurationType.ExplodeBom:
+                bomConfiguration = new ExplodeBomConfiguration();
+                break;
+
+            case BomConfigurationType.BigBanBom:
+                bomConfiguration = new BigBanBomConfiguration();
+                break;
+
+            case BomConfigurationType.FireUp:
+                bomConfiguration = new FireUpConfiguration();
+                break;
+
+            default:
+                bomConfiguration = new DefaultBomConfiguration(); // デフォルト設定
+                break;
+        }
+
+        return bomConfiguration;
+        
+    }
+
+/*
+    public BomConfigurationBase GetBomConfiguration(BomConfigurationType configType)
+    {
+        // BomConfigurationType に基づいて派生クラスを生成
+        switch (configType)
+        {
+            case BomConfigurationType.ExplodeBom:
+                bomConfiguration = new ExplodeBomConfiguration(bomConfiguration);
+                break;
+
+            case BomConfigurationType.BigBanBom:
+                bomConfiguration = new BigBanBomConfiguration(bomConfiguration);
+                break;
+
+            case BomConfigurationType.FireUp:
+                bomConfiguration = new FireUpConfiguration(bomConfiguration);
+                break;
+
+            default:
+                bomConfiguration = new DefaultBomConfiguration(); // デフォルト設定
+                break;
+        }
+
+        return bomConfiguration;
+    }
+*/
+
+
+    public BomConfigurationBase GetBomConfiguration()
+    {
+        return bomConfiguration;
+    }
+
+/*
+    public void SetBomKind(BOM_KIND bomKind)
+    {
+        bomConfiguration.SetBomKind(bomKind);
+    }
+    public void IncreaseExplosion()
+    {
+        bomConfiguration.IncreaseExplosion();
+    }
+*/
+    public BomParameters CreateBomParameters(Vector3 position, Vector3 direction)
+    {
+        return new BomParameters
+        {
+            position = position,
+            bomKind = GetBomKind(),
+            viewID = 0,  // 必要に応じて設定
+            explosionNum = GetExplosionNum(),
+            bomKick = CanKick(),
+            materialType = GetMaterialType(),
+            bomAttack = CanAttack(),
+            direction = direction
+        };
+    }
+
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 
-public class Explosion_Base : MonoBehaviourPunCallbacks
+public class Explosion_Base : MonoBehaviour
 {
     protected Field_Block_Base cField;
     protected bool bField = false;

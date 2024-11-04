@@ -1,5 +1,5 @@
 using UnityEngine;
-public class Item:MonoBehaviour{
+public abstract class Item : MonoBehaviour {
     private SoundManager soundManager;
 
     void Awake(){
@@ -8,8 +8,7 @@ public class Item:MonoBehaviour{
     void Start(){
     }
 
-    public virtual void Reflection(string objname){}
-
+    public abstract void Reflection(string objname);
 
     private void OnTriggerEnter(Collider col){
         if(col.transform.name.StartsWith("Player")){

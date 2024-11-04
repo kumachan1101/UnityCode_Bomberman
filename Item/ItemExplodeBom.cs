@@ -1,9 +1,7 @@
 
-public class ItemExplodeBom : Item{
-    public override void Reflection(string objname){
-        BomConfiguration cBomConfiguration = Library_Base.GetBomConfigurationFromObject(objname);
-        if(null != cBomConfiguration){
-            cBomConfiguration.SetBomKind(BOM_KIND.BOM_KIND_EXPLODE);
-        }
+public class ItemExplodeBom : ItemPlayerBom{
+    protected override BomConfigurationType GetBomConfigurationType()
+    {
+        return BomConfigurationType.ExplodeBom;
     }
 }
