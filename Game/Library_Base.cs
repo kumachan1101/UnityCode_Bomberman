@@ -217,7 +217,7 @@ public class Library_Base : MonoBehaviour{
         }
         return cPlayerBom;
     }
-
+/*
     public static BomConfigurationBase GetBomConfigurationFromObject(string objname, BomConfigurationType configType)
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
@@ -240,7 +240,6 @@ public class Library_Base : MonoBehaviour{
     }
 
 
-
     public static BomStatus GetBomStatusFromObject(string objname)
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
@@ -257,7 +256,6 @@ public class Library_Base : MonoBehaviour{
 
         return cBomStatus;
     }
-
     public static BomManagement GetBomManagementFromObject(string objname)
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
@@ -274,6 +272,7 @@ public class Library_Base : MonoBehaviour{
 
         return cBomManagement;
     }
+*/
 
     public static PlayerAction GetcPlayerActionFromObject(string objname)
     {

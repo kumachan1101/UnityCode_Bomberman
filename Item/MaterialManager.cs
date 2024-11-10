@@ -94,6 +94,23 @@ public class MaterialManager : MonoBehaviour
         }
     }
 
+    public ReqType GetReqtypeOfMaterial(string type)
+    {
+        switch (type)
+        {
+            case MaterialTypes.BomMaterial1:
+                return ReqType.MaterialBom1;
+            case MaterialTypes.BomMaterial2:
+                return ReqType.MaterialBom2;
+            case MaterialTypes.BomMaterial3:
+                return ReqType.MaterialBom3;
+            case MaterialTypes.BomMaterial4:
+                return ReqType.MaterialBom4;
+            default:
+                Debug.LogError("Invalid material type: " + type);
+                return ReqType.MaterialBom1;
+        }
+    }
 
     public string GetBomMaterialByPlayerName(string playerName)
     {

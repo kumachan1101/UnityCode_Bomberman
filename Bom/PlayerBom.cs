@@ -1,201 +1,95 @@
 using UnityEngine;
+public enum ReqType
+{
+    ExplodeBom,
+    BigBanBom,
+    FireUp,
+    BomKick,
+    BomAttack,
+    BomUp,
+    MaterialBom1,
+    MaterialBom2,
+    MaterialBom3,
+    MaterialBom4
+}
+
+public enum GetKind
+{
+    BomKind,
+    FireNum,
+    BomKick,
+    BomAttack,
+    BomNum,
+    MaterialType
+}
+
+
 
 public class PlayerBom
 {
-    private BomConfigurationBase bomConfiguration;
-    private BomStatus bomStatus;
-    private BomManagement bomManagement;
+    private BomConfigurationManager cBomConfigManager;
+    private BomListManager cBomListManager;
 
     public PlayerBom()
     {
-        bomConfiguration = new DefaultBomConfiguration();
-        bomStatus = new BomStatus_BomDefault();
-        bomManagement = new BomManagement();
+        cBomConfigManager = new BomConfigurationManager();
+        cBomListManager = new BomListManager();
     }
 
-    public string GetMaterialType()
+    public void Request(ReqType reqtype)
     {
-        return bomConfiguration.GetMaterialType();
+        switch (reqtype)
+        {
+            case ReqType.ExplodeBom:
+            case ReqType.BigBanBom:
+            case ReqType.MaterialBom1:
+            case ReqType.MaterialBom2:
+            case ReqType.MaterialBom3:
+            case ReqType.MaterialBom4:
+                cBomConfigManager.Set(reqtype);
+                break;
+
+            case ReqType.FireUp:
+            case ReqType.BomKick:
+            case ReqType.BomAttack:
+            case ReqType.BomUp:
+                cBomConfigManager.Request(reqtype);
+                break;
+
+            default:
+                break;
+        }
     }
 
-    public void SetMaterialType(string materialType)
+    public T Get<T>(GetKind kind)
     {
-        bomConfiguration.SetMaterialType(materialType);
+        return (T)cBomConfigManager.Get(kind);
     }
 
-
-    public void IncreaseBom()
+    public void Add(GameObject bom)
     {
-        bomStatus.IncreaseBom();
-    }
-
-    public void EnableKick()
-    {
-        bomStatus.EnableKick();
-    }
-
-    public void EnableAttack()
-    {
-        bomStatus.EnableAttack();
-    }
-
-    public void EnableBreakthrough()
-    {
-        bomStatus.EnableBreakthrough();
-    }
-
-    public int GetExplosionNum()
-    {
-        return bomConfiguration.GetExplosionNum();
-    }
-
-    public bool CanKick()
-    {
-        return bomStatus.CanKick();
-    }
-
-    public bool CanAttack()
-    {
-        return bomStatus.CanAttack();
-    }
-
-    public bool CanBreakthrough()
-    {
-        return bomStatus.CanBreakthrough();
-    }
-
-    public void AddBom(GameObject bom)
-    {
-        bomManagement.AddBom(bom);
+        cBomListManager.Add(bom);
     }
 
     public bool IsBomAvailable(Vector3 position)
     {
-        return bomManagement.IsBomAvailable(position, bomStatus.GetBomNum());
+        int iBomNum = (int)cBomConfigManager.Get(GetKind.BomNum);
+        return cBomListManager.IsBomAvailable(position, iBomNum);
     }
 
-    public BOM_KIND GetBomKind()
-    {
-        return bomConfiguration.GetBomKind();
-    }
-
-
-	public BomStatus GetBomStatus(){
-		return bomStatus;
-	}
-
-	public BomManagement GetBomManagement(){
-		return bomManagement;
-	}
-
-    public BomStatus CreateBomStatus(BomStatusType statusType)
-    {
-        BomStatus cBomStatus = null;
-        switch (statusType)
-        {
-            case BomStatusType.BomAttack:
-                cBomStatus = new BomStatus_BomAttack();
-                break;
-
-            case BomStatusType.BomKick:
-                cBomStatus = new BomStatus_BomKick();
-                break;
-
-            case BomStatusType.BomUp:
-                cBomStatus = new BomStatus_BomUp();
-                break;
-                
-            case BomStatusType.BomStatusInvalid:
-                cBomStatus = new BomStatus_BomDefault();
-                break;
-        }
-
-        return cBomStatus;
-        
-    }
-
-    public BomConfigurationBase CreateBomConfiguration(BomConfigurationType configType)
-    {
-        BomConfigurationBase bomConfiguration;
-        switch (configType)
-        {
-            case BomConfigurationType.ExplodeBom:
-                bomConfiguration = new ExplodeBomConfiguration();
-                break;
-
-            case BomConfigurationType.BigBanBom:
-                bomConfiguration = new BigBanBomConfiguration();
-                break;
-
-            case BomConfigurationType.FireUp:
-                bomConfiguration = new FireUpConfiguration();
-                break;
-
-            default:
-                bomConfiguration = new DefaultBomConfiguration(); // デフォルト設定
-                break;
-        }
-
-        return bomConfiguration;
-        
-    }
-
-/*
-    public BomConfigurationBase GetBomConfiguration(BomConfigurationType configType)
-    {
-        // BomConfigurationType に基づいて派生クラスを生成
-        switch (configType)
-        {
-            case BomConfigurationType.ExplodeBom:
-                bomConfiguration = new ExplodeBomConfiguration(bomConfiguration);
-                break;
-
-            case BomConfigurationType.BigBanBom:
-                bomConfiguration = new BigBanBomConfiguration(bomConfiguration);
-                break;
-
-            case BomConfigurationType.FireUp:
-                bomConfiguration = new FireUpConfiguration(bomConfiguration);
-                break;
-
-            default:
-                bomConfiguration = new DefaultBomConfiguration(); // デフォルト設定
-                break;
-        }
-
-        return bomConfiguration;
-    }
-*/
-
-
-    public BomConfigurationBase GetBomConfiguration()
-    {
-        return bomConfiguration;
-    }
-
-/*
-    public void SetBomKind(BOM_KIND bomKind)
-    {
-        bomConfiguration.SetBomKind(bomKind);
-    }
-    public void IncreaseExplosion()
-    {
-        bomConfiguration.IncreaseExplosion();
-    }
-*/
     public BomParameters CreateBomParameters(Vector3 position, Vector3 direction)
     {
-        return new BomParameters
+        BomParameters cBomParameters = new BomParameters
         {
             position = position,
-            bomKind = GetBomKind(),
+            bomKind = Get<BOM_KIND>(GetKind.BomKind),
             viewID = 0,  // 必要に応じて設定
-            explosionNum = GetExplosionNum(),
-            bomKick = CanKick(),
-            materialType = GetMaterialType(),
-            bomAttack = CanAttack(),
+            explosionNum = Get<int>(GetKind.FireNum),
+            bomKick = Get<bool>(GetKind.BomKick),
+            materialType = Get<string>(GetKind.MaterialType),
+            bomAttack = Get<bool>(GetKind.BomAttack),
             direction = direction
         };
+        return cBomParameters;
     }
-
 }
