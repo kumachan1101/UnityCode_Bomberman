@@ -10,6 +10,20 @@ public class BomListManager
         bomList.Add(bom);
     }
 
+    // リストから指定されたGameObjectを削除
+    public void Remove(GameObject bom)
+    {
+        if (bomList.Contains(bom))
+        {
+            bomList.Remove(bom);
+            Debug.Log($"GameObject {bom.name} をリストから削除しました。");
+        }
+        else
+        {
+            Debug.LogWarning($"GameObject {bom.name} はリストに存在しません。");
+        }
+    }
+
     public bool IsBomAvailable(Vector3 position, int maxBomNum)
     {
         if (maxBomNum <= GetCurrentBomNum())
@@ -33,12 +47,20 @@ public class BomListManager
         {
             if (bom != null)
             {
+                // bDelがtrueの場合、カウントをスキップ
+                var bomComponent = bom.GetComponent<Bom_Base>(); // BomComponentはカスタムコンポーネント
+                if (bomComponent != null && bomComponent.bDel)
+                {
+                    continue;
+                }
+
                 count++;
             }
         }
 
         return count;
     }
+
 
     private bool IsBomAtPosition(Vector3 position)
     {

@@ -29,7 +29,7 @@ public class Field_Player_Stage1 : Field_Player_CpuMode {
         playerName = "Player" + iPlayerNo;
     }
 
-    protected override void SetPower(Slider cSlider){
+    public override void SetPower(Slider cSlider){
         cSlider.maxValue = 10;
 		cSlider.value = 10;
     }

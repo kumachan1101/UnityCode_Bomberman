@@ -21,19 +21,6 @@ public class Field_CpuMode :MonoBehaviour{
 	{
 		bFlag = false;
 		cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-/*
-		GetComponent<Field_Block_Base>().CreateField();
-
-		Field_Player_Base fieldPlayerBase = GetComponent<Field_Player_Base>();
-		int playercnt = fieldPlayerBase.GetArrayLength(fieldPlayerBase.GetIndex());
-        for (int i = 1; i <= playercnt; i++)
-        {
-			fieldPlayerBase.SpawnPlayerObjects(i);
-			fieldPlayerBase.SetPlayerCnt(i); 
-		}
-		//ローカルプレイでは、操作するプレイヤーの名前を設定して、この設定した名前で検索してオブジェクトを特定
-		fieldPlayerBase.SetName("Player1(Clone)");
-*/
 	}
 
     protected void GameTransision()
@@ -45,15 +32,11 @@ public class Field_CpuMode :MonoBehaviour{
             return; 
         }
 
-        if(null == cGameManager){
-            cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        }
-
         // "Player1(Clone)" または "PlayerDummy1" の存在を確認します
         GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
         foreach (GameObject obj in allObjects)
         {
-            if (obj.name == "Player1(Clone)")
+            if (obj.name == "Player1")
             {
                 hasPlayer1 = true;
             }
@@ -72,9 +55,9 @@ public class Field_CpuMode :MonoBehaviour{
         if (hasPlayer1 || hasPlayerDummy1)
         {
             // "Player2(Clone)", "Player3(Clone)", "Player4(Clone)", "PlayerDummy2", "PlayerDummy3", "PlayerDummy4" が存在しないかどうかを確認します
-            if (GameObject.Find("Player2(Clone)") == null &&
-                GameObject.Find("Player3(Clone)") == null &&
-                GameObject.Find("Player4(Clone)") == null &&
+            if (GameObject.Find("Player2") == null &&
+                GameObject.Find("Player3") == null &&
+                GameObject.Find("Player4") == null &&
                 GameObject.Find("PlayerDummy2") == null &&
                 GameObject.Find("PlayerDummy3") == null &&
                 GameObject.Find("PlayerDummy4") == null)

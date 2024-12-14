@@ -1,32 +1,7 @@
-﻿using UnityEngine;
-public class Player : Player_Base
+﻿public class Player : Player_Base
 {
-    public override void UpdateKey(){
-        if (Input.GetKey(KeyCode.Return)) {
-             if (pushFlag == false){
-                pushFlag = true;
-                DropBom();
-                //AttackExplosion();
-             }
-        }
-        else{
-            pushFlag = false;
-        }
+    public override void AddPlayerComponent(){
+        this.gameObject.AddComponent<PlayerAction>();
     }
-
-    protected override bool IsAvairable(){
-        if(iViewID == -1){
-            return false;
-        }
-        return true;
-    }
-
-
-    protected override void CreatePlayerAction(){
-        cPlayerAction = new PlayerAction(ref rigidBody, ref myTransform);
-    }
-	protected override void DestroySync(GameObject g){
-		Destroy(g);
-	}
 
 }

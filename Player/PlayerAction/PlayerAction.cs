@@ -1,96 +1,120 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections.Generic;
+using System;
+using Unity.Collections.LowLevel.Unsafe;
+
 [System.Serializable]
-public class PlayerAction
+public class PlayerAction : MonoBehaviour
 {
-    [SerializeField]protected PlayerMovement playerMovement;
+    [SerializeField] protected PlayerMovement playerMovement;
     private PlayerInput playerInput;
-    protected PlayerMaterial playerMaterial;
 
-    protected Transform myTransform;
-    protected Field_Block_Base cField;
-    protected Field_Player_Base cField_Player;
-    protected Vector3 LastV3;
-    protected bool canMove = true;
-    protected Library_Base cLibrary;
+    private PlayerBomToBomControl cPlayerBomToBomControl;
 
-    public PlayerAction(ref Rigidbody rb, ref Transform tf)
+    // 入力と方向の紐付けを行うDictionaryを用意
+    private Dictionary<InputAction, Vector3> movementBindings;
+    private Dictionary<InputAction, Action> actionBindings;
+
+    public void Start()
     {
-        cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
-        cField_Player = GameObject.Find("Field").GetComponent<Field_Player_Base>();
-        myTransform = tf;
+        InitCommon();
+        InitDiff();
+    }
 
-        playerMovement = new PlayerMovement(rb, tf);
+    private void InitCommon()
+    {
+        InitializeBindings();
+        playerMovement = this.gameObject.AddComponent<PlayerMovement>();
         playerInput = new PlayerInput();
-        playerMaterial = new PlayerMaterial();
-
-        LastV3 = myTransform.position;
+        cPlayerBomToBomControl = this.gameObject.AddComponent<PlayerBomToBomControl>();
     }
 
+    protected virtual void InitDiff() { }
 
-    virtual public void MoveUp()
+    protected virtual void InitializeBindings()
     {
-        PerformPlayerAction(Vector3.forward);
-    }
-
-    virtual public void MoveDown()
-    {
-        PerformPlayerAction(Vector3.back);
-    }
-
-    virtual public void MoveRight()
-    {
-        PerformPlayerAction(Vector3.right);
-    }
-
-    virtual public void MoveLeft()
-    {
-        PerformPlayerAction(Vector3.left);
-    }
-	protected virtual void CanMove(){
-	}
-	
-
-     protected virtual void UpdatePlayerMovement()
-    {
-        if (playerInput.pushBtnUp)
+        movementBindings = new Dictionary<InputAction, Vector3>
         {
-			MoveUp();
-        }
-        else if (playerInput.pushBtnDown)
+            { InputAction.Up, Vector3.forward },
+            { InputAction.Down, Vector3.back },
+            { InputAction.Left, Vector3.left },
+            { InputAction.Right, Vector3.right }
+        };
+
+        actionBindings = new Dictionary<InputAction, Action>
         {
-            MoveDown();
-        }
-        else if (playerInput.pushBtnLeft)
-        {
-            MoveLeft();
-        }
-        else if (playerInput.pushBtnRight)
-        {
-            MoveRight();
-        }
-		else{
-			MoveClear();
-		}
+            { InputAction.Enter, DropBom }
+        };
     }
-    public void SetMaterialType(string sParamMaterialType)
+
+    void Update()
     {
-		if(sParamMaterialType == null){
-			Debug.Log("MaterialType is null");
-			return;
-		}
-        playerMaterial.SetMaterialType(sParamMaterialType);
+        UpdatePlayer();
     }
-    public void UpdateMovement()
+
+    protected virtual bool IsAvailable()
     {
+        return true;
+    }
+
+    protected void UpdatePlayer()
+    {
+        if (!IsAvailable())
+        {
+            return;
+        }
+
         playerInput.UpdateInput();
         UpdatePlayerMovement();
-		CanMove();
+        UpdatePlayerActions();
+    }
+
+    protected virtual void UpdatePlayerMovement()
+    {
+        // ジョイスティックの移動ベクトルを取得し動作に反映
+        Vector3 joystickMove = playerInput.GetJoystickVector();
+        if (joystickMove != Vector3.zero)
+        {
+            PerformPlayerAction(joystickMove);
+            return;
+        }
+
+        // キー入力の方向を処理
+        foreach (var binding in movementBindings)
+        {
+            if (playerInput.IsInputActive(binding.Key))
+            {
+                PerformPlayerAction(binding.Value);
+                return;
+            }
+        }
+
+        // どの方向にも動かない場合の処理
+        MoveClear();
+    }
+
+    protected virtual void UpdatePlayerActions()
+    {
+        foreach (var binding in actionBindings)
+        {
+            if (playerInput.IsInputActive(binding.Key))
+            {
+                binding.Value.Invoke();
+            }
+        }
+    }
+
+    public virtual void UpdateKey() { }
+
+    public void DropBom()
+    {
+        Vector3 position = Library_Base.GetPos(transform.position);
+        Vector3 direction = transform.forward;
+        cPlayerBomToBomControl.RequestDropBom(position, direction);
     }
 
     public void MoveClear()
     {
-        playerInput.ClearInput();
         playerMovement.MoveClear();
     }
 
@@ -100,26 +124,11 @@ public class PlayerAction
         playerMovement.Move(moveDirection);
     }
 
-    public void Move(Vector3 moveDirection){
-        playerMovement.Move(moveDirection);
-    }
     public void SpeedUp()
     {
-		playerMovement.SpeedUp();
+        if(null == playerMovement){
+            return;
+        }
+        playerMovement.SpeedUp();
     }
-
-    private GameObject GetPlayerGameObject()
-    {
-        string name = cField_Player.GetName();
-        GameObject gPlayer = GameObject.Find(name);
-        return gPlayer;
-    }
-
-    protected Player_Base GetPlayerComponent(GameObject gPlayer)
-    {
-        Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
-        return cPlayer;
-    }
-
-
 }

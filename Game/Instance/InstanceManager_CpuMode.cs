@@ -2,25 +2,17 @@ using UnityEngine;
 
 public class InstanceManager_CpuMode : InstanceManager_Base
 {
-/*
-    public override GameObject InstantiateInstance(Vector3 position)
-    {
-        if (prefab == null)
-        {
-            Debug.LogError("Prefab is not set.");
-            return null;
-        }
-        GameObject instance = Instantiate(prefab, position, Quaternion.identity);
-        return instance;
+    public override void InstantiateInstancePool(Vector3 position)
+	{
+        InstantiateInstancePool_Base(position);
     }
 
-    public override void DestroyInstance(GameObject instance)
+    public override void DestroyInstancePool(GameObject instance)
     {
-        if (instance != null)
-        {
-            Destroy(instance);
-        }
+        gTemp = instance;
+        DestroyInstancePool_Base();
     }
-*/
+
+
 
 }

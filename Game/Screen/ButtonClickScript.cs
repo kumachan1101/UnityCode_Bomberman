@@ -1,26 +1,28 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using Photon.Pun;
 
+using Photon.Pun;
+using UnityEngine.UI;
 public class ButtonClickScript : MonoBehaviour
 {
+	void Awake(){
+        Button button = transform.Find("ReturnTitle").GetComponent<Button>();
 
-    public void LoadGameScene()
+        if (button != null)
+        {
+            // 動的に関数を追加
+            button.onClick.AddListener(() => LoadGameScene());
+        }
+        else
+        {
+            Debug.LogError("Button not found on GameEndCanvas");
+        }
+	}
+
+
+
+    virtual public void LoadGameScene()
     {
-		DestroyAllPhotonViews();
-        PhotonNetwork.Disconnect();
-        PhotonNetwork.LoadLevel("GameTitle");
     }
 
-	public void DestroyAllPhotonViews()
-	{
-		foreach (PhotonView view in FindObjectsOfType<PhotonView>())
-		{
-			if (view.IsMine)
-			{
-				PhotonNetwork.Destroy(view.gameObject);
-			}
-		}
-	}
 
 }

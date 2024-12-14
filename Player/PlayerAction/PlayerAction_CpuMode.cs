@@ -1,101 +1,92 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class PlayerAction_CpuMode : PlayerAction
 {
 	private float timer; 
-
 	private int randomDirection;
 	private float changeDirectionInterval = 3f; // 向きを変える間隔
+	private Dictionary<int, Vector3> randomMovementBindings;
+    private Field_Block_Base cField;
+    protected Material cMaterial;
+    private float bombCooldown = 3f; // 爆弾を置くクールダウン時間
+    private float bombTimer = 0f; // 次に爆弾を置けるまでの時間
+	protected override void InitDiff() {
+        cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+        MaterialManager materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+		string MaterialType = materialManager.GetBomMaterialByPlayerName(this.gameObject.name);
+        cMaterial = materialManager.GetMaterialOfType(MaterialType);
 
-	public PlayerAction_CpuMode(ref Rigidbody rb, ref Transform tf) : base(ref rb, ref tf) {
-		// サブクラス固有の初期化処理
+	}
+
+    protected override void InitializeBindings()
+    {
+        // ランダム方向の動作を設定
+        randomMovementBindings = new Dictionary<int, Vector3>
+        {
+            { 0, Vector3.forward }, // Up
+            { 1, Vector3.back },    // Down
+            { 2, Vector3.left },    // Left
+            { 3, Vector3.right }    // Right
+        };
+    }
+
+
+	protected override void UpdatePlayerMovement()
+	{
+        // タイマーを減少させ、ランダムな方向を選択
+        timer -= Time.deltaTime;
+        if (timer <= 0f)
+        {
+            timer = changeDirectionInterval;
+            randomDirection = Random.Range(0, randomMovementBindings.Count);
+        }
+
+        // ランダム方向に基づいて動作
+        if (randomMovementBindings.TryGetValue(randomDirection, out var direction))
+        {
+            if(CanMove(direction)){
+                PerformPlayerAction(direction);
+            }
+        }
+        
 	}
 
 
-	protected override void CanMove()
-	{
-		if (cLibrary == null)
-		{
-			cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
-		}
+    protected override void UpdatePlayerActions()
+    {
+        bombTimer -= Time.deltaTime; // タイマーを進める
 
-		Vector3 currentPos = Library_Base.GetPos(myTransform.position);
-		Vector3 forwardDirection = myTransform.forward; // 進行方向を取得
+        // タイマーが0以下になったら爆弾を置ける
+        if (bombTimer <= 0f)
+        {
+            DropBom(); // 爆弾を設置
+            ResetBombTimer(); // タイマーをリセット
+        }
+    }
+
+    // 爆弾を置くタイミングをランダムにする
+    private void ResetBombTimer()
+    {
+        // 次に爆弾を置けるまでの時間をランダムに設定（例：1秒〜5秒）
+        bombTimer = Random.Range(1f, bombCooldown);
+    }
+
+	private bool CanMove(Vector3 forwardDirection)
+	{
+		Vector3 currentPos = Library_Base.GetPos(playerMovement.GetCurrentPos());
 		Vector3 nextPos = currentPos + forwardDirection; // 進もうとしている位置
 
 		// 現在位置の地面に爆風があるかどうかではなく、進行先の地面に爆風があるかをチェック
 		Vector3 nextGroundPos = new Vector3(nextPos.x, nextPos.y - 1, nextPos.z);
-		canMove = cField.IsMatch(nextGroundPos, playerMaterial.GetMaterial());
+        bool canMove = cField.IsMatch(nextGroundPos, cMaterial);
 
 		// 範囲外に出ようとしていないか確認
 		if (Library_Base.IsPositionOutOfBounds(nextPos))
 		{
 			canMove = false;
 		}
-
-		// 移動可能なら進む、移動不可なら元の位置に戻す
-		if (canMove)
-		{
-			LastV3 = myTransform.position;
-		}
-		else
-		{
-			myTransform.position = LastV3; // 元の位置に戻す
-		}
+        return canMove;
 	}
-
-	protected override void UpdatePlayerMovement()
-	{
-		timer -= Time.deltaTime;
-		if (timer <= 0f){
-			timer = changeDirectionInterval;
-			randomDirection = UnityEngine.Random.Range(0, 4); // 0: Up, 1: Down, 2: Left, 3: Right
-		}
-
-		switch (randomDirection)
-		{
-			case 0:
-				MoveUp();
-				break;
-			case 1:
-				MoveDown();
-				break;
-			case 2:
-				MoveLeft();
-				break;
-			case 3:
-				MoveRight();
-				break;
-			default:
-				break;
-		}
-
-	}
-
-
-	public override void MoveUp()
-	{
-		//playerMovement.Move(Vector3.forward, 0); // 上方向への移動と回転角度0度を指定
-		playerMovement.Move(Vector3.forward); // 上方向への移動と回転角度0度を指定
-	}
-
-	public override void MoveDown()
-	{
-		//playerMovement.Move(-Vector3.forward, 180); // 下方向への移動と回転角度180度を指定
-		playerMovement.Move(-Vector3.forward); // 下方向への移動と回転角度180度を指定
-	}
-
-	public override void MoveLeft()
-	{
-		//playerMovement.Move(-Vector3.right, 270); // 左方向への移動と回転角度270度を指定
-		playerMovement.Move(-Vector3.right); // 左方向への移動と回転角度270度を指定
-	}
-
-	public override void MoveRight()
-	{
-		//playerMovement.Move(Vector3.right, 90); // 右方向への移動と回転角度90度を指定
-		playerMovement.Move(Vector3.right); // 右方向への移動と回転角度90度を指定
-	}
-
 }
 

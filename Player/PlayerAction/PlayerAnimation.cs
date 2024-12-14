@@ -1,12 +1,11 @@
 using UnityEngine;
 
-public class PlayerAnimation
+public class PlayerAnimation:MonoBehaviour
 {
     private Animator animator;
-
-    public PlayerAnimation(Transform myTransform)
+    public void Awake()
     {
-		  animator = myTransform.GetComponent<Animator>();
+      animator = this.gameObject.GetComponent<Animator>();
     }
 
     public void SetWalking(bool isWalking)

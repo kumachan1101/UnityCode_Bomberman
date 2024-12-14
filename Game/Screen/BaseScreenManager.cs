@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-
 public abstract class BaseScreenManager:MonoBehaviour
 {
     protected GameObject currentCanvas;
@@ -24,6 +23,5 @@ public abstract class BaseScreenManager:MonoBehaviour
             Transform downTransform = currentCanvas.transform.Find("down");
             cameraController.downButton = downTransform.GetComponent<Button>();
         }
-        GameObject gGameEndCanvas = Instantiate(Resources.Load("GameEndCanvas") as GameObject);
     }
 }

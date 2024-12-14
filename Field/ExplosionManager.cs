@@ -1,23 +1,44 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using System.Collections;
-
+using Unity.VisualScripting;
 public class ExplosionManager : MonoBehaviour
 {
     public List<GameObject> ExplosionList = new List<GameObject>();
+    public List<GameObject> ExplosionList_temp = new List<GameObject>();
+
+    public GameObject gtemp;
+
+    public List<GameObject> ExplosionIDList = new List<GameObject>();
 
     private ObjectPooler_Base objectPooler;
     private Library_Base cLibrary;
     private object lockObject = new object();
-
+    MaterialManager cMaterialManager;
     public void Initialize(ObjectPooler_Base pooler, Library_Base library)
     {
         objectPooler = pooler;
         cLibrary = library;
+        cMaterialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();        
     }
 
-
+    public GameObject GetGameObject(int iID)
+    {
+        // リストをループしてIDをチェック
+        foreach (GameObject explosion in ExplosionIDList)
+        {
+            if (explosion != null)
+            {
+                Explosion_Base explosionBase = explosion.GetComponent<Explosion_Base>();
+                if (explosionBase != null && explosionBase.GetID() == iID)
+                {
+                    return explosion; // 一致するGameObjectを返す
+                }
+            }
+        }
+        Debug.Log("id:" + iID);
+        return null; // 一致するIDが見つからなかった場合
+    }
     public void AddPool(string tag, int size)
     {
         GameObject prefab = Resources.Load<GameObject>(tag);
@@ -38,7 +59,10 @@ public class ExplosionManager : MonoBehaviour
                 if (obj != null && obj.transform.position == gObj.transform.position)
                 {
                     Renderer renderer = obj.GetComponent<Renderer>();
-                    if (renderer.material.name == cMaterial.name)
+                    string rendererMaterialName = renderer.material.name.Replace("(Instance)", "");
+                    string newMaterialName = cMaterial.name.Replace("(Instance)", "");
+
+                    if (rendererMaterialName == newMaterialName)
                     {
                         EnqueueObject(gObj); // Assuming Field_Block_Base is also a singleton
                         return;
@@ -60,31 +84,35 @@ public class ExplosionManager : MonoBehaviour
             ExplosionList.Add(gObj);
         }
     }
-
-    public void DelExplosion(Vector3 v3)
+    public void UpdateGroundExplosion(string objName, Vector3 position)
     {
         GameObject delobj = null;
+        GameObject gtemp = DequeueObject(objName.Replace("(Clone)",""));
+        gtemp.transform.position = position;
         foreach (GameObject obj in ExplosionList)
         {
-            if (obj != null && obj.transform.position == v3)
-            {
-                delobj = obj;
-                break;
+            if (obj != null && obj.transform.position == position){
+                if(obj.name != objName)
+                {
+                    delobj = obj; // 後で削除
+                    EnqueueObject(obj);      // オブジェクトをキューに戻す
+                    break;
+                }
+                else
+                {
+                    EnqueueObject(gtemp); // マテリアルが一致する場合は再利用
+                    return;
+                }
             }
         }
-        if (delobj != null)
-        {
+        if(null != delobj){
             ExplosionList.Remove(delobj);
-            Destroy(delobj);
         }
+        ExplosionList.Add(gtemp); // 新しいオブジェクトを追加
     }
 
 
 
-    public void AddExplosion(GameObject g)
-    {
-        ExplosionList.Add(g);
-    }
 
     public string GetExplosionType(string input)
     {
@@ -141,4 +169,18 @@ public class ExplosionManager : MonoBehaviour
         string tag = GetExplosionType(obj.name);
         objectPooler.EnqueueObject(tag, obj);
     }
+
+    public bool GetExplosionList(GameObject obj)
+    {
+        // ExplosionListに指定したobjが含まれているか確認
+        foreach (GameObject listObj in ExplosionList)
+        {
+            if (listObj == obj)
+            {
+                return true; // 見つかった場合はtrueを返す
+            }
+        }
+        return false; // 見つからなかった場合はfalseを返す
+    }
+
 }

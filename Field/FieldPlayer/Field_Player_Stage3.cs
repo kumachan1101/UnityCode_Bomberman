@@ -32,7 +32,7 @@ public class Field_Player_Stage3 : Field_Player_Stage2 {
 		playerName = "Player3";
     }
 
-    protected override void SetPower(Slider cSlider){
+    public override void SetPower(Slider cSlider){
         cSlider.maxValue = 14;
 		cSlider.value = 14;
     }

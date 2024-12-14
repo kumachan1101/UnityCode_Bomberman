@@ -87,7 +87,7 @@ public class Library_Base : MonoBehaviour{
         return false;
     }
 
-    public GameObject GetPositionAndNameObj(Vector3 targetPosition, string targetName)
+    static public GameObject GetPositionAndNameObj(Vector3 targetPosition, string targetName)
     {
         // シーン内の全てのGameObjectを取得
         GameObject[] allGameObjects = GameObject.FindObjectsOfType<GameObject>();
@@ -136,7 +136,7 @@ public class Library_Base : MonoBehaviour{
 
 
 
-    public GameObject IsPositionAndName(Vector3 targetPosition, string targetName)
+    static public GameObject IsPositionAndName(Vector3 targetPosition, string targetName)
     {
         // シーン内の全てのGameObjectを取得
         GameObject[] allGameObjects = GameObject.FindObjectsOfType<GameObject>();
@@ -209,12 +209,7 @@ public class Library_Base : MonoBehaviour{
     public static PlayerBom GetPlayerBomFromObject(string objname)
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
-        PlayerBom cPlayerBom = null; // PlayerBomコンポーネントの参照を初期化
-        Player_Base cPlayer = GetcPlayerFromObject(objname);
-        if (cPlayer != null)
-        {
-            cPlayerBom = cPlayer.GetPlayerBom();
-        }
+        PlayerBom cPlayerBom = gPlayer.GetComponent<PlayerBom>();
         return cPlayerBom;
     }
 /*
@@ -277,12 +272,7 @@ public class Library_Base : MonoBehaviour{
     public static PlayerAction GetcPlayerActionFromObject(string objname)
     {
         GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
-        PlayerAction cPlayerAction = null;
-        Player_Base cPlayer = GetcPlayerFromObject(objname);
-        if (cPlayer != null)
-        {
-            cPlayerAction = cPlayer.GetPlayerAction();
-        }
+        PlayerAction cPlayerAction = gPlayer.GetComponent<PlayerAction>();
         return cPlayerAction;
     }
 
@@ -317,23 +307,6 @@ public class Library_Base : MonoBehaviour{
             // マッチしなかった場合は0を返すが、適切なエラーハンドリングが必要であれば適宜修正してください
             return 0;
         }
-    }
-
-    public static Player_Base FindAndSetPlayer()
-    {
-        Field_Player_Base cField = GameObject.Find("Field").GetComponent<Field_Player_Base>();
-        //Debug.Log(cField);
-        string name = cField.GetName();
-        if(null == name){
-            return null;
-        }
-
-        GameObject gPlayer = FindPlayerObject(name);
-        Player_Base cPlayer = null;
-        if(null != gPlayer){
-            cPlayer = gPlayer.GetComponent<Player_Base>();
-        }
-		return cPlayer;
     }
 
     public static GameObject FindPlayerObject(string name)
@@ -416,5 +389,17 @@ public class Library_Base : MonoBehaviour{
 		return false;
 	}
 
+    public static GameObject FindGameObjectByInstanceID(int instanceID)
+    {
+        GameObject[] allObjects = FindObjectsOfType<GameObject>();
+        foreach (GameObject obj in allObjects)
+        {
+            if (obj.GetInstanceID() == instanceID)
+            {
+                return obj;
+            }
+        }
+        return null; // 見つからない場合
+    }
 
 }

@@ -8,11 +8,11 @@ public abstract class Item : MonoBehaviour {
     void Start(){
     }
 
-    public abstract void Reflection(string objname);
+    public abstract void Reflection(GameObject gObj);
 
     private void OnTriggerEnter(Collider col){
         if(col.transform.name.StartsWith("Player")){
-            Reflection(col.transform.name);
+            Reflection(col.gameObject);
             Destroy(this.gameObject);
             soundManager.PlaySoundEffect("GETITEM");
         }

@@ -1,7 +1,12 @@
 using UnityEngine;
 using Photon.Pun;
+using Unity.Collections.LowLevel.Unsafe;
 public class BomBigBan_Online : BomBigBan_Base
 {
+    override protected void AddComponentInstanceManager(){
+        cInsManager = gameObject.AddComponent<InstanceManager_Online>();
+        cInsManager.SetPothonView(cPhotonView.ViewID);
+    }
     protected override bool IsExplosion(){
         if(null == cInsManager){
             return false;
@@ -10,6 +15,10 @@ public class BomBigBan_Online : BomBigBan_Base
         // RPCで位置情報を同期して、ネットワーク全体でブロードキャストして、各キューから取り出してもらう。インスタンス生成は各自で生成のまま。
         // Bomクラスはオンライン用の派生クラスを爆風別に用意して、Player側でボム生成時に、AddComponentでオンラインの場合は、オンラインスクリプトをaddする
         if(cPhotonView.IsMine == false){
+            return false;
+        }
+        Vector3 v3 = Library_Base.GetPos(transform.position);
+        if (Library_Base.IsPositionOutOfBounds(v3)){
             return false;
         }
         return true;
@@ -30,6 +39,10 @@ public class BomBigBan_Online : BomBigBan_Base
 	[PunRPC]
     public void Explosion_RPC(Vector3 basePosition)
     {
+        if(null == cInsManager){
+            return;
+        }
+        moveManager.StopMoving();
         transform.position = basePosition;
 
         // Reset processed coordinates
@@ -70,6 +83,20 @@ public class BomBigBan_Online : BomBigBan_Base
         cInsManager.DestroyInstance(this.gameObject);
     }
 
+    [PunRPC]
+    public void InstantiateInstancePool_RPC(Vector3 position){
+        if(null == cInsManager){
+            return;
+        }
+        cInsManager.InstantiateInstancePool_Base(position);
+    }
+    [PunRPC]
+    public void DestroyInstancePool_RPC(){
+        if(null == cInsManager){
+            return;
+        }
+        cInsManager.DestroyInstancePool_Base();
 
+    }
 
 }

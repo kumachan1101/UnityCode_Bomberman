@@ -7,6 +7,17 @@ public class Explosion_Base : MonoBehaviour
     protected bool bField = false;
     private SoundManager soundManager;
     private PhotonTransformView transformView;
+
+    int iID;
+
+    public void SetID(int id){
+        iID = id;
+    }
+
+    public int GetID(){
+        return iID;
+    }
+
     public void FieldValid()
     {
         bField = true;
@@ -26,6 +37,17 @@ public class Explosion_Base : MonoBehaviour
 		cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
         //Invoke(nameof(hide), 1f);
         soundManager.PlaySoundEffect("EXPLOISON");
+        if (Library_Base.IsPositionOutOfBounds(transform.position)){
+            DestroySync(this.gameObject);
+        }
+
+    }
+
+    void update(){
+        if (Library_Base.IsPositionOutOfBounds(transform.position)){
+            DestroySync(this.gameObject);
+        }
+
     }
 
 	public void ReqHide(){
@@ -39,18 +61,13 @@ public class Explosion_Base : MonoBehaviour
 		}
         bool bRet = cField.IsMatchObjMove(transform.position);
         if(bRet){
-            DestroySync(gameObject);
+            DestroySync(this.gameObject);
         }
         else{
 			if (gameObject.activeInHierarchy){
 				cField.UpdateGroundExplosion(this.gameObject);
 			}
-			else{
-				//Debug.Log("hide no active");
-			}
-            
         }
-        
     }
 
 	protected virtual void DestroySync(GameObject g){
@@ -60,6 +77,10 @@ public class Explosion_Base : MonoBehaviour
 			return;
 		}
 		//Field_Block_Base cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+		if(null == cField){
+            Debug.Log(g.transform.position);
+			cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+		}
 		cField.EnqueueObject(g);
 
 		//Destroy(g);
@@ -88,6 +109,7 @@ public class Explosion_Base : MonoBehaviour
         switch (other.transform.name)
         {
             case "FixedWall(Clone)":
+                Debug.Log(gameObject.transform.position);
                 DestroySync(gameObject);
                 break;
             default:

@@ -34,6 +34,12 @@ public class RoomButton : MonoBehaviour
 
         // ボタンに対応したルーム名のルームに参加する（ルームが存在しなければ作成してから参加する）
         var roomOptions = new RoomOptions();
+
+        roomOptions.CleanupCacheOnLeave = true; // プレイヤー退出時にキャッシュを削除
+        roomOptions.PlayerTtl = 0; // プレイヤー情報を即座に削除
+        roomOptions.EmptyRoomTtl = 0; // ルームが空なら即座に削除
+
+
         roomOptions.MaxPlayers = MaxPlayers;
         PhotonNetwork.JoinOrCreateRoom(RoomName, roomOptions, TypedLobby.Default);
     }

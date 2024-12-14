@@ -34,6 +34,8 @@ public class Bom_Base : MonoBehaviourPunCallbacks
     protected Bom_Base_MaterialHandler materialHandler;
     protected Bom_Base_CollisionManager collisionManager;
 
+    public bool bDel;
+
     public void SetMoveDirection(Vector3 direction)
     {
         //moveDirection =direction;
@@ -53,12 +55,15 @@ public class Bom_Base : MonoBehaviourPunCallbacks
     }
 
     protected virtual void init(){
-        cInsManager = gameObject.AddComponent<InstanceManager_Base>();
+        //cInsManager = gameObject.AddComponent<InstanceManager_Base>();
+        AddComponentInstanceManager();
         sExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
         ExplosionPrefab = Resources.Load<GameObject>(sExplosion);
         cInsManager.SetPrefab(ExplosionPrefab);	
 
     }
+
+    protected virtual void AddComponentInstanceManager(){}
 
     void Start()
     {
@@ -126,93 +131,7 @@ public class Bom_Base : MonoBehaviourPunCallbacks
         // Destroy時に登録したInvokeをすべてキャンセル
         CancelInvoke();
     }
-/*
-    protected virtual bool XorZ_Explosion(Vector3 v3Temp)
-    {
-        // 壁の判定
-        bool bRet = IsWall(v3Temp);
-        if (bRet)
-        {
-            return false;
-        }
 
-        // 既存の爆発を破棄
-        GameObject gExplosion = cLibrary.IsPositionAndName(v3Temp, "Explosion");
-        if (gExplosion != null)
-        {
-            cInsManager.DestroyInstancePool(gExplosion);
-        }
-
-        // 新しい爆発のインスタンスを生成
-        GameObject g = cInsManager.InstantiateInstancePool(v3Temp);
-        if (g == null)
-        {
-            return false;
-        }
-
-        // ブロックが破壊可能かどうかを派生クラスで判定する
-        if (ShouldCheckIsBroken() && cField.IsBroken(v3Temp))
-        {
-            g.transform.position = v3Temp;
-            return false;
-        }
-
-        g.transform.position = v3Temp;
-        return true;
-    }
-    protected virtual bool X_Explosion(int i){
-        Vector3 v3Temp = new Vector3(transform.position.x+i,transform.position.y,transform.position.z);
-        bool bRet = XorZ_Explosion(v3Temp);
-        return bRet;
-    }
-
-    protected virtual bool Z_Explosion(int i){
-        Vector3 v3Temp = new Vector3(transform.position.x,transform.position.y,transform.position.z+i);
-        bool bRet = XorZ_Explosion(v3Temp);
-        return bRet;
-    }
-    protected void HandleExplosion(Vector3 v3)
-    {
-        if(null == cInsManager){
-            return;
-        }
-        transform.position = v3;
-        GameObject gExplosion = cLibrary.IsPositionAndName(v3, "Explosion");
-        if (gExplosion != null)
-        {
-            cInsManager.DestroyInstancePool(gExplosion);
-        }
-
-        GameObject g = cInsManager.InstantiateInstancePool(v3);
-        if (g == null)
-        {
-            return;
-        }
-        g.transform.position = v3;
-
-        for (int i = 1; i <= iExplosionNum; i++)
-        {
-            if (!X_Explosion(i * (-1))) break;
-        }
-
-        for (int i = 1; i <= iExplosionNum; i++)
-        {
-            if (!X_Explosion(i)) break;
-        }
-
-        for (int i = 1; i <= iExplosionNum; i++)
-        {
-            if (!Z_Explosion(i * (-1))) break;
-        }
-
-        for (int i = 1; i <= iExplosionNum; i++)
-        {
-            if (!Z_Explosion(i)) break;
-        }
-
-        cInsManager.DestroyInstance(this.gameObject);
-    }
-    */
     protected void HandleExplosion(Vector3 initialPosition)
     {
         if (cInsManager == null)
@@ -220,23 +139,28 @@ public class Bom_Base : MonoBehaviourPunCallbacks
             return;
         }
 
+        moveManager.StopMoving();
+
         // 初期位置に移動
         transform.position = initialPosition;
 
         // 既存の爆風がある場合は破棄
-        GameObject existingExplosion = cLibrary.IsPositionAndName(initialPosition, "Explosion");
+        GameObject existingExplosion = Library_Base.IsPositionAndName(initialPosition, "Explosion");
         if (existingExplosion != null)
         {
             cInsManager.DestroyInstancePool(existingExplosion);
         }
 
         // 爆風のインスタンスを生成
+        cInsManager.InstantiateInstancePool(initialPosition);
+        /*
         GameObject initialExplosion = cInsManager.InstantiateInstancePool(initialPosition);
         if (initialExplosion == null)
         {
             return; // インスタンス生成失敗時は処理を終了
         }
         initialExplosion.transform.position = initialPosition;
+        */
 
         // X方向の爆風を生成
         for (int i = 1; i <= iExplosionNum; i++)
@@ -310,7 +234,7 @@ public class Bom_Base : MonoBehaviourPunCallbacks
 
     private void DestroyExistingExplosion(Vector3 position)
     {
-        GameObject existingExplosion = cLibrary.IsPositionAndName(position, "Explosion");
+        GameObject existingExplosion = Library_Base.IsPositionAndName(position, "Explosion");
         if (existingExplosion != null)
         {
             cInsManager.DestroyInstancePool(existingExplosion);
@@ -321,6 +245,9 @@ public class Bom_Base : MonoBehaviourPunCallbacks
     /// </summary>
     protected virtual bool CreateExplosion(Vector3 position)
     {
+        cInsManager.InstantiateInstancePool(position);
+        return true;
+        /*
         GameObject newExplosion = cInsManager.InstantiateInstancePool(position);
         if (newExplosion == null)
         {
@@ -329,6 +256,7 @@ public class Bom_Base : MonoBehaviourPunCallbacks
 
         newExplosion.transform.position = position;
         return true;
+        */
     }
 
     /// <summary>

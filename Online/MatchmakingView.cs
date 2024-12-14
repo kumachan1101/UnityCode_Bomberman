@@ -33,6 +33,7 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
         canvasGroup.interactable = true;
     }
 
+
     public override void OnRoomListUpdate(List<RoomInfo> changedRoomList) {
         //Debug.Log("OnRoomListUpdate");
         roomList.Update(changedRoomList);
@@ -97,20 +98,25 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
 		string roomName = PhotonNetwork.CurrentRoom.Name;
 		foreach (var roomButton in roomButtonList) {
 			if (roomButton.RoomName == roomName) {
+				GameObject gField = GameObject.Find("Field");
+
+                Field_Player_Base cFieldPlayer = gField.GetComponent<Field_Player_Base>();
+                cFieldPlayer.SetPlayerCnt(playerCount);
+                if (playerCount == myJoinOrder) {
+                    cFieldPlayer.SpawnPlayerObjects(myJoinOrder);
+                }
+
 				roomButton.SetPlayerCount(playerCount);
 				if (roomButton.GetIsMax(playerCount)) {
-					GameObject gField = GameObject.Find("Field");
 					Field_Block_Base cField = gField.GetComponent<Field_Block_Base>();
+                    GameObject gGameEndCanvasLocal = GameObject.Find("GameEndCanvas_Local(Clone)");
+                    Destroy(gGameEndCanvasLocal);
                     // マスタークライアントのみがこの処理を行う
                     if (!PhotonNetwork.IsMasterClient) {
     					cField.CreateField();
+                        GameObject gGameEndCanvas = PhotonNetwork.Instantiate("GameEndCanvas_Online", Vector3.zero, Quaternion.identity);
                     }
 					cField.SetupStage();
-
-					Field_Player_Base cFieldPlayer = gField.GetComponent<Field_Player_Base>();
-					cFieldPlayer.SpawnPlayerObjects(myJoinOrder);
-					cFieldPlayer.SetPlayerCnt(playerCount);
-
 					gameObject.SetActive(false);
 				}
 			}
@@ -121,4 +127,6 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
         // ルームへの参加が失敗したら、再びルーム参加ボタンを押せるようにする
         canvasGroup.interactable = true;
     }
+
+
 }

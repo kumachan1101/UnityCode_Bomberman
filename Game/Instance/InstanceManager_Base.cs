@@ -1,9 +1,14 @@
 using UnityEngine;
 using Photon.Pun;
-public class InstanceManager_Base : MonoBehaviour
+using System.Collections.Generic;
+abstract public class InstanceManager_Base : MonoBehaviour
 {
     protected GameObject prefab;
     protected string resource;
+
+    // 破棄予定のGameObjectを保持するリスト
+
+    protected Queue<GameObject> instanceQueue = new Queue<GameObject>();
 
     public GameObject InstantiateInstance(Vector3 position)
     {
@@ -16,7 +21,7 @@ public class InstanceManager_Base : MonoBehaviour
         return instance;
     }
 
-    public void DestroyInstance(GameObject instance)
+    virtual public void DestroyInstance(GameObject instance)
     {
         /*
         PhotonView pv = instance.GetComponent<PhotonView>();
@@ -28,16 +33,20 @@ public class InstanceManager_Base : MonoBehaviour
         */
         // オンライン生成した場合も、PhotonNetwork.Destroyではなく、以下Destroyで削除してしまっている。
         if(null != instance){
+            var bomComponent = instance.GetComponent<Bom_Base>(); // BomComponentはカスタムコンポーネント
+            bomComponent.bDel = true;
             Destroy(instance); // ローカルのみで削除
         }
         
     }
 
-	//public abstract GameObject InstantiateInstancePool(Vector3 position);
-    public GameObject InstantiateInstancePool(Vector3 position)
+	public abstract void InstantiateInstancePool(Vector3 position);
+    public abstract void DestroyInstancePool(GameObject instance);
+
+    public void InstantiateInstancePool_Base(Vector3 position)
 	{
 		// Field_Block_Base 経由でデキューしてオブジェクトを取得
-		GameObject explosion = cField.DequeueObect(prefab.name);
+		GameObject explosion = cField.DequeueObject(prefab.name);
 
 		if (explosion != null)
 		{
@@ -50,18 +59,25 @@ public class InstanceManager_Base : MonoBehaviour
 		{
 			Debug.LogWarning("Explosion pool is empty or not found.");
 		}
-        return explosion;
+    }
+    
+    public GameObject gTemp;
+    public virtual void SetPothonView(int viewid){}
+
+    public void DestroyInstancePool_Base()
+    {
+        // キュー内のすべてのオブジェクトを処理
+        while (instanceQueue.Count > 0)
+        {
+            GameObject gtemp = instanceQueue.Dequeue(); // キューから取り出し
+
+            // キューに取り出したオブジェクトをエンキューする
+            cField.EnqueueObject(gtemp);
+        }
     }
 
-    public void DestroyInstancePool(GameObject instance)
-    {
-		if (instance == null)
-		{
-			Debug.LogWarning("Instance is null, cannot enqueue.");
-			return;
-		}
-		cField.EnqueueObject(instance);
-    }
+
+
 	protected Field_Block_Base cField;
 	
 	void Start()

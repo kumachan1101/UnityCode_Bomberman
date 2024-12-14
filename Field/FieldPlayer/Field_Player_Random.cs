@@ -52,13 +52,8 @@ public class Field_Player_Random : Field_Player_CpuMode {
 	    return false;
 	}
 
-    protected override void GetPlayerNames(int iPlayerNo, ref string canvasName, ref string playerName)
-    {
-        canvasName = "Canvas" + iPlayerNo;
-        playerName = "Player" + iPlayerNo;
-    }
 
-    protected override void SetPower(Slider cSlider){
+    public override void SetPower(Slider cSlider){
         cSlider.maxValue = 10;
 		cSlider.value = 10;
     }

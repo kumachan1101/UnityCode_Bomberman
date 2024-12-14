@@ -20,41 +20,98 @@ public class Field_Player_CpuMode : Field_Player_Base {
 			SetPlayerCnt(i); 
 			SpawnPlayerObjects(Random.Range(2, 5));
 		}
-
-		//ローカルプレイでは、操作するプレイヤーの名前を設定して、この設定した名前で検索してオブジェクトを特定
-		SetName("Player1(Clone)");
 	}
 
     protected virtual void init(){}
+
+    public override void AddDummyPlayer(int iPlayerNo, Vector3 v3)
+    {
+        bool bIsMine = PreAddDummyPlayer();
+        if (!bIsMine)
+        {
+            return;
+        }
+
+        string canvasName = "";
+        string playerName = "";
+        GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
+
+        GameObject gCanvas = InstantiateCanvas("CanvasPowerGage");
+        GameObject gPlayer = InstantiatePlayer("Player", v3);
+        
+        if (gPlayer != null)
+        {
+            gPlayer.AddComponent<Player_CpuMode>();
+        }
+        SetupPlayerAndCanvas(iPlayerNo, gCanvas, gPlayer, playerName);
+    }
+
+
+    public override void SpawnPlayerObjects(int iPlayerNo)
+    {
+        string canvasName = "";
+        string playerName = "";
+        GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
+
+        GameObject gCanvas = InstantiateCanvas("CanvasPowerGage");
+        GameObject gPlayer = InstantiatePlayer("Player", GetPlayerPosition(GetIndex(), iPlayerNo - 1));
+
+        if (gPlayer != null)
+        {
+            if (iPlayerNo == 1)
+            {
+                gPlayer.AddComponent<Player>();
+            }
+            else
+            {
+                gPlayer.AddComponent<Player_CpuMode>();
+            }
+        }
+        SetupPlayerAndCanvas(iPlayerNo, gCanvas, gPlayer, playerName);
+    }
+
+    private void SetupPlayerAndCanvas(int iPlayerNo, GameObject gCanvas, GameObject gPlayer, string playerName)
+    {
+        if (gCanvas == null || gPlayer == null)
+        {
+            return;
+        }
+        gPlayer.name = playerName;
+
+        gCanvas.GetComponent<PowerGage_Slider>().SetPlayerCnt(GetPlayerCnt());
+        gCanvas.GetComponent<PowerGage_Slider>().SetPlayerNo(iPlayerNo);
+
+        PowerGageIF cPowerGageIF = gPlayer.AddComponent<PowerGageIF_CpuMode>();
+        cPowerGageIF.SetCanvasInsID(gCanvas.GetInstanceID());
+
+        Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
+        cPlayer.AddPlayerComponent();
+    }
 
 	protected override bool PreAddDummyPlayer(){
 		AddPlayerCnt();
 		return true;
 	}
-
+    /*
 	protected override void PlayerDestroy(GameObject gPlayer){
-		Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
-		Destroy(cPlayer);
+		PlayerDestroyComponent(gPlayer);
 	}
+    */
 
-    protected override GameObject InstantiateCanvas(string canvasName)
+    protected GameObject InstantiateCanvas(string canvasName)
     {
         GameObject gCanvas = LoadResource(canvasName);
         gCanvas.transform.position = new Vector3(0, 0, 0);
         return gCanvas;
     }
 
-    protected override GameObject InstantiatePlayer(string playerName, Vector3 position)
+    protected GameObject InstantiatePlayer(string playerName, Vector3 position)
     {
 		GameObject gPlayer = LoadResource(playerName);
 		gPlayer.transform.position = position;
         return gPlayer;
     }
 
-    protected override Player_Base AddComponent_RPC(GameObject gPlayer){
-        Player_Base cPlayer = gPlayer.AddComponent<Player_CpuMode>();
-        return cPlayer;
-    }
 	protected override void DestroySync(GameObject g){
 		Destroy(g);
 	}
@@ -63,12 +120,8 @@ public class Field_Player_CpuMode : Field_Player_Base {
         return "Canvas";
     }
 
-    protected override string GetPlayerName(){
+    public override string GetPlayerName(){
         return "Player";
 	}
-	public override void SetupSlider_RPC(GameObject gCanvas,GameObject gPlayer,int iPlayerNo)
-	{
-        SetupSliderCommon(gCanvas, gPlayer, iPlayerNo);
-    }
 
 }

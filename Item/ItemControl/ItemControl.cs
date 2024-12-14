@@ -55,7 +55,8 @@ public class ItemControl: MonoBehaviourPunCallbacks
         ABILITY_ADD_DUMMY,
 
         ABILITY_MAX,
-        ABILITY_RANGE = 40
+        //ABILITY_RANGE = 40
+        ABILITY_RANGE = ABILITY_MAX
     }
 
     protected virtual void CreateItem_RPC(ABILITY eRand, Vector3 v3){

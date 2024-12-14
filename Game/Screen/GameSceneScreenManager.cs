@@ -6,6 +6,7 @@ public class GameSceneScreenManager : BaseScreenManager
     {
         InitializeCanvas();
         CreateStage();
+        GameObject gGameEndCanvas = Instantiate(Resources.Load("GameEndCanvas_Local") as GameObject);
     }
 
     private void CreateStage()

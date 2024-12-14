@@ -33,7 +33,7 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
     public virtual void Rainbow_RPC(string sMaterialType) { }
 
     [SerializeField] protected ObjectPooler_Base objectPooler;
-
+    MaterialManager cMaterialMng;
 
     void Start()
     {
@@ -50,6 +50,7 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
         objectPooler.pools.Clear();
         ConfigurePools();
         objectPooler.InitializePool(); // プールを再生成
+        //explosionManager.SetObjPool();
     }
 
     virtual protected void ConfigurePools()
@@ -71,6 +72,7 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
         objectPooler = GetComponent<ObjectPooler_Base>();
         explosionManager = new GameObject("ExplosionManager").AddComponent<ExplosionManager>();
         explosionManager.Initialize(objectPooler, cLibrary);
+        cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
 
     }
 
@@ -220,42 +222,50 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
     }
 
 
-    public void UpdateGroundExplosion(GameObject gObj)
-    {
-        explosionManager.UpdateGroundExplosion(gObj);
-    }
+    public virtual void UpdateGroundExplosion(GameObject gObj){}
 
-    public GameObject DequeueObect(string tag)
-    {
-        return explosionManager.DequeueObject(tag);
-    }
-
-    public void EnqueueObject(GameObject obj)
-    {
-		explosionManager.EnqueueObject(obj);
-    }
-
+    public virtual GameObject DequeueObject(string tag){return null;}
+    public virtual void EnqueueObject(GameObject obj){}
 
     [PunRPC]
-    public void Rainbow(string sMaterialType)
+    public void Rainbow(string objname)
     {
-        MaterialManager cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-        string StrExplosion = cMaterialMng.GetMaterialOfExplosion(sMaterialType);
+        List<GameObject> objectsToRemove = new List<GameObject>();
+        List<GameObject> objectsToAdd = new List<GameObject>();
 
         foreach (GameObject obj in explosionManager.ExplosionList)
         {
-            if (obj != null)
+            if (obj == null) continue;
+            if (objname != obj.name)
             {
-                Renderer renderer = obj.GetComponent<Renderer>();
-                if (renderer != null)
+                GameObject gobj = null;
+                try
                 {
-                    Material newMaterial = cMaterialMng.GetMaterialOfTypeExplosion(StrExplosion);
-                    renderer.material = newMaterial;
+                    gobj = DequeueObject(objname.Replace("(Clone)",""));
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"Failed to dequeue object: {ex.Message}");
                 }
 
-                Explosion_Base cExplosion = obj.GetComponent<Explosion_Base>();
-                //cExplosion.SetPosition(obj.transform.position);
+                if (gobj != null)
+                {
+                    objectsToAdd.Add(gobj);
+                    Explosion_Base cExplosion = gobj.GetComponent<Explosion_Base>();
+                    cExplosion.SetPosition(obj.transform.position);
+                }
+                objectsToRemove.Add(obj);
             }
         }
+
+        explosionManager.ExplosionList.AddRange(objectsToAdd);
+        foreach (GameObject obj in objectsToRemove)
+        {
+            explosionManager.ExplosionList.Remove(obj);
+            EnqueueObject(obj);
+        }
     }
+
+
+
 }

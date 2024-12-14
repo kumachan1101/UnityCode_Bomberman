@@ -120,7 +120,7 @@ public class MaterialManager : MonoBehaviour
             return null;
         }
         
-        string suffix = playerName.Replace("Player", "").Replace("Dummy", "").Replace("Online", "").Replace("(Clone)", "");
+        string suffix = playerName.Replace("Player", "").Replace("Dummy", "").Replace("Online", "").Replace("(Clone)", "").Replace("(Instance)", "").Replace("BomMaterial", "").Replace("(Material)", "");
 
         if (int.TryParse(suffix, out int playerNumber))
         {

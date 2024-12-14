@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
-using System.Collections;
+using UnityEngine.UI;
+using System;
 public class Field_Player_Online : Field_Player_Base {
 
 	protected Vector3[] v3PlayerPos1;
@@ -25,11 +26,12 @@ public class Field_Player_Online : Field_Player_Base {
         return "CanvasOnline";
     }
 
-    protected override string GetPlayerName(){
-        return "PlayerOnline";
+    public override string GetPlayerName(){
+        //return "PlayerOnline";
+        return playername;
 	}
 
-
+/*
 	protected override void PlayerDestroy(GameObject gPlayer){
 		photonView.RPC(nameof(OnlinePlayerDestroy), RpcTarget.All, gPlayer.GetComponent<PhotonView>().ViewID);
 		//OnlinePlayerDestroy(gPlayer.GetComponent<PhotonView>().ViewID);
@@ -50,105 +52,71 @@ public class Field_Player_Online : Field_Player_Base {
 			Debug.Log("GameObject Error");
 			return;
 		}
-		Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
-		Debug.Log(cPlayer);
-		Destroy(cPlayer);
+		PlayerDestroyComponent(gPlayer);
 	}
+*/
 
-
-    protected override GameObject InstantiateCanvas(string canvasName)
+    protected GameObject InstantiateCanvas(string canvasName,int iPlayerCnt, int iPlayerNo)
     {
-        Vector3 v3PwrGage = new Vector3(0, 0, 0);
-        return PhotonNetwork.Instantiate(canvasName, v3PwrGage, Quaternion.identity);
+        return PhotonNetwork.Instantiate(canvasName, new Vector3(0, 0, 0), Quaternion.identity, 0, new object[] { iPlayerCnt, iPlayerNo });
     }
 
-    protected override GameObject InstantiatePlayer(string playerName, Vector3 position)
+    protected GameObject InstantiatePlayer(string playerName, Vector3 position, int iCanvasInsID, int iPlayerNo, string script)
     {
-        return PhotonNetwork.Instantiate(playerName, position, Quaternion.identity);
+        return PhotonNetwork.Instantiate(playerName, position, Quaternion.identity,0, new object[] { iCanvasInsID, iPlayerNo ,script});
     }
-
-    protected override void GetPlayerNames(int iPlayerNo, ref string canvasName, ref string playerName)
-    {
-        canvasName = "CanvasOnline" + iPlayerNo;
-        playerName = "PlayerOnline" + iPlayerNo;
-    }
-
 
     public override int GetIndex(){
         return 1;
     }
-	public override void SetupSlider_RPC(GameObject gCanvas,GameObject gPlayer, int iPlayerNo)
-	{
-        photonView.RPC(nameof(SetupSlider), RpcTarget.All, gCanvas.GetComponent<PhotonView>().ViewID,  gPlayer.GetComponent<PhotonView>().ViewID,iPlayerNo);
-    }
-
-	[PunRPC]
-	public void SetupSlider(int iViewIDCanvas, int iViewIDPlayer, int iPlayerNo)
-	{
-		PhotonView ViewCanvas = PhotonView.Find(iViewIDCanvas);
-		PhotonView ViewPlayer = PhotonView.Find(iViewIDPlayer);
-		if (ViewCanvas == null || ViewPlayer == null)
-		{
-			Debug.Log("ViewFind Error");
-			return;
-		}
-		GameObject gCanvas = ViewCanvas.gameObject;
-		GameObject gPlayer = ViewPlayer.gameObject;
-		if (gCanvas == null || gPlayer == null)
-		{
-			Debug.Log("GameObject Error");
-			return;
-		}
-		//OnlineSetupSliderCommon(gCanvas, gPlayer, iPlayerNo);
-		SetupSliderCommon(gCanvas, gPlayer, iPlayerNo);
-	}
-
-
-	private void OnlineSetupSliderCommon(GameObject gCanvas, GameObject gPlayer, int iPlayerNo){
-		StartCoroutine(OnlineSetupSliderCommonCoroutine(gCanvas, gPlayer, iPlayerNo));
-	}
-
-	private IEnumerator OnlineSetupSliderCommonCoroutine(GameObject gCanvas, GameObject gPlayer, int iPlayerNo){
-		while(true){
-			Player_Base cPlayer = gPlayer.GetComponent<Player_Base>();
-			if (cPlayer != null)
-			{
-				SetupSliderCommon(gCanvas, gPlayer, iPlayerNo);
-				break;
-			}
-			else{
-				yield return new WaitForEndOfFrame(); // 現在のフレームの終了まで待つ
-			}
-		}
-	}
 
 	protected override bool PreAddDummyPlayer(){
 		AddPlayerCnt();
 		return GetComponent<PhotonView>().IsMine;
 	}
 
-    protected override Player_Base AddComponent_RPC(GameObject gPlayer){
-		photonView.RPC(nameof(AddComponent), RpcTarget.All, gPlayer.GetComponent<PhotonView>().ViewID);
-        return null;
+    protected void AddComponent_RPC(GameObject gPlayer, Type componentType)
+    {
+        Debug.Log("AddComponent_RPC");
+        string typeName = componentType.AssemblyQualifiedName; // 型情報を文字列に変換
+        photonView.RPC(nameof(AddComponent), RpcTarget.All, gPlayer.GetComponent<PhotonView>().ViewID, typeName);
+        return;
     }
 
-	[PunRPC]
-    protected Player_Base AddComponent(int iViewID){
-		PhotonView ViewPlayer = PhotonView.Find(iViewID);
-		if (ViewPlayer == null)
-		{
-			Debug.Log("ViewFind Error");
-			return null;
-		}
-		GameObject gPlayer = ViewPlayer.gameObject;
-		if (gPlayer == null)
-		{
-			Debug.Log("GameObject Error");
-			return null;
-		}
+    [PunRPC]
+    public void AddComponent(int iViewID, string typeName)
+    {
+        PhotonView viewPlayer = PhotonView.Find(iViewID);
+        if (viewPlayer == null)
+        {
+            Debug.LogError("ViewFind Error");
+            return;
+        }
 
-		Player_Base cPlayer = gPlayer.AddComponent<Player_Online_Dummy>();
-        return cPlayer;
+        GameObject gPlayer = viewPlayer.gameObject;
+        if (gPlayer == null)
+        {
+            Debug.LogError("GameObject Error");
+            return;
+        }
+
+        // 渡された文字列から型を復元
+        Type componentType = Type.GetType(typeName);
+        if (componentType == null)
+        {
+            Debug.LogError($"Failed to get Type from name: {typeName}");
+            return;
+        }
+
+        // 動的にコンポーネントを追加
+        Player_Base cPlayer = gPlayer.AddComponent(componentType) as Player_Base;
+        if (cPlayer == null)
+        {
+            Debug.LogError($"Failed to add component: {componentType.Name}");
+        }
+        Debug.Log(cPlayer);
+        cPlayer.AddPlayerComponent();
+        return;
     }
 
     public override string GetBomMaterial(Vector3 target, int index)
@@ -168,4 +136,32 @@ public class Field_Player_Online : Field_Player_Base {
         return "InvalidMaterial";
     }
 
+    public override void AddDummyPlayer(int iPlayerNo, Vector3 v3)
+    {
+        bool bIsMine = PreAddDummyPlayer();
+        if (!bIsMine)
+        {
+            return;
+        }
+
+        string canvasName = "";
+        string playerName = "";
+        GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
+		
+        GameObject gCanvas = InstantiateCanvas("CanvasPowerGage",GetPlayerCnt(), iPlayerNo);
+        GameObject gPlayer = InstantiatePlayer("Player", v3, gCanvas.GetComponent<PhotonView>().ViewID, iPlayerNo,"Player_Online_Dummy");
+    }
+
+
+    public override void SpawnPlayerObjects(int iPlayerNo)
+    {
+        string canvasName = "";
+        string playerName = "";
+        GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
+
+        GameObject gCanvas = InstantiateCanvas("CanvasPowerGage",GetPlayerCnt(), iPlayerNo);
+        //Debug.Log(gCanvas.GetComponent<PhotonView>().ViewID);
+        GameObject gPlayer = InstantiatePlayer("Player", GetPlayerPosition(GetIndex(), iPlayerNo - 1),gCanvas.GetComponent<PhotonView>().ViewID, iPlayerNo,"Player_Online");
+        SetPlayerName(gPlayer.name);
+    }
 }

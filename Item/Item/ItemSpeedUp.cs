@@ -1,6 +1,7 @@
+using UnityEngine;
 public class ItemSpeedUp : Item{
-    public override void Reflection(string objname){
-        PlayerAction cPlayerAction = Library_Base.GetcPlayerActionFromObject(objname);
+    public override void Reflection(GameObject gObj){
+        PlayerAction cPlayerAction = gObj.GetComponent<PlayerAction>();
         if(null != cPlayerAction){
             cPlayerAction.SpeedUp();
         }

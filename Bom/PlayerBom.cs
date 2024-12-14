@@ -25,15 +25,20 @@ public enum GetKind
 
 
 
-public class PlayerBom
+public class PlayerBom : MonoBehaviour
 {
     private BomConfigurationManager cBomConfigManager;
     private BomListManager cBomListManager;
+    private MaterialManager materialManager;
 
-    public PlayerBom()
+    public void Awake()
     {
         cBomConfigManager = new BomConfigurationManager();
         cBomListManager = new BomListManager();
+        materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+		string MaterialType = materialManager.GetBomMaterialByPlayerName(this.gameObject.name);
+        Request(materialManager.GetReqtypeOfMaterial(MaterialType));
+
     }
 
     public void Request(ReqType reqtype)

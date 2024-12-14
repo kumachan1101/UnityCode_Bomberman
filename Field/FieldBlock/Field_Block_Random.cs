@@ -10,9 +10,9 @@ public class Field_Block_Random : Field_Block_CpuMode {
 
     protected override void ConfigurePools()
     {
-        explosionManager.AddPool(ExplosionTypes.Explosion1, 500);
-        explosionManager.AddPool(ExplosionTypes.Explosion2, 500);
-        explosionManager.AddPool(ExplosionTypes.Explosion3, 500);
-        explosionManager.AddPool(ExplosionTypes.Explosion4, 500);
+        explosionManager.AddPool(ExplosionTypes.Explosion1, 5000);
+        explosionManager.AddPool(ExplosionTypes.Explosion2, 5000);
+        explosionManager.AddPool(ExplosionTypes.Explosion3, 5000);
+        explosionManager.AddPool(ExplosionTypes.Explosion4, 5000);
     }
 }

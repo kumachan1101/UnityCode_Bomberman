@@ -39,7 +39,7 @@ public class Field_Player_Stage2 : Field_Player_CpuMode {
 		canvasName = "Canvas2";
 		playerName = "Player2";
 	}
-   protected override void SetPower(Slider cSlider){
+   public override void SetPower(Slider cSlider){
         cSlider.maxValue = 12;
 		cSlider.value = 12;
     }

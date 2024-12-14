@@ -1,12 +1,13 @@
 using UnityEngine;
 using Photon.Pun;
-
+using System.Collections.Generic;
 public class BomControl : MonoBehaviourPunCallbacks
 {
     public GameObject BomPrefab;
     protected GameObject tempBom;
     protected ItemControl cItemControl;
     private SoundManager soundManager;
+    public List<GameObject> instanceList = new List<GameObject>();
 
 
     protected virtual Bom_Base AddComponent_BomExplode(GameObject gBom){

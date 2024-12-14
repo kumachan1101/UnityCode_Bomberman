@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class BomBigBan_CpuMode : BomBigBan_Base
 {
+    override protected void AddComponentInstanceManager(){
+        cInsManager = gameObject.AddComponent<InstanceManager_CpuMode>();
+    }
      protected override bool IsExplosion(){
         if(null == cInsManager){
             return false;
@@ -15,7 +18,7 @@ public class BomBigBan_CpuMode : BomBigBan_Base
         {
             return;
         }
-
+        moveManager.StopMoving();
         Vector3 basePosition = Library_Base.GetPos(transform.position);
         transform.position = basePosition;
 
