@@ -1,89 +1,36 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Photon.Pun;
-using Unity.VisualScripting;
 public class ExplosionManager : MonoBehaviour
 {
     public List<GameObject> ExplosionList = new List<GameObject>();
-    public List<GameObject> ExplosionList_temp = new List<GameObject>();
-
-    public GameObject gtemp;
-
-    public List<GameObject> ExplosionIDList = new List<GameObject>();
 
     private ObjectPooler_Base objectPooler;
-    private Library_Base cLibrary;
-    private object lockObject = new object();
-    MaterialManager cMaterialManager;
-    public void Initialize(ObjectPooler_Base pooler, Library_Base library)
+    public void Initialize(ObjectPooler_Base pooler)
     {
         objectPooler = pooler;
-        cLibrary = library;
-        cMaterialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();        
     }
 
-    public GameObject GetGameObject(int iID)
+    public void SetupStage()
     {
-        // リストをループしてIDをチェック
-        foreach (GameObject explosion in ExplosionIDList)
-        {
-            if (explosion != null)
-            {
-                Explosion_Base explosionBase = explosion.GetComponent<Explosion_Base>();
-                if (explosionBase != null && explosionBase.GetID() == iID)
-                {
-                    return explosion; // 一致するGameObjectを返す
-                }
-            }
-        }
-        Debug.Log("id:" + iID);
-        return null; // 一致するIDが見つからなかった場合
+        objectPooler.pools.Clear();
+        ConfigurePools();
+        objectPooler.InitializePool(); // プールを再生成
     }
-    public void AddPool(string tag, int size)
+    virtual protected void ConfigurePools()
+    {
+        AddPool(ExplosionTypes.Explosion1, 1000);
+        AddPool(ExplosionTypes.Explosion2, 1000);
+        AddPool(ExplosionTypes.Explosion3, 1000);
+        AddPool(ExplosionTypes.Explosion4, 1000);
+    }
+
+    private void AddPool(string tag, int size)
     {
         GameObject prefab = Resources.Load<GameObject>(tag);
         ObjectPooler_Base.Pool newPool = new ObjectPooler_Base.Pool { tag = tag, prefab = prefab, size = size };
         objectPooler.pools.Add(newPool);
     }
 
-
-    public void UpdateGroundExplosion(GameObject gObj)
-    {
-        lock (lockObject)
-        {
-            Material cMaterial = gObj.GetComponent<Renderer>().material;
-            GameObject objToRemove = null;
-
-            foreach (GameObject obj in ExplosionList) // Assuming ExplosionList is public
-            {
-                if (obj != null && obj.transform.position == gObj.transform.position)
-                {
-                    Renderer renderer = obj.GetComponent<Renderer>();
-                    string rendererMaterialName = renderer.material.name.Replace("(Instance)", "");
-                    string newMaterialName = cMaterial.name.Replace("(Instance)", "");
-
-                    if (rendererMaterialName == newMaterialName)
-                    {
-                        EnqueueObject(gObj); // Assuming Field_Block_Base is also a singleton
-                        return;
-                    }
-                    else
-                    {
-                        objToRemove = obj;
-                        break;
-                    }
-                }
-            }
-
-            if (objToRemove != null)
-            {
-                ExplosionList.Remove(objToRemove);
-                EnqueueObject(objToRemove);
-            }
-
-            ExplosionList.Add(gObj);
-        }
-    }
     public void UpdateGroundExplosion(string objName, Vector3 position)
     {
         GameObject delobj = null;
@@ -110,9 +57,6 @@ public class ExplosionManager : MonoBehaviour
         }
         ExplosionList.Add(gtemp); // 新しいオブジェクトを追加
     }
-
-
-
 
     public string GetExplosionType(string input)
     {
@@ -181,6 +125,48 @@ public class ExplosionManager : MonoBehaviour
             }
         }
         return false; // 見つからなかった場合はfalseを返す
+    }
+
+    // ExplosionListにオブジェクトを追加するメソッド
+    public void AddToExplosionList(List<GameObject> objectsToAdd)
+    {
+        ExplosionList.AddRange(objectsToAdd);
+    }
+
+    // ExplosionListからオブジェクトを削除するメソッド
+    public void RemoveFromExplosionList(List<GameObject> objectsToRemove)
+    {
+        foreach (GameObject obj in objectsToRemove)
+        {
+            ExplosionList.Remove(obj);
+        }
+    }
+
+    // ExplosionListを取得するメソッド（必要なら条件付きで許可）
+    public IEnumerable<GameObject> GetExplosionList()
+    {
+        return ExplosionList;
+    }
+
+    public void AddExplosionObjects(IEnumerable<GameObject> objectsToAdd)
+    {
+        foreach (var obj in objectsToAdd)
+        {
+            if (obj != null && !ExplosionList.Contains(obj))
+            {
+                ExplosionList.Add(obj);
+            }
+        }
+    }
+    public void RemoveExplosionObjects(IEnumerable<GameObject> objectsToRemove)
+    {
+        foreach (var obj in objectsToRemove)
+        {
+            if (obj != null && ExplosionList.Contains(obj))
+            {
+                ExplosionList.Remove(obj);
+            }
+        }
     }
 
 }

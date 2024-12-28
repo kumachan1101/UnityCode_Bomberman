@@ -31,7 +31,6 @@ public class RoomList : IEnumerable<RoomInfo>
             yield return kvp.Value;
         }
     }
-
     IEnumerator IEnumerable.GetEnumerator() {
         return GetEnumerator();
     }

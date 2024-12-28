@@ -39,7 +39,7 @@ public class PowerGage_Slider : MonoBehaviourPunCallbacks, IPunInstantiateMagicC
 	private void SetSliderPos(int iPlayerPos){
 		RectTransform sliderRectTransform = cSlider.GetComponent<RectTransform>(); // SliderのRectTransformを取得します。
 		Vector3 newPosition = sliderRectTransform.anchoredPosition; // ローカル座標
-		newPosition.y = newPosition.y - (iPlayerPos - 1) * 20;
+		newPosition.y = newPosition.y - (iPlayerPos - 1) * 12;
 		sliderRectTransform.anchoredPosition = newPosition; // 新しい座標を設定します。
 	}
 

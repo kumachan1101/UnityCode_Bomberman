@@ -5,10 +5,14 @@ abstract public class InstanceManager_Base : MonoBehaviour
 {
     protected GameObject prefab;
     protected string resource;
-
-    // 破棄予定のGameObjectを保持するリスト
+	protected Field_Block_Base cField;
+    public GameObject gTemp;
 
     protected Queue<GameObject> instanceQueue = new Queue<GameObject>();
+	void Start()
+	{
+		 cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+	}
 
     public GameObject InstantiateInstance(Vector3 position)
     {
@@ -23,21 +27,12 @@ abstract public class InstanceManager_Base : MonoBehaviour
 
     virtual public void DestroyInstance(GameObject instance)
     {
-        /*
-        PhotonView pv = instance.GetComponent<PhotonView>();
-        if (pv != null && pv.IsMine) {
-            PhotonNetwork.Destroy(instance); // ネットワーク全体で削除
-        } else {
-            Destroy(instance); // ローカルのみで削除
-        }
-        */
         // オンライン生成した場合も、PhotonNetwork.Destroyではなく、以下Destroyで削除してしまっている。
         if(null != instance){
             var bomComponent = instance.GetComponent<Bom_Base>(); // BomComponentはカスタムコンポーネント
             bomComponent.bDel = true;
             Destroy(instance); // ローカルのみで削除
         }
-        
     }
 
 	public abstract void InstantiateInstancePool(Vector3 position);
@@ -61,7 +56,6 @@ abstract public class InstanceManager_Base : MonoBehaviour
 		}
     }
     
-    public GameObject gTemp;
     public virtual void SetPothonView(int viewid){}
 
     public void DestroyInstancePool_Base()
@@ -75,37 +69,12 @@ abstract public class InstanceManager_Base : MonoBehaviour
             cField.EnqueueObject(gtemp);
         }
     }
-
-
-
-	protected Field_Block_Base cField;
 	
-	void Start()
-	{
-		 cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
-	}
-
-    // 共通の位置設定メソッド
-    protected void SetObjectPosition(GameObject instance, Vector3 position)
-    {
-        if (instance != null)
-        {
-            instance.transform.position = position;
-        }
-    }
 
     // プレハブをセットするメソッド
     public void SetPrefab(GameObject newPrefab)
     {
         prefab = newPrefab;
     }
-
-    // リソース名をセットするメソッド
-    public void SetResource(string newResource)
-    {
-        resource = newResource;
-    }
-
-    // 他の共通メソッドやロジックがあればここに追加
 }
 

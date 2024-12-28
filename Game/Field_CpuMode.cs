@@ -10,18 +10,34 @@ public class Field_CpuMode :MonoBehaviour{
     void Start()
     {
         Init();
+        // プレイヤーの追加・削除イベントをリッスン
+        Player_Base.onPlayerAdded.AddListener(OnPlayerAdded);
+        Player_Base.onPlayerRemoved.AddListener(OnPlayerRemoved);
     }
 
     void Update()
     {
-        GameTransision();        
-		
     }
 	protected void Init()
 	{
 		bFlag = false;
 		cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
 	}
+
+
+    // プレイヤー追加時の処理
+    private void OnPlayerAdded(Player_Base player)
+    {
+        //Debug.Log($"{player.name} がゲームに追加されました");
+        GameTransision();  // ゲーム進行チェックを呼び出す
+    }
+
+    // プレイヤー削除時の処理
+    private void OnPlayerRemoved(Player_Base player)
+    {
+        //Debug.Log($"{player.name} がゲームから削除されました");
+        GameTransision();  // ゲーム進行チェックを呼び出す
+    }
 
     protected void GameTransision()
     {

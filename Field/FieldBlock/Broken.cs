@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Broken : MonoBehaviour
@@ -33,7 +31,6 @@ public class Broken : MonoBehaviour
             GetComponent<Collider>().isTrigger = true;
         }
         */
-
     }
     private void OnTriggerEnter(Collider col){
         //Debug.Log($"{col.transform.name} is OnTriggerEnter");

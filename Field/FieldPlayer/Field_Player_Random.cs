@@ -5,6 +5,7 @@ public class Field_Player_Random : Field_Player_CpuMode {
     protected Vector3[] v3PlayerPos100;
 
     public override int GetIndex(){
+        // Field100のGameObjectを読みだす。100というのは、なるべく大きめの重複しない値を指定しただけ
         return 100;
     }
 

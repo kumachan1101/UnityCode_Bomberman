@@ -157,6 +157,81 @@ public class Library_Base : MonoBehaviour{
         }
         return g;
     }
+
+    /// <summary>
+    /// 指定した座標に存在するすべてのGameObjectを取得します。
+    /// </summary>
+    /// <param name="position">確認する座標</param>
+    /// <param name="radius">チェック範囲の半径</param>
+    /// <returns>その座標に存在するGameObjectのリストを返します。</returns>
+    public static List<GameObject> GetGameObjectsAtPosition(Vector3 position, float radius = 0.25f)
+    {
+        // 指定した座標に存在するすべてのコライダーを取得
+        Collider[] colliders = Physics.OverlapSphere(position, radius);
+
+        // コライダーからGameObjectを取得してリストに変換
+        List<GameObject> gameObjects = new List<GameObject>();
+        foreach (var collider in colliders)
+        {
+            if (collider.gameObject != null)
+            {
+                gameObjects.Add(collider.gameObject);
+            }
+        }
+
+        return gameObjects;
+    }
+
+    /// <summary>
+    /// 指定した座標に存在するGameObjectを1つ返却します。
+    /// </summary>
+    /// <param name="position">確認する座標</param>
+    /// <param name="radius">チェック範囲の半径（デフォルトは0.25）</param>
+    /// <returns>指定した座標と一致するGameObject。見つからない場合はnullを返します。</returns>
+    public static GameObject GetGameObjectAtExactPosition(Vector3 position, float radius = 0.25f)
+    {
+        // 座標付近のGameObjectを取得
+        List<GameObject> gameObjects = GetGameObjectsAtPosition(position, radius);
+
+        // 座標が完全一致するGameObjectを検索して返却
+        foreach (GameObject obj in gameObjects)
+        {
+            if (obj.transform.position == position)
+            {
+                return obj;
+            }
+        }
+
+        // 一致するGameObjectが見つからなかった場合はnullを返す
+        return null;
+    }
+
+    /// <summary>
+    /// 指定した座標と名称が一致するGameObjectを1つ返却します。
+    /// </summary>
+    /// <param name="position">確認する座標</param>
+    /// <param name="name">確認するGameObjectの名称</param>
+    /// <param name="radius">チェック範囲の半径（デフォルトは0.25）</param>
+    /// <returns>指定した座標と名称が一致するGameObject。見つからない場合はnullを返します。</returns>
+    public static GameObject GetGameObjectAtExactPositionWithName(Vector3 position, string name, float radius = 0.25f)
+    {
+        // 座標付近のGameObjectを取得
+        List<GameObject> gameObjects = GetGameObjectsAtPosition(position, radius);
+
+        // 座標と名称が一致するGameObjectを検索して返却
+        foreach (GameObject obj in gameObjects)
+        {
+            if (obj.transform.position == position && obj.name.Contains(name))
+            {
+                return obj;
+            }
+        }
+
+        // 一致するGameObjectが見つからなかった場合はnullを返す
+        return null;
+    }
+
+
     static public Vector3 GetPos(Vector3 position)
     {
         float x = Mathf.Round(position.x);
@@ -212,62 +287,6 @@ public class Library_Base : MonoBehaviour{
         PlayerBom cPlayerBom = gPlayer.GetComponent<PlayerBom>();
         return cPlayerBom;
     }
-/*
-    public static BomConfigurationBase GetBomConfigurationFromObject(string objname, BomConfigurationType configType)
-    {
-        GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
-        PlayerBom cPlayerBom = null; // PlayerBomコンポーネントの参照を初期化
-        BomConfigurationBase cBomConfiguration = null;
-        Player_Base cPlayer = GetcPlayerFromObject(objname); // プレイヤー取得
-
-        if (cPlayer != null)
-        {
-            cPlayerBom = cPlayer.GetPlayerBom(); // プレイヤーのボムコンフィグを取得
-        }
-
-        if (cPlayerBom != null)
-        {
-            // BomConfigurationType に基づいて派生クラスを取得
-            cBomConfiguration = cPlayerBom.GetBomConfiguration();
-        }
-
-        return cBomConfiguration;
-    }
-
-
-    public static BomStatus GetBomStatusFromObject(string objname)
-    {
-        GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
-        PlayerBom cPlayerBom = null; // PlayerBomコンポーネントの参照を初期化
-		BomStatus cBomStatus = null;
-        Player_Base cPlayer = GetcPlayerFromObject(objname);
-        if (cPlayer != null)
-        {
-            cPlayerBom = cPlayer.GetPlayerBom();
-        }
-		if(cPlayerBom != null){
-			cBomStatus = cPlayerBom.GetBomStatus();
-		}
-
-        return cBomStatus;
-    }
-    public static BomManagement GetBomManagementFromObject(string objname)
-    {
-        GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
-        PlayerBom cPlayerBom = null; // PlayerBomコンポーネントの参照を初期化
-		BomManagement cBomManagement = null;
-        Player_Base cPlayer = GetcPlayerFromObject(objname);
-        if (cPlayer != null)
-        {
-            cPlayerBom = cPlayer.GetPlayerBom();
-        }
-		if(cPlayerBom != null){
-			cBomManagement = cPlayerBom.GetBomManagement();
-		}
-
-        return cBomManagement;
-    }
-*/
 
     public static PlayerAction GetcPlayerActionFromObject(string objname)
     {

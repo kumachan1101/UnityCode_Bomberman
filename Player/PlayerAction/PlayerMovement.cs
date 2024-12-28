@@ -25,7 +25,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void SpeedUp()
     {
-        if (moveSpeed < 10)
+        if (moveSpeed < 7)
         {
             moveSpeed += 1f;
         }

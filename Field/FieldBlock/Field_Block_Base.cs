@@ -23,43 +23,14 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
     protected Library_Base cLibrary;
     protected ExplosionManager explosionManager;
 
-    private object lockObject = new object(); // ロックオブジェクト
-
     protected virtual void ClearBrokenList_RPC() { }
     protected virtual void InsBrokenBlock_RPC(int x, int y, int z) { }
 
     protected virtual void InsObjMove_RPC(int x, int y, int z, Library_Base.Direction randomDirection) { }
 
     public virtual void Rainbow_RPC(string sMaterialType) { }
-
-    [SerializeField] protected ObjectPooler_Base objectPooler;
-    MaterialManager cMaterialMng;
-
-    void Start()
-    {
-        SetupStage();
-
-        cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
-        CreateFixedBlock();
-        CreateField();
-
-    }
-
-    public void SetupStage()
-    {
-        objectPooler.pools.Clear();
-        ConfigurePools();
-        objectPooler.InitializePool(); // プールを再生成
-        //explosionManager.SetObjPool();
-    }
-
-    virtual protected void ConfigurePools()
-    {
-        explosionManager.AddPool(ExplosionTypes.Explosion1, 5000);
-        explosionManager.AddPool(ExplosionTypes.Explosion2, 5000);
-        // 他のExplosionタイプが必要であれば追加
-    }
-
+    
+    private bool bSetUp;
 
     void Awake()
     {
@@ -68,17 +39,31 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
         BrokenPrefab = Resources.Load<GameObject>("Broken");
         GroundExplosionPrefab = Resources.Load<GameObject>("Explosion1");
         ObjMovePrefab = Resources.Load<GameObject>("ObjMove");
-
-        objectPooler = GetComponent<ObjectPooler_Base>();
         explosionManager = new GameObject("ExplosionManager").AddComponent<ExplosionManager>();
-        explosionManager.Initialize(objectPooler, cLibrary);
-        cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+        explosionManager.Initialize(GetComponent<ObjectPooler_Base>());
+        bSetUp = false;
+    }
 
+    void Start()
+    {
+        SetupStage();
+        cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
+        CreateFixedBlock();
+        CreateField();
     }
 
     public void CreateField()
     {
         AddBrokenBlock(5);
+    }
+    public void SetupStage()
+    {
+        explosionManager.SetupStage();
+        bSetUp = true;
+    }
+
+    public bool GetSetUp(){
+        return bSetUp;
     }
 
     [PunRPC]
@@ -186,8 +171,6 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
 
             }
         }
-
-
     }
 
     public bool IsAllWall(Vector3 v3){
@@ -220,52 +203,9 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
     {
         return explosionManager.IsMatch(targetPosition, targetMaterial);
     }
-
-
     public virtual void UpdateGroundExplosion(GameObject gObj){}
 
     public virtual GameObject DequeueObject(string tag){return null;}
     public virtual void EnqueueObject(GameObject obj){}
-
-    [PunRPC]
-    public void Rainbow(string objname)
-    {
-        List<GameObject> objectsToRemove = new List<GameObject>();
-        List<GameObject> objectsToAdd = new List<GameObject>();
-
-        foreach (GameObject obj in explosionManager.ExplosionList)
-        {
-            if (obj == null) continue;
-            if (objname != obj.name)
-            {
-                GameObject gobj = null;
-                try
-                {
-                    gobj = DequeueObject(objname.Replace("(Clone)",""));
-                }
-                catch (System.Exception ex)
-                {
-                    Debug.LogError($"Failed to dequeue object: {ex.Message}");
-                }
-
-                if (gobj != null)
-                {
-                    objectsToAdd.Add(gobj);
-                    Explosion_Base cExplosion = gobj.GetComponent<Explosion_Base>();
-                    cExplosion.SetPosition(obj.transform.position);
-                }
-                objectsToRemove.Add(obj);
-            }
-        }
-
-        explosionManager.ExplosionList.AddRange(objectsToAdd);
-        foreach (GameObject obj in objectsToRemove)
-        {
-            explosionManager.ExplosionList.Remove(obj);
-            EnqueueObject(obj);
-        }
-    }
-
-
 
 }

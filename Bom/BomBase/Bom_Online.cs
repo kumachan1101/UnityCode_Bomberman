@@ -3,9 +3,10 @@ using Photon.Pun;
 
 public class Bom_Online : Bom_Base
 {
-
+    private PhotonView cPhotonView;
     override protected void AddComponentInstanceManager(){
         cInsManager = gameObject.AddComponent<InstanceManager_Online>();
+        cPhotonView = GetComponent<PhotonView>();
         cInsManager.SetPothonView(cPhotonView.ViewID);
     }
  
@@ -32,11 +33,10 @@ public class Bom_Online : Bom_Base
         if (!IsExplosion()) return;
 
         Vector3 v3 = Library_Base.GetPos(transform.position);
-        cPhotonView.RPC(nameof(Explosion_RPC), RpcTarget.All, v3);
+        Explosion_RPC(v3);
     }
 
-    [PunRPC]
-    public void Explosion_RPC(Vector3 v3)
+    virtual public void Explosion_RPC(Vector3 v3)
     {
         HandleExplosion(v3);
     }

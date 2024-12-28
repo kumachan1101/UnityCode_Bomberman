@@ -1,6 +1,4 @@
 using UnityEngine;
-
-using Photon.Pun;
 using UnityEngine.UI;
 public class ButtonClickScript : MonoBehaviour
 {
@@ -17,12 +15,5 @@ public class ButtonClickScript : MonoBehaviour
             Debug.LogError("Button not found on GameEndCanvas");
         }
 	}
-
-
-
-    virtual public void LoadGameScene()
-    {
-    }
-
-
+    virtual public void LoadGameScene(){}
 }

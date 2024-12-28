@@ -8,11 +8,4 @@ public class Field_Block_Random : Field_Block_CpuMode {
         GameManager.SetFieldRange(width, height);
     }
 
-    protected override void ConfigurePools()
-    {
-        explosionManager.AddPool(ExplosionTypes.Explosion1, 5000);
-        explosionManager.AddPool(ExplosionTypes.Explosion2, 5000);
-        explosionManager.AddPool(ExplosionTypes.Explosion3, 5000);
-        explosionManager.AddPool(ExplosionTypes.Explosion4, 5000);
-    }
 }

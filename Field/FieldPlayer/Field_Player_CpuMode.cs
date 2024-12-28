@@ -3,18 +3,11 @@ public class Field_Player_CpuMode : Field_Player_Base {
 
 	public void Start()
 	{
-
 		int playercnt = GetArrayLength(GetIndex());
-		/*
-        for (int i = 1; i <= playercnt; i++)
-        {
-			SpawnPlayerObjects(i);
-			SetPlayerCnt(i); 
-		}
-		*/
 		// SetPlayerCntで毎回人数を設定することでスライダーの座標位置を変えている。。
 		SetPlayerCnt(1); 
 		SpawnPlayerObjects(1);
+        SetPlayerName("Player1");
         for (int i = 2; i <= playercnt; i++)
         {
 			SetPlayerCnt(i); 
@@ -24,14 +17,12 @@ public class Field_Player_CpuMode : Field_Player_Base {
 
     protected virtual void init(){}
 
+
     public override void AddDummyPlayer(int iPlayerNo, Vector3 v3)
     {
-        bool bIsMine = PreAddDummyPlayer();
-        if (!bIsMine)
-        {
+        if(false == IsAddDummyPlayer(iPlayerNo)){
             return;
         }
-
         string canvasName = "";
         string playerName = "";
         GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
@@ -92,11 +83,6 @@ public class Field_Player_CpuMode : Field_Player_Base {
 		AddPlayerCnt();
 		return true;
 	}
-    /*
-	protected override void PlayerDestroy(GameObject gPlayer){
-		PlayerDestroyComponent(gPlayer);
-	}
-    */
 
     protected GameObject InstantiateCanvas(string canvasName)
     {
@@ -119,9 +105,4 @@ public class Field_Player_CpuMode : Field_Player_Base {
     protected override string GetCanvasName(){
         return "Canvas";
     }
-
-    public override string GetPlayerName(){
-        return "Player";
-	}
-
 }

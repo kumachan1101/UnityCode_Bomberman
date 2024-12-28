@@ -25,12 +25,12 @@ public class Field_Player_Online : Field_Player_Base {
     protected override string GetCanvasName(){
         return "CanvasOnline";
     }
-
+/*
     public override string GetPlayerName(){
         //return "PlayerOnline";
         return playername;
 	}
-
+*/
 /*
 	protected override void PlayerDestroy(GameObject gPlayer){
 		photonView.RPC(nameof(OnlinePlayerDestroy), RpcTarget.All, gPlayer.GetComponent<PhotonView>().ViewID);
@@ -138,12 +138,9 @@ public class Field_Player_Online : Field_Player_Base {
 
     public override void AddDummyPlayer(int iPlayerNo, Vector3 v3)
     {
-        bool bIsMine = PreAddDummyPlayer();
-        if (!bIsMine)
-        {
+        if(false == IsAddDummyPlayer(iPlayerNo)){
             return;
         }
-
         string canvasName = "";
         string playerName = "";
         GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);

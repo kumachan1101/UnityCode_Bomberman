@@ -6,7 +6,6 @@ public class Explosion_Base : MonoBehaviour
     protected Field_Block_Base cField;
     protected bool bField = false;
     private SoundManager soundManager;
-    private PhotonTransformView transformView;
 
     int iID;
 
@@ -76,14 +75,11 @@ public class Explosion_Base : MonoBehaviour
 			Debug.LogWarning("Instance is null, cannot enqueue.");
 			return;
 		}
-		//Field_Block_Base cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
 		if(null == cField){
-            Debug.Log(g.transform.position);
+            //Debug.Log(g.transform.position);
 			cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
 		}
 		cField.EnqueueObject(g);
-
-		//Destroy(g);
 	}
 
 
@@ -109,7 +105,7 @@ public class Explosion_Base : MonoBehaviour
         switch (other.transform.name)
         {
             case "FixedWall(Clone)":
-                Debug.Log(gameObject.transform.position);
+                //Debug.Log(gameObject.transform.position);
                 DestroySync(gameObject);
                 break;
             default:

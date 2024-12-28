@@ -101,6 +101,7 @@ public class ObjectPooler_Base : MonoBehaviour
                 Debug.LogWarning("inactive object.");
             }
         }
+        //Debug.Log(tag+":"+objectPoolByTag[tag].Count);
     }
 
     public GameObject DequeueObject(string tag)
@@ -110,6 +111,7 @@ public class ObjectPooler_Base : MonoBehaviour
             GameObject obj = objectPoolByTag[tag].Dequeue(); // タグごとのキューから取り出す
 
             SetObjectActive_RPC(obj, true); // オブジェクトをアクティブにする
+            //Debug.Log(tag+":"+objectPoolByTag[tag].Count);
             return obj; // 条件に合うオブジェクトを返す
         }
 
@@ -199,12 +201,12 @@ public class ObjectPooler_Base : MonoBehaviour
         Debug.LogWarning("No available objects with tag \"" + tag + "\".");
         return null;
     }
-*/
+
 
     public List<GameObject> GetAllObjectsInPool()
     {
         return objectPoolQueue.ToList();
     }
-
+*/
 
 }

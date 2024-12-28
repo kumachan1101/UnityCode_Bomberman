@@ -26,32 +26,28 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
     public virtual void AddDummyPlayer(int iPlayerNo, Vector3 v3){}
     public virtual void SpawnPlayerObjects(int iPlayerNo){}
 
-
-	protected virtual bool PreAddDummyPlayer(){return false;}
-
-	//protected virtual void PlayerDestroy(GameObject gPlayer){}
-    /*
-    protected void PlayerDestroyComponent(GameObject gPlayer){
-		Destroy(gPlayer.GetComponent<Player_Base>());
-		Destroy(gPlayer.GetComponent<PlayerBom>());
-		Destroy(gPlayer.GetComponent<Player_Collision>());
-		Destroy(gPlayer.GetComponent<PlayerBomToBomControl>());
-        Destroy(gPlayer.GetComponent<PlayerAction>());
-        Destroy(gPlayer.GetComponent<PowerGageIF>());
-        Destroy(gPlayer.GetComponent<PlayerMovement>());
-        Destroy(gPlayer.GetComponent<PlayerAnimation>());
-        Destroy(gPlayer.GetComponent<Player_Texture>());
+    protected bool IsAddDummyPlayer(int iPlayerNo){
+        int iPlayerCnt = Library_Base.CountObjectsWithName("Player"+iPlayerNo);
+        //Debug.Log(iPlayerCnt);
+        if(iPlayerCnt >= 5){
+            return false;
+        }
+        bool bIsMine = PreAddDummyPlayer();
+        if (!bIsMine)
+        {
+            return false;
+        }
+        return true;
     }
 
-	public virtual void SetupSlider_RPC(GameObject gCanvas, GameObject gPlayer,int iPlayerNo){}
-    */
+	protected virtual bool PreAddDummyPlayer(){return false;}
 
     protected virtual string GetCanvasName(){
         return "";
     }
 
     public virtual string GetPlayerName(){
-        return "";
+        return playername;
     }
 
     protected void SetPlayerName(string name){

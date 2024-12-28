@@ -1,62 +1,20 @@
 using UnityEngine;
 
-public class BomBigBan_CpuMode : BomBigBan_Base
+public class BomBigBan_CpuMode : Bom_CpuMode
 {
-    override protected void AddComponentInstanceManager(){
-        cInsManager = gameObject.AddComponent<InstanceManager_CpuMode>();
-    }
-     protected override bool IsExplosion(){
-        if(null == cInsManager){
-            return false;
-        }
-        return true;
+    BomBigBan_Common cBomBiBomBigBan;
+
+    void Awake() {
+        AwakeCommon();
+        cBomBiBomBigBan = gameObject.AddComponent<BomBigBan_Common>();
     }
 
-    protected override void Explosion()
+    protected override void HandleExplosion(Vector3 initialPosition)
     {
-        if (!IsExplosion())
-        {
-            return;
-        }
+        cBomBiBomBigBan.SetInstanceManager(cInsManager);
         moveManager.StopMoving();
-        Vector3 basePosition = Library_Base.GetPos(transform.position);
-        transform.position = basePosition;
-
-        // Reset processed coordinates
-        processedCoordinates.Clear();
-
-        // Explode in X and Z directions (positive and negative)
-
-        for (int i = 0; i <= iExplosionNum; i++)
-        {
-            for (int j = 0; j <= iExplosionNum; j++)
-            {
-				XZ_Explosion(basePosition, i, j);
-            }
-        }
-        for (int i = 0; i <= iExplosionNum; i++)
-        {
-            for (int j = 0; j <= iExplosionNum; j++)
-            {
-                XZ_Explosion(basePosition, i, -j);
-            }
-        }
-        for (int i = 0; i <= iExplosionNum; i++)
-        {
-            for (int j = 0; j <= iExplosionNum; j++)
-            {
-				XZ_Explosion(basePosition, -i, j);
-            }
-        }
-        for (int i = 0; i <= iExplosionNum; i++)
-        {
-            for (int j = 0; j <= iExplosionNum; j++)
-            {
-                XZ_Explosion(basePosition, -i, -j);
-            }
-        }
-
-        // Destroy the bomb object after explosion
-        cInsManager.DestroyInstance(this.gameObject);
+        transform.position = initialPosition;
+        cBomBiBomBigBan.BomBiBomBigBan_Explosion(transform.position);
     }
+
 }

@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class Bom_CpuMode : Bom_Base
 {
-
-
     override protected void AddComponentInstanceManager(){
         cInsManager = gameObject.AddComponent<InstanceManager_CpuMode>();
     }

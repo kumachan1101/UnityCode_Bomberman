@@ -1,26 +1,26 @@
 ﻿using UnityEngine;
 using Photon.Pun;
+using UnityEngine.Events;
 public class Player_Base : MonoBehaviourPunCallbacks
 {
+    // プレイヤーの生成・削除イベント
+    public static UnityEvent<Player_Base> onPlayerAdded = new UnityEvent<Player_Base>();
+    public static UnityEvent<Player_Base> onPlayerRemoved = new UnityEvent<Player_Base>();
+
     void Awake(){
-        //this.gameObject.AddComponent<PowerGageIF>();
-    }    
+   }    
     void Start ()
     {
-		//InitComponent();
-        //AddPlayerComponent();//ローカルとオンラインでスクリプトをAddしないといけない。つまりRPC同期が必要。左記以外は、最初から追加しておく。もしくはPothhonのインスタンス生成時にAddsするか
+        onPlayerAdded.Invoke(this);  // 自分が追加されたことを通知
 	}
-/*
-	protected void InitComponent(){
-        this.gameObject.AddComponent<Player_Collision>();
-        this.gameObject.AddComponent<Player_Texture>();
-        AddPlayerComponent();
-	}
-*/
     public virtual void AddPlayerComponent(){}
 
 	public virtual void DestroySync(){
 		Destroy(this.gameObject);
 	}
 
+    void OnDestroy()
+    {
+        onPlayerRemoved.Invoke(this);  // 自分が削除されたことを通知
+    }
 }

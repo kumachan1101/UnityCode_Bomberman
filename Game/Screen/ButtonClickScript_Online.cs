@@ -1,55 +1,29 @@
-using UnityEngine.SceneManagement;
 using Photon.Pun;
 using UnityEngine;
-
 public class ButtonClickScript_Online : ButtonClickScript
 {
-/*
-    override public void LoadGameScene(){
-		DestroyAllPhotonViews();
-        PhotonNetwork.Disconnect();
-        PhotonNetwork.LoadLevel("GameTitle");
-    }
-	[PunRPC]
+    // 他のクライアントがシーン遷移をリクエストする
+    [PunRPC]
     public void LoadGameScene_RPC()
     {
-		DestroyAllPhotonViews();
-        PhotonNetwork.Disconnect();
-        PhotonNetwork.LoadLevel("GameTitle");
+        if (PhotonNetwork.IsMasterClient)
+        {
+            if (PhotonNetwork.IsConnected && PhotonNetwork.InRoom)
+            {
+                PhotonNetwork.LoadLevel("GameTitle");
+            }
+            else
+            {
+                Debug.LogError("Cannot load level. Client is not connected or not in a room.");
+            }
+        }
     }
 
-
-*/
-
-    void Start(){
-    }
-
+    // シーン遷移リクエストを送信する
     override public void LoadGameScene()
     {
-        Debug.Log("Online LoadGameScene");
-		PhotonView cPhotonView = GetComponent<PhotonView>();
-        cPhotonView.TransferOwnership(PhotonNetwork.MasterClient);
-        PhotonNetwork.LoadLevel("GameTitle");
-		//cPhotonView.RPC(nameof(LoadGameScene_RPC), RpcTarget.All);
+        //Debug.Log("Sending scene change request to MasterClient...");
+        PhotonView photonView = GetComponent<PhotonView>();
+        photonView.RPC(nameof(LoadGameScene_RPC), RpcTarget.MasterClient);
     }
-	[PunRPC]
-    public void LoadGameScene_RPC()
-    {
-        SceneManager.LoadScene("GameTitle");
-        //PhotonNetwork.LoadLevel("GameTitle");
-    }
-
-
-	public void DestroyAllPhotonViews()
-	{
-		foreach (PhotonView view in FindObjectsOfType<PhotonView>())
-		{
-			if (view.IsMine)
-			{
-				PhotonNetwork.Destroy(view.gameObject);
-			}
-		}
-	}
-
-
 }

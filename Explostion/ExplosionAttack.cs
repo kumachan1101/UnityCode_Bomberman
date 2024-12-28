@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
+/* アイテム取得して爆風を投げる場合のクラス(アイテム未実装)*/
 public class ExplosionAttack : Explosion_Base
 {
     private Vector3 moveDirection;

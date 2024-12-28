@@ -5,12 +5,6 @@ public class GameTitleScreenManager : BaseScreenManager
     public override void InitializeScreen()
     {
         InitializeCanvas();
-        //DestroyAllPhotonViews();
-        if (PhotonNetwork.IsConnected)
-        {
-            PhotonNetwork.Disconnect(); // 切断処理を開始
-        }
-
     }
 
     protected override void InitializeCanvas()
@@ -23,13 +17,10 @@ public class GameTitleScreenManager : BaseScreenManager
         }
     }
 
-	public void DestroyAllPhotonViews()
-	{
-		foreach (PhotonView view in FindObjectsOfType<PhotonView>())
-		{
-            view.TransferOwnership(PhotonNetwork.MasterClient);
-			PhotonNetwork.Destroy(view.gameObject);
-		}
-	}
-
+    void Start(){
+        if (PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.Disconnect(); // 切断処理を開始
+        }
+    }
 }

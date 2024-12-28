@@ -1,15 +1,91 @@
-using System.IO;
+using System;
+using System.Reflection;
 using ExitGames.Client.Photon;
 using UnityEngine;
 
 public static class CustomTypes
 {
+    private static readonly byte[] memBomParameters;
+
+    private static int BomParametersSize;
+
+    static CustomTypes()
+    {
+        BomParametersSize = CalculateBomParametersSize(typeof(BomParameters));
+        //Debug.Log(BomParametersSize);
+
+        // BomParametersSizeを計算した後でmemBomParametersを初期化
+        memBomParameters = new byte[BomParametersSize];
+    }
+
+
+    private static int CalculateBomParametersSize(Type type)
+    {
+        int totalSize = 0;
+
+        // フィールドを取得
+        FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+        foreach (FieldInfo field in fields)
+        {
+            // フィールドの型に基づいてサイズを計算
+            if (field.FieldType == typeof(int))
+            {
+                totalSize += sizeof(int);
+            }
+            else if (field.FieldType == typeof(float))
+            {
+                totalSize += sizeof(float);
+            }
+            else if (field.FieldType == typeof(bool))
+            {
+                totalSize += sizeof(bool);
+            }
+            else if (field.FieldType == typeof(Vector3))
+            {
+                totalSize += sizeof(float) * 3; // Vector3はfloatが3つ
+            }
+            else if (field.FieldType == typeof(string))
+            {
+                totalSize += sizeof(int); // 文字列の長さ（int型）
+                totalSize += 256;         // 最大文字列サイズ（固定長）
+            }
+            else if (field.FieldType.IsEnum) // enum型の処理
+            {
+                Type underlyingType = Enum.GetUnderlyingType(field.FieldType); // enumの基底型を取得
+                if (underlyingType == typeof(int))
+                {
+                    totalSize += sizeof(int);
+                }
+                else if (underlyingType == typeof(byte))
+                {
+                    totalSize += sizeof(byte);
+                }
+                else if (underlyingType == typeof(short))
+                {
+                    totalSize += sizeof(short);
+                }
+                else
+                {
+                    throw new NotSupportedException($"Unsupported enum underlying type: {underlyingType}");
+                }
+            }
+            else
+            {
+                throw new NotSupportedException($"Unsupported field type: {field.FieldType}");
+            }
+        }
+
+        return totalSize;
+    }
+
+
+
     public static void Register()
     {
         PhotonPeer.RegisterType(typeof(BomParameters), (byte)'B', SerializeBomParameters, DeserializeBomParameters);
     }
 
-    private static readonly byte[] memBomParameters = new byte[4 * 3 + 4 + 4 + 1 + 4 + 1 + 4 * 3 + 256]; // 追加のバッファを用意
 
     private static short SerializeBomParameters(StreamBuffer outStream, object customObject)
     {

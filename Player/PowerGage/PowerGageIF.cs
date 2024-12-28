@@ -1,10 +1,12 @@
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
+using System.Collections;
 public class PowerGageIF : MonoBehaviourPunCallbacks
 {
 	protected PowerGage cPowerGage;
 	protected int iCanvasInsID;
+
 	public void SetPowerGage(PowerGage cObj){
 		cPowerGage = cObj;
 	}
@@ -19,14 +21,50 @@ public class PowerGageIF : MonoBehaviourPunCallbacks
         if(cPowerGage == null){
             return;
         }
-        cPowerGage.SetDamage(iDamage);
+        SetDamage_RPC(iDamage);
+	}
+
+	protected virtual void SetDamage_RPC(int iDamage){}
+	[PunRPC]
+	public void SyncSetDamage(int iDamage){
+        if(cPowerGage == null){
+			Debug.Log("cPowerGage is null");
+			StartCoroutine(RetrySyncSetDamage(iDamage));
+            return;
+        }
+		cPowerGage.SetDamage(iDamage);
 		if(cPowerGage.IsDead()){
 			GetComponent<Player_Base>().DestroySync();
 		}
+		//Debug.Log($"Received RPC 'SyncSetDamage' at ViewID: {photonView.ViewID} with Damage: {iDamage}");
+		
+	}
+
+	private IEnumerator RetrySyncSetDamage(int iDamage){
+		int retries = 5; // 再試行回数
+		float delay = 0.1f; // 再試行間隔
+		while (retries > 0){
+			if (cPowerGage != null) {
+				SyncSetDamage(iDamage); // cPowerGage が初期化済みなら SyncSetDamage を呼び出す
+				yield break;
+			}
+			retries--;
+			yield return new WaitForSeconds(delay);
+		}
+		Debug.LogError("Failed to initialize cPowerGage after retries.");
 	}
 
 	public void HeartUp(int iHeart){
         if(cPowerGage == null){
+            return;
+        }
+		HeartUp_RPC(iHeart);
+	}
+	protected virtual void HeartUp_RPC(int iHeart){}
+	[PunRPC]
+	public void SyncHeartUp(int iHeart){
+        if(cPowerGage == null){
+			Debug.Log("cPowerGage is null");
             return;
         }
 		cPowerGage.HeartUp(iHeart);

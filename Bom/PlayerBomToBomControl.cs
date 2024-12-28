@@ -4,12 +4,18 @@ public class PlayerBomToBomControl : MonoBehaviour
     BomControl cBomControl;
     PlayerBom cPlayerBom;
 
+    Field_Block_Base cField_Block;
+
     public void Awake(){
         cBomControl = GameObject.Find("BomControl").GetComponent<BomControl>();
         cPlayerBom = this.gameObject.AddComponent<PlayerBom>();
+        cField_Block = GameObject.Find("Field").GetComponent<Field_Block_Base>();
     }
 
     public void RequestDropBom(Vector3 position, Vector3 direction){
+        if(false == cField_Block.GetSetUp()){
+            return;
+        }
 		if(Library_Base.IsPositionOutOfBounds(position)){
 			return;
 		}

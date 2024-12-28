@@ -1,6 +1,5 @@
 using UnityEngine;
 using Photon.Pun;
-using System.Linq;
 
 public class InstanceManager_Online : InstanceManager_Base
 {
@@ -43,7 +42,7 @@ public class InstanceManager_Online : InstanceManager_Base
             instance.transform.position = new Vector3(0, -5, 0);
 
             // リストが10個を超えた場合、古いものを削除
-            if (cBomControl.instanceList.Count > 10)
+            if (cBomControl.instanceList.Count > 3)
             {
                 GameObject oldestInstance = cBomControl.instanceList[0]; // 最初の要素を取得
                 cBomControl.instanceList.RemoveAt(0);                   // リストから削除

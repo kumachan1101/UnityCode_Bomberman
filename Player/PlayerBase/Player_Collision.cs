@@ -4,7 +4,8 @@ public class Player_Collision : MonoBehaviour
 {
 
     private string MaterialType;
-
+    private float lastDamageTime = 0f;
+    private float damageCooldown = 1f; // ダメージを受ける間隔（秒）
     private MaterialManager materialManager;
     void Start()
     {
@@ -24,8 +25,13 @@ public class Player_Collision : MonoBehaviour
         {
             string materialName = other.GetComponent<Renderer>().material.name.Replace(" (Instance)", "");
             if(MaterialType != materialName){
+                if (Time.time - lastDamageTime < damageCooldown){
+                    return;
+                }
                 int iDamage = other.GetComponent<Explosion_Base>().GetDamage();
                 GetComponent<PowerGageIF>().SetDamage(iDamage);
+                // 最後にダメージを受けた時間を更新
+                lastDamageTime = Time.time;
             }
         }
     }

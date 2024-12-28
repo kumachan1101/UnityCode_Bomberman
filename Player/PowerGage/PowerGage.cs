@@ -2,7 +2,7 @@ using Photon.Pun;
 using UnityEngine.UI;
 using UnityEngine;
 
-public class PowerGage : MonoBehaviourPunCallbacks
+public class PowerGage : MonoBehaviour
 {
 	protected Slider cSlider;
 
@@ -13,26 +13,19 @@ public class PowerGage : MonoBehaviourPunCallbacks
 		cSlider.value = iPower;
 
 	}
+
 	public void SetDamage(int iDamage){
-		SetDamage_RPC(iDamage);
-	}
-
-	protected virtual void SetDamage_RPC(int iDamage){}
-
-	[PunRPC]
-	public void SyncSetDamage(int iDamage){
 		cSlider.value -= iDamage;
 	}
 
 	public void HeartUp(int iHeart){
-		HeartUp_RPC(iHeart);
-	}
-
-	protected virtual void HeartUp_RPC(int iHeart){}
-
-	[PunRPC]
-	public void SyncHeartUp(int iHeart){
 		cSlider.value += iHeart;
+	}
+	public bool IsHeartUp(){
+		if(cSlider.value == cSlider.maxValue){
+			return false;
+		}
+		return true;
 	}
 
 	public bool IsDead(){

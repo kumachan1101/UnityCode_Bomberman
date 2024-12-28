@@ -50,7 +50,7 @@ public class BomControl : MonoBehaviourPunCallbacks
 		if(cItemControl.IsItem(bomParams.position)){
 			return null;
 		}
-		if(Library_Base.CheckPositionAndName(bomParams.position, "Explosion")){
+        if(null != Library_Base.GetGameObjectAtExactPositionWithName(bomParams.position, "Explosion")){
 			return null;
 		}
 		MakeBom_RPC(bomParams);
