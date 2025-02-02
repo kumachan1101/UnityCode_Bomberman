@@ -4,6 +4,22 @@ public class Field_Player_Random : Field_Player_CpuMode {
 
     protected Vector3[] v3PlayerPos100;
 
+	public void Start()
+	{
+		int playercnt = GetArrayLength(GetIndex());
+		// SetPlayerCntで毎回人数を設定することでスライダーの座標位置を変えている。。
+        for (int i = 1; i <= playercnt; i++)
+        {
+            if(i == 1){
+                SpawnPlayerObjects(i);
+                SetPlayerName("Player1");
+            }
+            else{
+                SpawnPlayerObjects(Random.Range(2, 5));
+            }
+            SetPlayerCnt(i); 
+		}
+	}
     public override int GetIndex(){
         // Field100のGameObjectを読みだす。100というのは、なるべく大きめの重複しない値を指定しただけ
         return 100;
@@ -57,6 +73,9 @@ public class Field_Player_Random : Field_Player_CpuMode {
     public override void SetPower(Slider cSlider){
         cSlider.maxValue = 10;
 		cSlider.value = 10;
+    }
+    public override int GetPower(){
+        return 10;
     }
 
 }

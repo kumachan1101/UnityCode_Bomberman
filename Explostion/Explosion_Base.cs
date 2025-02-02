@@ -1,26 +1,12 @@
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.SceneManagement;
 
 public class Explosion_Base : MonoBehaviour
 {
     protected Field_Block_Base cField;
     protected bool bField = false;
     private SoundManager soundManager;
-
-    int iID;
-
-    public void SetID(int id){
-        iID = id;
-    }
-
-    public int GetID(){
-        return iID;
-    }
-
-    public void FieldValid()
-    {
-        bField = true;
-    }
 
     void Awake(){
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
@@ -29,10 +15,12 @@ public class Explosion_Base : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        /*
         if(bField){
             //cField.AddExplosion(this.gameObject);
             return;
         }
+        */
 		cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
         //Invoke(nameof(hide), 1f);
         soundManager.PlaySoundEffect("EXPLOISON");
@@ -49,15 +37,16 @@ public class Explosion_Base : MonoBehaviour
 
     }
 
+
 	public void ReqHide(){
 		Invoke(nameof(hide), 1f);
 	}
 
-    void hide(){
-        SetPosition(new Vector3(transform.position.x, transform.position.y-1, transform.position.z));
+    protected virtual void hide(){
 		if(null == cField){
 			cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
 		}
+        SetPosition(new Vector3(transform.position.x, transform.position.y-1, transform.position.z));
         bool bRet = cField.IsMatchObjMove(transform.position);
         if(bRet){
             DestroySync(this.gameObject);

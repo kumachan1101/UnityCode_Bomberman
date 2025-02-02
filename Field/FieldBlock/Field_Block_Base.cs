@@ -1,53 +1,50 @@
+
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using System.Collections;
 
-public class Field_Block_Base:MonoBehaviourPunCallbacks 
+public class Field_Block_Base : MonoBehaviourPunCallbacks
 {
-    public GameObject FixedWallPrefab;
-    public GameObject GroundPrefab;
-    public GameObject BrokenPrefab;
-
-    public GameObject GroundExplosionPrefab;
-
-    public GameObject ObjMovePrefab;
-
-    public List<GameObject> GroundList = new List<GameObject>();
-    public List<GameObject> WallList = new List<GameObject>();
-    public List<GameObject> FixedWallList = new List<GameObject>();
-    public List<GameObject> BrokenList = new List<GameObject>();
-
-    public List<GameObject> ObjMoveList = new List<GameObject>();
+    private bool bSetUp;
 
     protected Library_Base cLibrary;
     protected ExplosionManager explosionManager;
 
+    private GroundBlockManager groundBlockManager;
+    private FixedWallBlockManager fixedWallBlockManager;
+    private BrokenBlockManager brokenBlockManager;
+    private ObjMoveBlockManager objMoveBlockManager;
+
     protected virtual void ClearBrokenList_RPC() { }
     protected virtual void InsBrokenBlock_RPC(int x, int y, int z) { }
-
     protected virtual void InsObjMove_RPC(int x, int y, int z, Library_Base.Direction randomDirection) { }
-
     public virtual void Rainbow_RPC(string sMaterialType) { }
-    
-    private bool bSetUp;
 
     void Awake()
     {
-        FixedWallPrefab = Resources.Load<GameObject>("FixedWall");
-        GroundPrefab = Resources.Load<GameObject>("Ground");
-        BrokenPrefab = Resources.Load<GameObject>("Broken");
-        GroundExplosionPrefab = Resources.Load<GameObject>("Explosion1");
-        ObjMovePrefab = Resources.Load<GameObject>("ObjMove");
         explosionManager = new GameObject("ExplosionManager").AddComponent<ExplosionManager>();
         explosionManager.Initialize(GetComponent<ObjectPooler_Base>());
+        cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
+
+        // Field_Block_BaseのGameObjectに管理クラスを追加
+        groundBlockManager = gameObject.AddComponent<GroundBlockManager>();
+        fixedWallBlockManager = gameObject.AddComponent<FixedWallBlockManager>();
+        brokenBlockManager = gameObject.AddComponent<BrokenBlockManager>();
+        objMoveBlockManager = gameObject.AddComponent<ObjMoveBlockManager>();
+
+        // 初期化処理
+        groundBlockManager.Initialize();
+        fixedWallBlockManager.Initialize();
+        brokenBlockManager.Initialize();
+        objMoveBlockManager.Initialize();
+
         bSetUp = false;
     }
 
     void Start()
     {
         SetupStage();
-        cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
         CreateFixedBlock();
         CreateField();
     }
@@ -56,35 +53,28 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
     {
         AddBrokenBlock(5);
     }
+
     public void SetupStage()
     {
         explosionManager.SetupStage();
         bSetUp = true;
     }
 
-    public bool GetSetUp(){
+    public bool GetSetUp()
+    {
         return bSetUp;
     }
 
     [PunRPC]
     public void ClearBrokenList()
     {
-        foreach (GameObject gBroken in BrokenList)
-        {
-            if (gBroken != null)
-            {
-                Destroy(gBroken);
-            }
-        }
-        BrokenList.Clear();
+        brokenBlockManager.ClearBrokenList();
     }
 
     [PunRPC]
     public void InsBrokenBlock(int x, int y, int z)
     {
-        GameObject g = Instantiate(BrokenPrefab);
-        g.transform.position = new Vector3(x, y, z);
-        BrokenList.Add(g);
+        brokenBlockManager.InsBrokenBlock(x, y, z);
     }
 
     public void AddBrokenBlock(int randomRangeMax)
@@ -123,13 +113,7 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
     [PunRPC]
     public void InsObjMove(int x, int y, int z, Library_Base.Direction randomDirection)
     {
-        ObjMovePrefab = Resources.Load<GameObject>("ObjMove");
-        GameObject g = Instantiate(ObjMovePrefab);
-        g.transform.position = new Vector3(x, y, z);
-
-        Library_Base.SetDirection(g, randomDirection);
-
-        ObjMoveList.Add(g);
+        objMoveBlockManager.InsObjMove(x, y, z, randomDirection);
     }
 
     protected virtual void SetFieldRange()
@@ -137,75 +121,157 @@ public class Field_Block_Base:MonoBehaviourPunCallbacks
         GameManager.SetFieldRange(20, 20);
     }
 
-    protected void CreateFixedBlock(){
-		SetFieldRange();
-		GetComponent<Field_Player_Base>().SetPlayerPositions();
-		
-        for (int x = 0; x < GameManager.xmax; x++) {
-            for (int z = 0; z < GameManager.zmax; z++) {
-                //int iRand = Random.Range(0, 10);
-                int iRand = 0;
-                int y1 = 0;
-                int y2 = 1;
+    protected void CreateFixedBlock()
+    {
+        SetFieldRange();
+        GetComponent<Field_Player_Base>().SetPlayerPositions();
 
-                //矢印ブロックは生成しないようにしている。オンラインの場合、このタイミングで生成しようとすると、Pothon実行前と思われ、エラーになってしまうため。
-                //オンラインに対応するのであれば、破壊ブロックと同じタイミングでPothonから生成するようにする。
-                if(1 == iRand){
-                    Library_Base.Direction randomDirection = Library_Base.GetRandomDirection();
-                    InsObjMove_RPC(x, y1, z, randomDirection);
-                }
-                else{
-                    //Instantiateはprehabの抽象データBoxを複製して実体化する
-                    GameObject g1 = Instantiate(GroundPrefab);
-                    g1.transform.position = new Vector3(x, y1, z);
-                    GroundList.Add(g1);
-                }
-
-                
-                if((x == 0 || z == 0 || x == GameManager.xmax-1 || z == GameManager.zmax-1)
-				|| (x == 1 || z == 1 || x == GameManager.xmax-2 || z == GameManager.zmax-2)){
-                    GameObject g2 = Instantiate(FixedWallPrefab);
-                    g2.transform.position = new Vector3(x, y2, z);
-                    FixedWallList.Add(g2);
-                }
-
-            }
-        }
+        fixedWallBlockManager.CreateFixedWall();
+        groundBlockManager.CreateGroundBlock();
     }
 
-    public bool IsAllWall(Vector3 v3){
-        bool isWall = cLibrary.IsObjectAtPosition(WallList, v3);
-        bool isFixedWall = cLibrary.IsObjectAtPosition(FixedWallList, v3);
-        bool isAllWall = isWall | isFixedWall;
-        return isAllWall;
+    public bool IsAllWall(Vector3 v3)
+    {
+        return cLibrary.IsObjectAtPosition(fixedWallBlockManager.FixedWallList, v3) || cLibrary.IsObjectAtPosition(fixedWallBlockManager.WallList, v3);
     }
 
-    public bool IsBroken(Vector3 v3){
-        bool isBroken = cLibrary.IsObjectAtPosition(BrokenList, v3);
-        return isBroken;
+    public bool IsBroken(Vector3 v3)
+    {
+        return cLibrary.IsObjectAtPosition(brokenBlockManager.BrokenList, v3);
     }
 
-
-
-	public bool IsMatchObjMove(Vector3 targetPosition)
-	{
-		foreach (GameObject obj in ObjMoveList)
-		{
-			if (obj != null && obj.transform.position == targetPosition)
-			{
-				return true; // 位置とマテリアルが一致する場合
-			}
-		}
-		return false; // 位置とマテリアルが一致しない場合
-	}
+    public bool IsMatchObjMove(Vector3 targetPosition)
+    {
+        return objMoveBlockManager.IsMatchObjMove(targetPosition);
+    }
 
     public bool IsMatch(Vector3 targetPosition, Material targetMaterial)
     {
         return explosionManager.IsMatch(targetPosition, targetMaterial);
     }
-    public virtual void UpdateGroundExplosion(GameObject gObj){}
 
-    public virtual GameObject DequeueObject(string tag){return null;}
-    public virtual void EnqueueObject(GameObject obj){}
+    public virtual void UpdateGroundExplosion(GameObject gObj) { }
+    public virtual GameObject DequeueObject(string tag) { return null; }
+    public virtual void EnqueueObject(GameObject obj) { }
+}
 
+public class GroundBlockManager : MonoBehaviour
+{
+    public GameObject GroundPrefab;
+    public List<GameObject> GroundList;
+
+    public void Initialize()
+    {
+        this.GroundPrefab = Resources.Load<GameObject>("Ground");
+        this.GroundList = new List<GameObject>();
+    }
+
+    public void CreateGroundBlock()
+    {
+        int y1 = 0;
+        for (int x = 0; x < GameManager.xmax; x++)
+        {
+            for (int z = 0; z < GameManager.zmax; z++)
+            {
+                GameObject g1 = Instantiate(GroundPrefab);
+                g1.transform.position = new Vector3(x, y1, z);
+                GroundList.Add(g1);
+            }
+        }
+    }
+}
+
+public class FixedWallBlockManager : MonoBehaviour
+{
+    public GameObject FixedWallPrefab;
+    public List<GameObject> FixedWallList;
+    public List<GameObject> WallList;
+
+    public void Initialize()
+    {
+        this.FixedWallPrefab = Resources.Load<GameObject>("FixedWall");
+        this.WallList = new List<GameObject>();
+        this.FixedWallList = new List<GameObject>();
+    }
+
+    public void CreateFixedWall()
+    {
+        int y2 = 1;
+        for (int x = 0; x < GameManager.xmax; x++)
+        {
+            for (int z = 0; z < GameManager.zmax; z++)
+            {
+                if ((x == 0 || z == 0 || x == GameManager.xmax - 1 || z == GameManager.zmax - 1) ||
+                    (x == 1 || z == 1 || x == GameManager.xmax - 2 || z == GameManager.zmax - 2))
+                {
+                    GameObject g2 = Instantiate(FixedWallPrefab);
+                    g2.transform.position = new Vector3(x, y2, z);
+                    FixedWallList.Add(g2);
+                }
+            }
+        }
+    }
+}
+
+public class BrokenBlockManager : MonoBehaviour
+{
+    public GameObject BrokenPrefab;
+    public List<GameObject> BrokenList;
+
+    public void Initialize()
+    {
+        this.BrokenPrefab = Resources.Load<GameObject>("Broken");
+        this.BrokenList = new List<GameObject>();
+    }
+
+    public void InsBrokenBlock(int x, int y, int z)
+    {
+        GameObject g = Instantiate(BrokenPrefab);
+        g.transform.position = new Vector3(x, y, z);
+        BrokenList.Add(g);
+    }
+
+    public void ClearBrokenList()
+    {
+        foreach (var g in BrokenList)
+        {
+            if (g != null)
+            {
+                Destroy(g);
+            }
+        }
+        BrokenList.Clear();
+    }
+}
+
+public class ObjMoveBlockManager : MonoBehaviour
+{
+    public GameObject ObjMovePrefab;
+    public List<GameObject> ObjMoveList;
+
+    public void Initialize()
+    {
+        this.ObjMovePrefab = Resources.Load<GameObject>("ObjMove");
+        this.ObjMoveList = new List<GameObject>();
+    }
+
+    public void InsObjMove(int x, int y, int z, Library_Base.Direction randomDirection)
+    {
+        GameObject g = Instantiate(ObjMovePrefab);
+        g.transform.position = new Vector3(x, y, z);
+        Library_Base.SetDirection(g, randomDirection);
+        ObjMoveList.Add(g);
+    }
+
+    public bool IsMatchObjMove(Vector3 targetPosition)
+    {
+        foreach (GameObject obj in ObjMoveList)
+        {
+            if (obj != null && obj.transform.position == targetPosition)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }

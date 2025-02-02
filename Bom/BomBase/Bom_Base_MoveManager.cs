@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Bom_Base_MoveManager : MonoBehaviour
@@ -43,14 +44,25 @@ public class Bom_Base_MoveManager : MonoBehaviour
         }
     }
 
-    public void AbailableBomKick()
+    public void ReqSetting(BomParameters bomParams){
+        AbailableBomKick(bomParams);
+        AbailableBomAttack(bomParams);
+    }
+
+    public void AbailableBomKick(BomParameters bomParams)
     {
+        if(false == bomParams.bomKick){
+            return;
+        }
         StartMoving();
     }
 
-    public void AbailableBomAttack(Vector3 direction)
+    public void AbailableBomAttack(BomParameters bomParams)
     {
+        if(false == bomParams.bomAttack){
+            return;
+        }
         StartMoving();
-        SetMoveDirection(direction);
+        SetMoveDirection(bomParams.direction);
     }
 }

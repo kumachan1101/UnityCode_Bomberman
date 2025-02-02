@@ -6,7 +6,17 @@ public class Field_Player_Stage1 : Field_Player_CpuMode {
     public override int GetIndex(){
         return 1;
     }
-
+	public void Start()
+	{
+		int playercnt = GetArrayLength(GetIndex());
+		// SetPlayerCntで毎回人数を設定することでスライダーの座標位置を変えている。。
+        for (int i = 1; i <= playercnt; i++)
+        {
+            SetPlayerCnt(i); 
+            SpawnPlayerObjects(i);
+		}
+        SetPlayerName("Player1");
+	}
     public override void SetPlayerPositions()
     {
         // GameManager.xmax と GameManager.zmax の値がここで取得可能であると仮定
@@ -33,6 +43,9 @@ public class Field_Player_Stage1 : Field_Player_CpuMode {
         cSlider.maxValue = 10;
 		cSlider.value = 10;
     }
+    public override int GetPower(){
+        return 1;
+    }
 
 
     public override string GetBomMaterial(Vector3 target, int index)
@@ -53,6 +66,15 @@ public class Field_Player_Stage1 : Field_Player_CpuMode {
     }
 
 
+    protected override bool IsAddDummyPlayer(int iPlayerNo){
+        int iPlayerCnt = Library_Base.CountObjectsWithName("Player"+iPlayerNo);
+        bool bIsMine = PreAddDummyPlayer();
+        if (!bIsMine)
+        {
+            return false;
+        }
+        return true;
+    }
 
 
 }

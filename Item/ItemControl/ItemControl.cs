@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-public class ItemControl: MonoBehaviourPunCallbacks
+using Unity.IO.LowLevel.Unsafe;
+abstract public class ItemControl: MonoBehaviourPunCallbacks
 {
     public GameObject ItemFirePrefab;
     public GameObject ItemBomPrefab;
@@ -22,8 +23,19 @@ public class ItemControl: MonoBehaviourPunCallbacks
     public GameObject ItemAddDummyPrefab;
 
     public List<GameObject> ItemList = new List<GameObject>();
+    [System.Serializable]
+    public class CreateItem
+    {
+        public string itemName;
+        public GameObject itemPrefab;
+    }
+    protected List<CreateItem> itemList = new List<CreateItem>();
+    // アイテムを生成する確率 (例えば、5分の1)
+    public float itemSpawnProbability = 0.2f;  // 20%の確率
 
     void Awake(){
+        CreateItem_AddList();
+        /*
         ItemFirePrefab = Resources.Load<GameObject>("item_fire");
         ItemBomPrefab = Resources.Load<GameObject>("item_bom");
         ItemBomExplodePrefab = Resources.Load<GameObject>("item_explode");
@@ -36,10 +48,13 @@ public class ItemControl: MonoBehaviourPunCallbacks
         ItemHeartPrefab = Resources.Load<GameObject>("item_heart");
         ItemAddBlockPrefab = Resources.Load<GameObject>("item_addblock");
         ItemAddDummyPrefab = Resources.Load<GameObject>("item_adddummy");        
+        */
     }
+
+    abstract protected void CreateItem_AddList();
+/*
     public enum ABILITY {
         ABILITY_NOTHING,//能力なし
-        /* 良い能力 */
         ABILITY_FIRE_UP,
         ABILITY_BOM_UP,
 
@@ -58,9 +73,8 @@ public class ItemControl: MonoBehaviourPunCallbacks
         //ABILITY_RANGE = 40
         ABILITY_RANGE = ABILITY_MAX
     }
-
-    protected virtual void CreateItem_RPC(ABILITY eRand, Vector3 v3){
-    }
+*/
+    abstract public void CreateItem_RPC(Vector3 v3);
 
     public int GetItemListNum(){
         int iLen = 0;
@@ -84,25 +98,10 @@ public class ItemControl: MonoBehaviourPunCallbacks
         return false;
     }
 
-    public void CreateRandItem(Vector3 v3){
-		if(false == GetComponent<PhotonView>().IsMine){
-			return;
-		}
-        int iRand = Random.Range((int)ABILITY.ABILITY_FIRE_UP, (int)ABILITY.ABILITY_RANGE);
-        GameObject gItem = Create((ABILITY)iRand);
-        if(gItem != null){
-            CreateItem_RPC((ABILITY)iRand, v3);
-        }
-    }
+    // アイテムをランダムに生成する関数
     [PunRPC]
-    public void CreateItem(ABILITY eRand, Vector3 v3){
-        GameObject gItem = Create(eRand);
-        if(gItem != null){
-            GameObject g = Instantiate(gItem);
-            g.transform.position = v3;
-        }
-    }
-
+    abstract public GameObject CreateRandomItem(Vector3 position);
+/*
     public GameObject Create(ABILITY eItem){
         GameObject gItem = null;
         switch(eItem){
@@ -146,6 +145,6 @@ public class ItemControl: MonoBehaviourPunCallbacks
         }
         return gItem;
     }
-
+*/
 
 }

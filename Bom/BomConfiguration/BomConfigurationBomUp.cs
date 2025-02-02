@@ -1,14 +1,22 @@
+public class BomConfigurationBomUpManager : BomConfigurationManagerBase
+{
+    public BomConfigurationBomUpManager() => configuration = new BomConfigurationBomUp();
+
+    public override void Request(ReqType reqType){
+        configuration.Request();
+    }
+}
 
 
 public class BomConfigurationBomUp : BomConfigurationBase
 {
     public BomConfigurationBomUp(){
-        Set(3);
+        value = 3;
     }
     public override void Request()
     {
         int ivalue = (int)Get();
         ivalue++;
-        Set(ivalue);
+        value = ivalue;
     }
 }

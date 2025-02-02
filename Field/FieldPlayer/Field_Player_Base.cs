@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.UI;
 using System.Reflection;
@@ -22,11 +23,10 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
 		return "";
     }
 
-
     public virtual void AddDummyPlayer(int iPlayerNo, Vector3 v3){}
     public virtual void SpawnPlayerObjects(int iPlayerNo){}
 
-    protected bool IsAddDummyPlayer(int iPlayerNo){
+    protected virtual bool IsAddDummyPlayer(int iPlayerNo){
         int iPlayerCnt = Library_Base.CountObjectsWithName("Player"+iPlayerNo);
         //Debug.Log(iPlayerCnt);
         if(iPlayerCnt >= 5){
@@ -81,10 +81,11 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
             return 0; // または適切なデフォルト値を返す
         }
     }
+
     protected GameObject LoadResource(string loadname){
         // Resourcesフォルダ内のPlayer1プレハブを読み込む
         GameObject playerPrefab = Resources.Load<GameObject>(loadname);
-        return Instantiate(playerPrefab);
+        return Object.Instantiate(playerPrefab); // 修正：Object.Instantiateを使う
     }
     public Vector3 GetPlayerPosition(int arrayIndex, int elementIndex)
     {
@@ -130,4 +131,87 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
 		playerName = "Player1";
     }
 
+}
+
+public class PlayerObjectManager
+{
+    private MonoBehaviour monoBehaviour;
+
+    public PlayerObjectManager(MonoBehaviour monoBehaviour)
+    {
+        this.monoBehaviour = monoBehaviour;
+    }
+
+    public virtual void SpawnPlayerObjects(int iPlayerNo)
+    {
+        // プレイヤーオブジェクトの生成
+        string loadname = "Player" + iPlayerNo;
+        GameObject playerObject = LoadResource(loadname);
+        // 必要に応じてその他の処理を追加
+    }
+
+    public GameObject LoadResource(string loadname)
+    {
+        GameObject playerPrefab = Resources.Load<GameObject>(loadname);
+        return Object.Instantiate(playerPrefab); // 修正：Object.Instantiateを使う
+    }
+
+    public virtual void SetPlayerPositions() { }
+
+    // GetPlayerNamesメソッドの追加
+    public void GetPlayerNames(int iPlayerNo, ref string canvasName, ref string playerName)
+    {
+        // プレイヤーの名前とキャンバス名を設定
+        canvasName = "Canvas" + iPlayerNo;
+        playerName = "Player" + iPlayerNo;
+    }
+
+    public int GetArrayLength(int arrayIndex)
+    {
+        // 変数名を構築
+        string variableName = "v3PlayerPos" + arrayIndex;
+
+        // フィールドを取得して配列の長さを取得
+        FieldInfo field = monoBehaviour.GetType().GetField(variableName, BindingFlags.NonPublic | BindingFlags.Instance);
+        if (field != null)
+        {
+            Vector3[] array = (Vector3[])field.GetValue(monoBehaviour);
+            return array.Length;
+        }
+        else
+        {
+            Debug.Log("GetArrayLength Error");
+            // 変数が見つからない場合のエラーハンドリング
+            return 0; // または適切なデフォルト値を返す
+        }
+    }
+
+    public Vector3 GetPlayerPosition(int arrayIndex, int elementIndex)
+    {
+        // 変数名を構築
+        string variableName = "v3PlayerPos" + arrayIndex;
+
+        // フィールドを取得して値を取得
+        FieldInfo field = monoBehaviour.GetType().GetField(variableName, BindingFlags.NonPublic | BindingFlags.Instance);
+        if (field != null)
+        {
+            Vector3[] array = (Vector3[])field.GetValue(monoBehaviour);
+            if (elementIndex >= 0 && elementIndex < array.Length)
+            {
+                return array[elementIndex];
+            }
+            else
+            {
+                Debug.Log("GetPlayerPosition Error");
+                // インデックスが範囲外の場合はエラーハンドリングを行う
+                return Vector3.zero; // または適切なデフォルト値を返す
+            }
+        }
+        else
+        {
+            Debug.Log("GetPlayerPosition Error");
+            // 変数が見つからない場合のエラーハンドリング
+            return Vector3.zero; // または適切なデフォルト値を返す
+        }
+    }
 }

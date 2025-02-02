@@ -1,12 +1,19 @@
+public class BomConfigurationBomAttackManager : BomConfigurationManagerBase
+{
+    public BomConfigurationBomAttackManager() => configuration = new BomConfigurationBomAttack();
 
+    public override void Request(ReqType reqType){
+        configuration.Request();
+    }
+}
 
 public class BomConfigurationBomAttack : BomConfigurationBase
 {
     public BomConfigurationBomAttack(){
-        Set(false);
+        value = false;
     }
     public override void Request()
     {
-        Set(true);
+        value = true;
     }
 }

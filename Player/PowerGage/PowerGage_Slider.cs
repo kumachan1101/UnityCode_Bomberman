@@ -3,9 +3,10 @@ using Photon.Pun;
 using UnityEngine.UI;
 public class PowerGage_Slider : MonoBehaviourPunCallbacks, IPunInstantiateMagicCallback
 {
-	private Slider cSlider;
+	protected Slider cSlider;
 	private int iPlayerCnt;
 	private int iPlayerNo;
+	private int iPlayerNo_before;
 
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
@@ -15,10 +16,14 @@ public class PowerGage_Slider : MonoBehaviourPunCallbacks, IPunInstantiateMagicC
     }
 
 	public void SetPlayerCnt(int iCnt){
+		iPlayerNo_before = iPlayerCnt;
 		iPlayerCnt = iCnt;
 	}
 	public void SetPlayerNo(int iNo){
 		iPlayerNo = iNo;
+	}
+	public int GetPlayerNo(){
+		return iPlayerNo;
 	}
 
 
@@ -26,6 +31,13 @@ public class PowerGage_Slider : MonoBehaviourPunCallbacks, IPunInstantiateMagicC
 	}
 	void Start(){
 		init();
+	}
+	void Update() {
+		if(iPlayerNo_before == iPlayerCnt){
+			return;
+		}
+		iPlayerNo_before = iPlayerCnt;
+		SetSliderPos(iPlayerCnt);
 	}
 	private void init()
 	{
@@ -36,10 +48,18 @@ public class PowerGage_Slider : MonoBehaviourPunCallbacks, IPunInstantiateMagicC
 		SetSliderColor(cColor);
 	}
 
-	private void SetSliderPos(int iPlayerPos){
+	public virtual void SetSliderPos(int iPlayerPos){
 		RectTransform sliderRectTransform = cSlider.GetComponent<RectTransform>(); // SliderのRectTransformを取得します。
 		Vector3 newPosition = sliderRectTransform.anchoredPosition; // ローカル座標
-		newPosition.y = newPosition.y - (iPlayerPos - 1) * 12;
+		// 横の位置を計算 (X個ごとにX座標をずらす)
+		int column = (iPlayerPos - 1) % 30; // X個ごとに新しい列を作成
+		int row = (iPlayerPos - 1) / 30; // 1列にX個が並んだら、次の行に移動
+
+		// Y座標: 同じ行の中で、X個目ごとにY座標を変えず、X座標を変更
+		newPosition.y = 200 - column * 12; // X個まで縦に並べる
+		// X座標: 5個ごとにずらす
+		newPosition.x = row * 55 - 400; // 1行に並ぶ間隔、必要に応じて調整
+
 		sliderRectTransform.anchoredPosition = newPosition; // 新しい座標を設定します。
 	}
 

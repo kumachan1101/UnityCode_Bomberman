@@ -5,11 +5,18 @@ public class GameStartCanvas : MonoBehaviour
 {
     public void LoadGameScene()
     {
-        SceneManager.LoadScene("GameScene");
+        GameManager cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        cGameManager.SwitchGameScene();
     }
     public void LoadGameOnline()
     {
-        SceneManager.LoadScene("GameOnline");
+        GameManager cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        cGameManager.SwitchGameOnline();
+    }
+    public void LoadGameTower()
+    {
+        GameManager cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        cGameManager.SwitchTowerScene();
     }
 
 }

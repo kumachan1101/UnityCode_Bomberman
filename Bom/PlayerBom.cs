@@ -43,28 +43,9 @@ public class PlayerBom : MonoBehaviour
 
     public void Request(ReqType reqtype)
     {
-        switch (reqtype)
-        {
-            case ReqType.ExplodeBom:
-            case ReqType.BigBanBom:
-            case ReqType.MaterialBom1:
-            case ReqType.MaterialBom2:
-            case ReqType.MaterialBom3:
-            case ReqType.MaterialBom4:
-                cBomConfigManager.Set(reqtype);
-                break;
-
-            case ReqType.FireUp:
-            case ReqType.BomKick:
-            case ReqType.BomAttack:
-            case ReqType.BomUp:
-                cBomConfigManager.Request(reqtype);
-                break;
-
-            default:
-                break;
-        }
+        cBomConfigManager.Request(reqtype);
     }
+
 
     public T Get<T>(GetKind kind)
     {

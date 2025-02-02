@@ -43,7 +43,7 @@ public class Field_Block_Online : Field_Block_Base {
         List<Vector3> positions = new List<Vector3>();
 
         // ExplosionList から座標を収集
-        foreach (GameObject obj in explosionManager.ExplosionList)
+        foreach (GameObject obj in explosionManager.GetExplosionList())
         {
             if (obj != null && objName != obj.name.Replace("(Clone)",""))
             {

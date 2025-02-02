@@ -207,6 +207,30 @@ public class Library_Base : MonoBehaviour{
     }
 
     /// <summary>
+    /// 指定された名称を含むすべてのGameObjectを検索して返却する。
+    /// </summary>
+    /// <param name="partialName">検索対象の部分名称</param>
+    /// <returns>一致するGameObjectのリスト</returns>
+    public static List<GameObject> FindGameObjectsByPartialName(string partialName)
+    {
+        List<GameObject> matchingObjects = new List<GameObject>();
+
+        // シーン内のすべてのGameObjectを取得
+        GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
+
+        foreach (GameObject obj in allObjects)
+        {
+            // 名前が指定した文字列を含む場合
+            if (obj.name.Contains(partialName))
+            {
+                matchingObjects.Add(obj);
+            }
+        }
+
+        return matchingObjects;
+    }
+
+    /// <summary>
     /// 指定した座標と名称が一致するGameObjectを1つ返却します。
     /// </summary>
     /// <param name="position">確認する座標</param>

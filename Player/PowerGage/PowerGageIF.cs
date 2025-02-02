@@ -2,10 +2,21 @@ using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
 using System.Collections;
-public class PowerGageIF : MonoBehaviourPunCallbacks
+abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 {
 	protected PowerGage cPowerGage;
 	protected int iCanvasInsID;
+	protected GameObject gCanvas;
+	void Start(){
+		if(cPowerGage == null){
+			gCanvas = Library_Base.FindGameObjectByInstanceID(iCanvasInsID);
+			if(gCanvas != null){
+				GameObject sliderObject = gCanvas.transform.Find("Slider").gameObject;
+				cPowerGage = CreatePowerGage(sliderObject);
+			}
+		}
+	}
+	protected abstract PowerGage CreatePowerGage(GameObject sliderObject);
 
 	public void SetPowerGage(PowerGage cObj){
 		cPowerGage = cObj;
@@ -26,7 +37,7 @@ public class PowerGageIF : MonoBehaviourPunCallbacks
 
 	protected virtual void SetDamage_RPC(int iDamage){}
 	[PunRPC]
-	public void SyncSetDamage(int iDamage){
+	public virtual void SyncSetDamage(int iDamage){
         if(cPowerGage == null){
 			Debug.Log("cPowerGage is null");
 			StartCoroutine(RetrySyncSetDamage(iDamage));
@@ -35,12 +46,17 @@ public class PowerGageIF : MonoBehaviourPunCallbacks
 		cPowerGage.SetDamage(iDamage);
 		if(cPowerGage.IsDead()){
 			GetComponent<Player_Base>().DestroySync();
+			DestroySync();
 		}
 		//Debug.Log($"Received RPC 'SyncSetDamage' at ViewID: {photonView.ViewID} with Damage: {iDamage}");
 		
 	}
 
-	private IEnumerator RetrySyncSetDamage(int iDamage){
+	protected void DestroySync(){
+		Debug.Log(gCanvas);
+		Destroy(gCanvas);
+	}
+	protected IEnumerator RetrySyncSetDamage(int iDamage){
 		int retries = 5; // 再試行回数
 		float delay = 0.1f; // 再試行間隔
 		while (retries > 0){

@@ -1,9 +1,10 @@
-using UnityEngine.SceneManagement;
+using UnityEngine;
 public class ButtonClickScript_CpuMode : ButtonClickScript
 {
     override public void LoadGameScene()
     {
-		  SceneManager.LoadScene("GameTitle");
+        GameManager cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        cGameManager.ReturnTitle();
     }
 
 

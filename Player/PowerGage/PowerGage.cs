@@ -1,4 +1,3 @@
-using Photon.Pun;
 using UnityEngine.UI;
 using UnityEngine;
 
@@ -11,6 +10,7 @@ public class PowerGage : MonoBehaviour
 		int iPower = GameObject.Find("Field").GetComponent<Field_Player_Base>().GetPower();
 		cSlider.maxValue = iPower;
 		cSlider.value = iPower;
+		ChangeSliderLength(50f);
 
 	}
 
@@ -58,6 +58,28 @@ public class PowerGage : MonoBehaviour
         }
 
 	}
+
+    // スライダーの長さを変更するメソッド
+    public void ChangeSliderLength(float newLength)
+    {
+        if (cSlider != null)
+        {
+            RectTransform rectTransform = cSlider.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                rectTransform.sizeDelta = new Vector2(newLength, rectTransform.sizeDelta.y);
+            }
+            else
+            {
+                Debug.LogError("RectTransformが見つかりません。スライダーが正しく設定されているか確認してください。");
+            }
+        }
+        else
+        {
+            Debug.LogError("スライダーが割り当てられていません。");
+        }
+    }
+
 }
 
 

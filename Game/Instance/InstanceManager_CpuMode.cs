@@ -14,5 +14,4 @@ public class InstanceManager_CpuMode : InstanceManager_Base
     }
 
 
-
 }

@@ -1,9 +1,21 @@
 using UnityEngine;
 using Photon.Pun;
 
+public class OnlineBomFactory : IBomFactory
+{
+    public Bom_Base CreateBom(GameObject gBom) => gBom.AddComponent<Bom_Online>();
+    public Bom_Base CreateBomExplode(GameObject gBom) => gBom.AddComponent<BomExplode_Online>();
+    public Bom_Base CreateBomBigBan(GameObject gBom) => gBom.AddComponent<BomBigBan_Online>();
+}
+
 public class BomControl_Online : BomControl
 {
 
+    protected override void InitFactory()
+    {
+        SetFactory(new OnlineBomFactory());
+    }
+/*
     protected override Bom_Base AddComponent_Bom(GameObject gBom){
         Bom_Base cBom = gBom.AddComponent<Bom_Online>();
         return cBom;
@@ -17,7 +29,7 @@ public class BomControl_Online : BomControl
         Bom_Base cBom = gBom.AddComponent<BomBigBan_Online>();
         return cBom;
     }
-
+*/
 
 	protected override void MakeBom_RPC(BomParameters bomParams){
 		tempBom = PhotonNetwork.Instantiate("Bom", bomParams.position, Quaternion.identity);
@@ -53,7 +65,8 @@ public class BomControl_Online : BomControl
 				{
 					Debug.LogWarning("Renderer component not found on the game object or its children.");
 				}
-
+				AddBomComponents(obj, bomParams.bomKind);
+				/*
 				if (bomParams.bomKind == BOM_KIND.BOM_KIND_BIGBAN)
 				{
 					AddComponent_BomBigBan(obj);
@@ -66,6 +79,7 @@ public class BomControl_Online : BomControl
 				{
 					AddComponent_Bom(obj);
 				}
+				*/
 
 				Bom_Base bomBase = obj.GetComponent<Bom_Base>();
 				if (bomBase != null)
@@ -73,15 +87,9 @@ public class BomControl_Online : BomControl
 					bomBase.SetMaterialKind(bomParams.materialType);
 					bomBase.iExplosionNum = bomParams.explosionNum;
 
-					if (bomParams.bomKick)
-					{
-						bomBase.AbailableBomKick();
-					}
-
-					if (bomParams.bomAttack)
-					{
-						bomBase.AbailableBomAttack(bomParams.direction);
-					}
+					Bom_Base_MoveManager cMoveManager = obj.GetComponent<Bom_Base_MoveManager>();
+					cMoveManager.AbailableBomKick(bomParams);
+					cMoveManager.AbailableBomAttack(bomParams);
 				}
 				else
 				{

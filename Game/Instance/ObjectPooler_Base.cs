@@ -27,8 +27,11 @@ public class ObjectPooler_Base : MonoBehaviour
     protected GameObject CreateObject(GameObject prefab)
     {
         // ローカルでオブジェクトをインスタンス化
-        return Instantiate(prefab, new Vector3(0, -2, 0), Quaternion.identity);
+        GameObject gobj = Instantiate(prefab, new Vector3(0, -2, 0), Quaternion.identity);
+        AddExplostionComponent(gobj);
+        return gobj;
     }
+    virtual protected void AddExplostionComponent(GameObject instance){}
 
     public Dictionary<string, Queue<GameObject>> GetObjectPoolByTag()
     {
@@ -53,7 +56,7 @@ public class ObjectPooler_Base : MonoBehaviour
             for (int i = 0; i < pool.size; i++)
             {
                 GameObject obj = CreateObject(pool.prefab);
-                obj.GetComponent<Explosion_Base>().SetID(i);
+                //obj.GetComponent<Explosion_Base>().SetID(i);
                 SetObjectActive_RPC(obj, false);
                 objectPoolByTag[pool.tag].Enqueue(obj); // タグごとのキューに格納
             }

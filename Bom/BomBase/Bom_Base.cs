@@ -205,7 +205,7 @@ public class Bom_Base : MonoBehaviour
         }
         return true;
     }
-
+/*
     public void AbailableBomKick()
     {
         moveManager.AbailableBomKick();
@@ -215,4 +215,5 @@ public class Bom_Base : MonoBehaviour
     {
         moveManager.AbailableBomAttack(direction);
     }
+*/
 }

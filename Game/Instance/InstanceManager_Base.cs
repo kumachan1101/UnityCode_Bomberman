@@ -22,6 +22,7 @@ abstract public class InstanceManager_Base : MonoBehaviour
             return null;
         }
         GameObject instance = Instantiate(prefab, position, Quaternion.identity);
+        
         return instance;
     }
 

@@ -19,6 +19,7 @@ public class Bom_Base_MaterialHandler:  MonoBehaviour
         }
         if (renderer != null)
         {
+            cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
             Material newMaterial = cMaterialMng.GetMaterialOfType(sMaterialKind);
             renderer.material = newMaterial;
         }

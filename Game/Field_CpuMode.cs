@@ -1,39 +1,37 @@
 using UnityEngine;
 using Photon.Pun;
-public class Field_CpuMode :MonoBehaviour{
-
-    private bool bFlag;
+public class Field_CpuMode :Field_Event{
 
     private GameManager cGameManager;
 
-
-    void Start()
+    // プレイヤーの追加・削除イベントリスナーを登録
+    protected override void RegisterListeners()
     {
-        Init();
-        // プレイヤーの追加・削除イベントをリッスン
-        Player_Base.onPlayerAdded.AddListener(OnPlayerAdded);
-        Player_Base.onPlayerRemoved.AddListener(OnPlayerRemoved);
+        Player_Base.onPlayerAdded.AddListener(Field_CpuMode_OnAdded);
+        Player_Base.onPlayerRemoved.AddListener(Field_CpuMode_OnRemoved);
+    }
+    protected override void UnregisterListeners()
+    {
+        Player_Base.onPlayerAdded.RemoveListener(Field_CpuMode_OnAdded);
+        Player_Base.onPlayerRemoved.RemoveListener(Field_CpuMode_OnRemoved);
     }
 
-    void Update()
-    {
-    }
-	protected void Init()
+
+	protected override void Init()
 	{
-		bFlag = false;
 		cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
 	}
 
 
     // プレイヤー追加時の処理
-    private void OnPlayerAdded(Player_Base player)
+    private void Field_CpuMode_OnAdded(object obj)
     {
         //Debug.Log($"{player.name} がゲームに追加されました");
         GameTransision();  // ゲーム進行チェックを呼び出す
     }
 
     // プレイヤー削除時の処理
-    private void OnPlayerRemoved(Player_Base player)
+    private void Field_CpuMode_OnRemoved(object obj)
     {
         //Debug.Log($"{player.name} がゲームから削除されました");
         GameTransision();  // ゲーム進行チェックを呼び出す
@@ -43,10 +41,6 @@ public class Field_CpuMode :MonoBehaviour{
     {
         bool hasPlayer1 = false;
         bool hasPlayerDummy1 = false;
-
-        if(bFlag){
-            return; 
-        }
 
         // "Player1(Clone)" または "PlayerDummy1" の存在を確認します
         GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
@@ -79,7 +73,6 @@ public class Field_CpuMode :MonoBehaviour{
                 GameObject.Find("PlayerDummy4") == null)
             {
                 cGameManager.GameWin();
-                bFlag = true;
             }
             else
             {
@@ -89,10 +82,7 @@ public class Field_CpuMode :MonoBehaviour{
         else
         {
             cGameManager.GameOver();
-            bFlag = true;
         }
     }
-
-
 
 }

@@ -40,7 +40,7 @@ public class Broken : MonoBehaviour
     }
 
     private void DelBox(){
-        cItemControl.CreateRandItem(transform.position);
+        cItemControl.CreateItem_RPC(transform.position);
         Destroy(gameObject);
     }
 

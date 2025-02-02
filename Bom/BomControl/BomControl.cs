@@ -1,6 +1,14 @@
 using UnityEngine;
 using Photon.Pun;
 using System.Collections.Generic;
+
+public interface IBomFactory
+{
+    Bom_Base CreateBom(GameObject gBom);
+    Bom_Base CreateBomExplode(GameObject gBom);
+    Bom_Base CreateBomBigBan(GameObject gBom);
+}
+
 public class BomControl : MonoBehaviourPunCallbacks
 {
     public GameObject BomPrefab;
@@ -9,7 +17,29 @@ public class BomControl : MonoBehaviourPunCallbacks
     private SoundManager soundManager;
     public List<GameObject> instanceList = new List<GameObject>();
 
+    protected IBomFactory bomFactory;
 
+    protected void SetFactory(IBomFactory factory)
+    {
+        this.bomFactory = factory;
+    }
+
+    protected void AddBomComponents(GameObject gBom, BOM_KIND bomKind)
+    {
+        if (bomKind == BOM_KIND.BOM_KIND_BIGBAN)
+        {
+            bomFactory.CreateBomBigBan(gBom);
+        }
+        else if (bomKind == BOM_KIND.BOM_KIND_EXPLODE)
+        {
+            bomFactory.CreateBomExplode(gBom);
+        }
+        else
+        {
+            bomFactory.CreateBom(gBom);
+        }
+    }
+/*
     protected virtual Bom_Base AddComponent_BomExplode(GameObject gBom){
         return null;
     }
@@ -19,14 +49,15 @@ public class BomControl : MonoBehaviourPunCallbacks
     protected virtual Bom_Base AddComponent_Bom(GameObject gBom){
         return null;
     }
-
-
+*/
+    protected virtual void InitFactory(){}
     public virtual void Awake(){
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
 		cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
 
 		ReadBomResource();
 		CustomTypes.Register();
+        InitFactory();
     }
 
 	protected void ReadBomResource(){
