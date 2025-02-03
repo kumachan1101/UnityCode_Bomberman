@@ -35,6 +35,10 @@ public class Field_Player_Stage2 : Field_Player_CpuMode {
         }
     }
 
+    void GetPlayerInfo(ref string canvasName, ref string playerName){
+		canvasName = "Canvas1";
+		playerName = "Player1";
+    }
 	protected override void GetCPUPlayerInfo(ref string canvasName, ref string playerName){
 		canvasName = "Canvas2";
 		playerName = "Player2";

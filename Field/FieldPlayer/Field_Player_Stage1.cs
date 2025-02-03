@@ -12,10 +12,10 @@ public class Field_Player_Stage1 : Field_Player_CpuMode {
 		// SetPlayerCntで毎回人数を設定することでスライダーの座標位置を変えている。。
         for (int i = 1; i <= playercnt; i++)
         {
-            SetPlayerCnt(i); 
+            cPlayerCountManager.SetPlayerCount(i); 
             SpawnPlayerObjects(i);
 		}
-        SetPlayerName("Player1");
+        cPlayerNameManager.SetPlayerName("Player1");
 	}
     public override void SetPlayerPositions()
     {

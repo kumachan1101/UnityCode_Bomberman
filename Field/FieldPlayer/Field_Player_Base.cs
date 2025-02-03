@@ -1,26 +1,18 @@
-
 using UnityEngine;
-using UnityEngine.UI;
 using System.Reflection;
 using Photon.Pun;
 
 public class Field_Player_Base : MonoBehaviourPunCallbacks {
 
-    [SerializeField]private int m_playerCount; //やられたプレイヤー含む全プレイヤー数
-    protected string playername; 
+    protected PlayerNameManager cPlayerNameManager;
+    protected PlayerCountManager cPlayerCountManager;
+    private void Awake()
+    {
+        cPlayerNameManager = gameObject.AddComponent<PlayerNameManager>();
+        cPlayerCountManager = gameObject.AddComponent<PlayerCountManager>();
+    }
     public virtual int GetIndex(){
         return 0;
-    }
-	protected virtual void DestroySync(GameObject g){}
-    public virtual void SetPower(Slider cSlider){}
-    public virtual int GetPower(){
-        return 10;
-    }
-    protected virtual void GetCPUPlayerInfo(ref string canvasName, ref string playerName){}
-
-    public virtual string GetBomMaterial(Vector3 target, int index)
-    {
-		return "";
     }
 
     public virtual void AddDummyPlayer(int iPlayerNo, Vector3 v3){}
@@ -41,18 +33,6 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
     }
 
 	protected virtual bool PreAddDummyPlayer(){return false;}
-
-    protected virtual string GetCanvasName(){
-        return "";
-    }
-
-    public virtual string GetPlayerName(){
-        return playername;
-    }
-
-    protected void SetPlayerName(string name){
-        playername = name;
-    }
 
 	public virtual void SetPlayerPositions(){}
 
@@ -82,11 +62,6 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
         }
     }
 
-    protected GameObject LoadResource(string loadname){
-        // Resourcesフォルダ内のPlayer1プレハブを読み込む
-        GameObject playerPrefab = Resources.Load<GameObject>(loadname);
-        return Object.Instantiate(playerPrefab); // 修正：Object.Instantiateを使う
-    }
     public Vector3 GetPlayerPosition(int arrayIndex, int elementIndex)
     {
         // 変数名を構築
@@ -117,18 +92,21 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
     }
 
 
-	public void SetPlayerCnt(int iPlayerCnt){
-		m_playerCount = iPlayerCnt;
-	}
-	public void AddPlayerCnt(){
-		m_playerCount++;
-	}
-	public int GetPlayerCnt(){
-		return m_playerCount;
-	}
-    protected void GetPlayerInfo(ref string canvasName, ref string playerName){
-		canvasName = "Canvas1";
-		playerName = "Player1";
-    }
+}
 
+public class PlayerCountManager : MonoBehaviour
+{
+    private int playerCount;//やられたプレイヤー含む全プレイヤー数
+
+    public void SetPlayerCount(int count) => playerCount = count;
+    public void AddPlayerCount() => playerCount++;
+    public int GetPlayerCount() => playerCount;
+}
+
+public class PlayerNameManager : MonoBehaviour
+{
+    private string playerName;
+
+    public string GetPlayerName() => playerName;
+    public void SetPlayerName(string name) => playerName = name;
 }

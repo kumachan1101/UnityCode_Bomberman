@@ -6,8 +6,9 @@ using System.Collections;
 public class Field_Player_Tower :Field_Event
 {
     private Button button; // 対象のボタンをInspectorで設定
-    Field_Player_Base cField;
-    GameManager cGameManager;
+    private Field_Player_Base cField;
+    private PlayerCountManager cPlayerCountManager;
+    private GameManager cGameManager;
     private static bool listenersRegistered = false;
 
     Color gold;
@@ -15,7 +16,9 @@ public class Field_Player_Tower :Field_Event
     private Image buttonImage;
 
     protected override void Init() {
-        cField = GameObject.Find("Field").GetComponent<Field_Player_Base>();
+        GameObject gFeild = GameObject.Find("Field");
+        cField = gFeild.GetComponent<Field_Player_Base>();
+        cPlayerCountManager = gFeild.GetComponent<PlayerCountManager>();
         cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         button = GetComponent<Button>();
         if (button == null){
@@ -105,7 +108,7 @@ public class Field_Player_Tower :Field_Event
         SetToneDown();
         GameObject gObj = GameObject.Find("Tower1");
         if(null != gObj){
-            cField.AddPlayerCnt();
+            cPlayerCountManager.AddPlayerCount();
             cField.SpawnPlayerObjects(1);
             gObj.GetComponent<PowerGageIF>().SetDamage(2);
         }

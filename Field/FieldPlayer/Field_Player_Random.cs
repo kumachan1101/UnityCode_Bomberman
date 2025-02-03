@@ -12,12 +12,12 @@ public class Field_Player_Random : Field_Player_CpuMode {
         {
             if(i == 1){
                 SpawnPlayerObjects(i);
-                SetPlayerName("Player1");
+                cPlayerNameManager.SetPlayerName("Player1");
             }
             else{
                 SpawnPlayerObjects(Random.Range(2, 5));
             }
-            SetPlayerCnt(i); 
+            cPlayerCountManager.SetPlayerCount(i); 
 		}
 	}
     public override int GetIndex(){

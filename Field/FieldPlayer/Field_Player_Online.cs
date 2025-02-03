@@ -22,40 +22,6 @@ public class Field_Player_Online : Field_Player_Base {
     }
 
 
-    protected override string GetCanvasName(){
-        return "CanvasOnline";
-    }
-/*
-    public override string GetPlayerName(){
-        //return "PlayerOnline";
-        return playername;
-	}
-*/
-/*
-	protected override void PlayerDestroy(GameObject gPlayer){
-		photonView.RPC(nameof(OnlinePlayerDestroy), RpcTarget.All, gPlayer.GetComponent<PhotonView>().ViewID);
-		//OnlinePlayerDestroy(gPlayer.GetComponent<PhotonView>().ViewID);
-	}
-
-	[PunRPC]
-	public void OnlinePlayerDestroy(int iViewIDPlayer)
-	{
-		PhotonView ViewPlayer = PhotonView.Find(iViewIDPlayer);
-		if (ViewPlayer == null)
-		{
-			Debug.Log("ViewFind Error");
-			return;
-		}
-		GameObject gPlayer = ViewPlayer.gameObject;
-		if (gPlayer == null)
-		{
-			Debug.Log("GameObject Error");
-			return;
-		}
-		PlayerDestroyComponent(gPlayer);
-	}
-*/
-
     protected GameObject InstantiateCanvas(string canvasName,int iPlayerCnt, int iPlayerNo)
     {
         return PhotonNetwork.Instantiate(canvasName, new Vector3(0, 0, 0), Quaternion.identity, 0, new object[] { iPlayerCnt, iPlayerNo });
@@ -71,7 +37,7 @@ public class Field_Player_Online : Field_Player_Base {
     }
 
 	protected override bool PreAddDummyPlayer(){
-		AddPlayerCnt();
+		cPlayerCountManager.AddPlayerCount();
 		return GetComponent<PhotonView>().IsMine;
 	}
 
@@ -119,23 +85,6 @@ public class Field_Player_Online : Field_Player_Base {
         return;
     }
 
-    public override string GetBomMaterial(Vector3 target, int index)
-    {
-        target.y += 1;
-
-        // v3PlayerPosの各要素と比較
-        for (int i = 0; i < GetArrayLength(index); i++)
-        {
-            if (GetPlayerPosition(index,i) == target)
-            {
-                // 一致する要素が見つかった場合、該当する文字列を返す
-                return "BomMaterial" + (i + 1);
-            }
-        }
-
-        return "InvalidMaterial";
-    }
-
     public override void AddDummyPlayer(int iPlayerNo, Vector3 v3)
     {
         if(false == IsAddDummyPlayer(iPlayerNo)){
@@ -145,7 +94,7 @@ public class Field_Player_Online : Field_Player_Base {
         string playerName = "";
         GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
 		
-        GameObject gCanvas = InstantiateCanvas("CanvasPowerGage",GetPlayerCnt(), iPlayerNo);
+        GameObject gCanvas = InstantiateCanvas("CanvasPowerGage",cPlayerCountManager.GetPlayerCount(), iPlayerNo);
         GameObject gPlayer = InstantiatePlayer("Player", v3, gCanvas.GetComponent<PhotonView>().ViewID, iPlayerNo,"Player_Online_Dummy");
     }
 
@@ -156,9 +105,9 @@ public class Field_Player_Online : Field_Player_Base {
         string playerName = "";
         GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
 
-        GameObject gCanvas = InstantiateCanvas("CanvasPowerGage",GetPlayerCnt(), iPlayerNo);
+        GameObject gCanvas = InstantiateCanvas("CanvasPowerGage",cPlayerCountManager.GetPlayerCount(), iPlayerNo);
         //Debug.Log(gCanvas.GetComponent<PhotonView>().ViewID);
         GameObject gPlayer = InstantiatePlayer("Player", GetPlayerPosition(GetIndex(), iPlayerNo - 1),gCanvas.GetComponent<PhotonView>().ViewID, iPlayerNo,"Player_Online");
-        SetPlayerName(gPlayer.name);
+        cPlayerNameManager.SetPlayerName(gPlayer.name);
     }
 }
