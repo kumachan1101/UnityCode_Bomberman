@@ -30,25 +30,22 @@ public class ItemControl_CpuMode: ItemControl
        
     }
     public override void CreateItem_RPC(Vector3 v3){
-        CreateRandomItem(v3);
+        if(false == IsCreateItem()){
+            return;
+        }    
+        int randomIndex = Random.Range(0, itemList.Count);
+        CreateRandomItem(v3, randomIndex);
     }
 
-    public override GameObject CreateRandomItem(Vector3 position)
+    protected override bool IsCreateItem()
     {
         // アイテム生成の確率
         if (Random.value <= 1f)  
         {
-            int randomIndex = Random.Range(0, itemList.Count);
-            CreateItem selectedItem = itemList[randomIndex];
-
-            // アイテムをインスタンス化
-            GameObject itemInstance = Instantiate(selectedItem.itemPrefab, position, Quaternion.identity);
-            return itemInstance;
+            return true;
         }
-        else
-        {
-            return null;
-        }
+        return false;
     }
+
 
 }

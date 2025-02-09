@@ -151,26 +151,11 @@ public class ExplosionManager : MonoBehaviour
     private ExplosionTracker explosionTracker;
     private ExplosionPoolManager explosionPoolManager;
 
-    public void Initialize(ObjectPooler_Base pooler)
+    public void Initialize()
     {
-        explosionPoolManager = new ExplosionPoolManager();
-        explosionPoolManager.Initialize(pooler);
+        ObjectPooler_Base pooler = this.gameObject.AddComponent<ObjectPooler_Local>();
+        explosionPoolManager = new ExplosionPoolManager(pooler);
         explosionTracker = new ExplosionTracker();
-    }
-
-    public void SetupStage()
-    {
-        explosionPoolManager.ClearPools();
-        ConfigurePools();
-        explosionPoolManager.InitializePool();
-    }
-
-    protected virtual void ConfigurePools()
-    {
-        explosionPoolManager.AddPool(ExplosionTypes.Explosion1, 1000);
-        explosionPoolManager.AddPool(ExplosionTypes.Explosion2, 1000);
-        explosionPoolManager.AddPool(ExplosionTypes.Explosion3, 1000);
-        explosionPoolManager.AddPool(ExplosionTypes.Explosion4, 1000);
     }
 
     public void UpdateGroundExplosion(string objName, Vector3 position)
@@ -307,17 +292,34 @@ public class ExplosionPoolManager
 {
     private ObjectPooler_Base objectPooler;
 
-    public void Initialize(ObjectPooler_Base pooler)
+    public ExplosionPoolManager(ObjectPooler_Base pooler)
     {
         objectPooler = pooler;
+        SetupPools();
     }
 
-    public void ClearPools()
+    public void SetupPools()
+    {
+        ClearPools();
+        ConfigurePools();
+        InitializePool();
+    }
+
+
+    private void ClearPools()
     {
         objectPooler.pools.Clear();
     }
 
-    public void InitializePool()
+    private void ConfigurePools()
+    {
+        AddPool(ExplosionTypes.Explosion1, 1000);
+        AddPool(ExplosionTypes.Explosion2, 1000);
+        AddPool(ExplosionTypes.Explosion3, 1000);
+        AddPool(ExplosionTypes.Explosion4, 1000);
+    }
+
+    private void InitializePool()
     {
         objectPooler.InitializePool();
     }

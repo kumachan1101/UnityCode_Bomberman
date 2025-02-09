@@ -125,8 +125,8 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
     // プレイヤー数を更新
     private void UpdatePlayerCount(RoomButton roomButton, int playerCount, GameObject gField) {
         roomButton.SetPlayerCount(playerCount);
-        Field_Player_Base cFieldPlayer = gField.GetComponent<Field_Player_Base>();
-        cFieldPlayer.SetPlayerCnt(playerCount);
+        PlayerCountManager cFieldPlayer = gField.GetComponent<PlayerCountManager>();
+        cFieldPlayer.SetPlayerCount(playerCount);
     }
 
     // プレイヤーオブジェクトの処理

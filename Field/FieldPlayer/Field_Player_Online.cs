@@ -35,6 +35,9 @@ public class Field_Player_Online : Field_Player_Base {
     public override int GetIndex(){
         return 1;
     }
+    public override int GetPower(){
+        return 10;
+    }
 
 	protected override bool PreAddDummyPlayer(){
 		cPlayerCountManager.AddPlayerCount();

@@ -31,30 +31,25 @@ public class ItemControl_Online: ItemControl
     }
 
     public override void CreateItem_RPC(Vector3 v3){
-		if(false == GetComponent<PhotonView>().IsMine){
+        PhotonView cPhotonView = GetComponent<PhotonView>();
+		if(false == cPhotonView.IsMine){
 			return;
 		}
-        photonView.RPC(nameof(CreateRandomItem), RpcTarget.All, v3);
+        if(false == IsCreateItem()){
+            return;
+        }    
+        int randomIndex = Random.Range(0, itemList.Count);
+        cPhotonView.RPC(nameof(CreateRandomItem), RpcTarget.All, v3, randomIndex);
     }
 
-    public override GameObject CreateRandomItem(Vector3 position)
+    protected override bool IsCreateItem()
     {
         // アイテム生成の確率
-        if (Random.value <= 0.2f)  // 20%の確率でアイテムを生成
+        if (Random.value <= 0.2f)  
         {
-            int randomIndex = Random.Range(0, itemList.Count);
-            CreateItem selectedItem = itemList[randomIndex];
-
-            // アイテムをインスタンス化
-            GameObject itemInstance = Instantiate(selectedItem.itemPrefab, position, Quaternion.identity);
-            //Debug.Log("Created item: " + selectedItem.itemName);
-            return itemInstance;
+            return true;
         }
-        else
-        {
-            //Debug.Log("No item spawned this time.");
-            return null;
-        }
+        return false;
     }
 
 

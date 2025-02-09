@@ -6,7 +6,7 @@ public class DropBomBtn : LongPressButton {
     public override void PushButton()
     {
         if(null == cPlayerAction){
-            Field_Player_Base cField = GameObject.Find("Field").GetComponent<Field_Player_Base>();
+            PlayerNameManager cField = GameObject.Find("Field").GetComponent<PlayerNameManager>();
             cPlayerAction = Library_Base.GetcPlayerActionFromObject(cField.GetPlayerName());
         }
         if(null != cPlayerAction){

@@ -12,7 +12,7 @@ public class ObjectPooler_Base : MonoBehaviour
         public int size;
     }
 
-    [SerializeField] public List<Pool> pools;
+    [SerializeField] public List<Pool> pools = new List<Pool>();
     protected Queue<GameObject> objectPoolQueue;
     protected Dictionary<string, GameObject> prefabByTag;
     protected Dictionary<string, Queue<GameObject>> objectPoolByTag;

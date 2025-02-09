@@ -14,6 +14,9 @@ public class Field_Player_Base : MonoBehaviourPunCallbacks {
     public virtual int GetIndex(){
         return 0;
     }
+    public virtual int GetPower(){
+        return 10;
+    }
 
     public virtual void AddDummyPlayer(int iPlayerNo, Vector3 v3){}
     public virtual void SpawnPlayerObjects(int iPlayerNo){}

@@ -78,9 +78,6 @@ public class StandardPlayerFactory : IPlayerFactory
 public class Field_Player_CpuMode : Field_Player_Base {
     protected virtual void GetCPUPlayerInfo(ref string canvasName, ref string playerName){}
     public virtual void SetPower(Slider cSlider){}
-    public virtual int GetPower(){
-        return 10;
-    }
 
 	protected override bool PreAddDummyPlayer(){
 		cPlayerCountManager.AddPlayerCount();

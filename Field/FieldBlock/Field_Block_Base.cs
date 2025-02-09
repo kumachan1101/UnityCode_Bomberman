@@ -24,7 +24,8 @@ public class Field_Block_Base : MonoBehaviourPunCallbacks
     void Awake()
     {
         explosionManager = new GameObject("ExplosionManager").AddComponent<ExplosionManager>();
-        explosionManager.Initialize(GetComponent<ObjectPooler_Base>());
+        explosionManager.Initialize();
+        //explosionManager.Initialize(GetComponent<ObjectPooler_Base>());
         cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
 
         // Field_Block_BaseのGameObjectに管理クラスを追加
@@ -44,22 +45,20 @@ public class Field_Block_Base : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        SetupStage();
         CreateFixedBlock();
         CreateField();
+        SetupStage();
     }
 
     public void CreateField()
     {
         AddBrokenBlock(5);
     }
-
     public void SetupStage()
     {
-        explosionManager.SetupStage();
+        //explosionManager.SetupStage();
         bSetUp = true;
     }
-
     public bool GetSetUp()
     {
         return bSetUp;
