@@ -1,33 +1,28 @@
+using System.Collections.Generic;
 using UnityEngine;
+
+public class ItemPathProvider_CpuMode : IItemPathProvider
+{
+    public Dictionary<string, string> GetItemPaths() => new Dictionary<string, string>
+    {
+        { "Item_FireUp", "item_fire" },
+        { "Item_BomUp", "item_bom" },
+        { "Item_BomExplode", "item_explode" },
+        { "Item_BomBigBan", "item_bigban" },
+        { "Item_SpeedUp", "item_speedup" },
+        { "Item_BomKick", "item_bomkick" },
+        { "Item_BomAttack", "item_bomattack" },
+        { "Item_Rainbow", "item_rainbow" },
+        { "Item_Heart", "item_heart" },
+        { "Item_AddBlock", "item_addblock" }
+        //{ "Item_AddDummy", "item_adddummy" }
+    };
+}
 
 public class ItemControl_CpuMode: ItemControl
 {
-    protected override void CreateItem_AddList(){
-        // アイテムPrefabのロード
-        GameObject ItemFirePrefab = Resources.Load<GameObject>("item_fire");
-        GameObject ItemBomPrefab = Resources.Load<GameObject>("item_bom");
-        GameObject ItemBomExplodePrefab = Resources.Load<GameObject>("item_explode");
-        GameObject ItemBomBigBanPrefab = Resources.Load<GameObject>("item_bigban");
-        GameObject ItemSpeedPrefab = Resources.Load<GameObject>("item_speedup");
-        GameObject ItemBomkickPrefab = Resources.Load<GameObject>("item_bomkick");
-        GameObject ItemBomAttackPrefab = Resources.Load<GameObject>("item_bomattack");
-        GameObject ItemRainbowPrefab = Resources.Load<GameObject>("item_rainbow");
-        GameObject ItemHeartPrefab = Resources.Load<GameObject>("item_heart");
-        GameObject ItemAddBlockPrefab = Resources.Load<GameObject>("item_addblock");
-        GameObject ItemAddDummyPrefab = Resources.Load<GameObject>("item_adddummy");
-
-        // アイテムリストに追加
-        itemList.Add(new CreateItem { itemName = "Item_FireUp", itemPrefab = ItemFirePrefab });
-        itemList.Add(new CreateItem { itemName = "Item_BomUp", itemPrefab = ItemBomPrefab });
-        itemList.Add(new CreateItem { itemName = "Item_BomExplode", itemPrefab = ItemBomExplodePrefab });
-        itemList.Add(new CreateItem { itemName = "Item_BomBigBan", itemPrefab = ItemBomBigBanPrefab });
-        itemList.Add(new CreateItem { itemName = "Item_SpeedUp", itemPrefab = ItemSpeedPrefab });
-        itemList.Add(new CreateItem { itemName = "Item_BomKick", itemPrefab = ItemBomkickPrefab });
-        itemList.Add(new CreateItem { itemName = "Item_BomAttack", itemPrefab = ItemBomAttackPrefab });
-        itemList.Add(new CreateItem { itemName = "Item_Rainbow", itemPrefab = ItemRainbowPrefab });
-        itemList.Add(new CreateItem { itemName = "Item_Heart", itemPrefab = ItemHeartPrefab });
-        itemList.Add(new CreateItem { itemName = "Item_AddBlock", itemPrefab = ItemAddBlockPrefab });
-       
+    protected override IItemPathProvider CreateItemPathProvider(){
+        return new ItemPathProvider_CpuMode();
     }
     public override void CreateItem_RPC(Vector3 v3){
         if(false == IsCreateItem()){
