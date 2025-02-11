@@ -294,7 +294,7 @@ public class Library_Base : MonoBehaviour{
         return newID;
     }
 
-    public bool IsObjectAtPosition(List<GameObject> objectList, Vector3 v3){
+    static public bool IsObjectAtPosition(List<GameObject> objectList, Vector3 v3){
         foreach (GameObject obj in objectList) {
             if(obj != null){
                 if(obj.transform.position == v3){

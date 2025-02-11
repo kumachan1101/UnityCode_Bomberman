@@ -56,7 +56,7 @@ public class Explosion_Base : MonoBehaviour
         }
         else{
 			if (gameObject.activeInHierarchy){
-				cField.UpdateGroundExplosion(this.gameObject);
+				cExplosionManager.UpdateGroundExplosion(this.gameObject);
 			}
         }
     }

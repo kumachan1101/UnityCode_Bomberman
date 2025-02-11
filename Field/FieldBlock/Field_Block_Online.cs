@@ -10,14 +10,15 @@ public class Field_Block_Online : Field_Block_Base {
 		CreateFixedBlock();
     }
 
+    protected override void CreateAndInitializeBrokenBlockManager()
+    {
+        brokenBlockManager = CreateBlockManager<BrokenBlockManager_Online>();
+        brokenBlockManager?.Initialize();
+    }
 
 	protected override void SetFieldRange(){
 		GameManager.SetFieldRange(10,10);
 	}
-    protected override void InsBrokenBlock_RPC(int x, int y, int z){
-        photonView.RPC(nameof(InsBrokenBlock), RpcTarget.All, x, y, z);
-    }
-
 
     protected override void InsObjMove_RPC(int x, int y, int z, Library_Base.Direction randomDirection){
 		if(false == GetComponent<PhotonView>().IsMine){
@@ -26,94 +27,24 @@ public class Field_Block_Online : Field_Block_Base {
         photonView.RPC(nameof(InsObjMove), RpcTarget.All, x, y, z, randomDirection);
     }
 
-    public override void Rainbow_RPC(string sMaterialType){
-        //Rainbow(sMaterialType);
-        if (false == PhotonNetwork.IsMasterClient){
-            return;
-        }
-        NotifyExplosionData(sMaterialType);
-        
-    }
-    public void NotifyExplosionData(string objName)
+    protected override ExplosionManager CreateExplosionManager()
     {
-        List<Vector3> positions = new List<Vector3>();
+        GameObject gExplosionManager = GameObject.Find("ExplosionManager");
+        var manager = gExplosionManager.AddComponent<ExplosionManager_Online>();
 
-        // ExplosionList から座標を収集
-        foreach (GameObject obj in explosionManager.GetExplosionList())
-        {
-            if (obj != null && objName != obj.name.Replace("(Clone)",""))
-            {
-                positions.Add(obj.transform.position);
-            }
-        }
+        PoolerType type = (GetComponent<Field_Block_Tower>() != null) ? PoolerType.Tower : PoolerType.Local;
+        manager.Initialize(type);
 
-        // RPCで座標リストと名称を送信
-        photonView.RPC(nameof(UpdateExplosionObjects), RpcTarget.All, objName, positions.ToArray());
+        return manager;
     }
 
-    [PunRPC]
-    public void UpdateExplosionObjects(string objName, Vector3[] positions)
-    {
-        // 新しいオブジェクトリストを構築
-        List<GameObject> objectsToRemove = new List<GameObject>();
-        List<GameObject> objectsToAdd = new List<GameObject>();
+}
 
-        foreach (Vector3 position in positions)
-        {
-            GameObject gobj_cur = Library_Base.GetGameObjectAtExactPositionWithName(position, "Explosion");
-            if (gobj_cur == null)
-            {
-                Debug.Log("gobj_cur is null");
-                GameObject gobj = explosionManager.DequeueObject(objName);
-                Explosion_Base cExplosion = gobj.GetComponent<Explosion_Base>();
-                cExplosion.SetPosition(position);
-                objectsToAdd.Add(gobj);
-            }
-            else
-            {
-                gobj_cur.name = gobj_cur.name.Replace("(Clone)", "");
-                if (gobj_cur.name != objName)
-                {
-                    objectsToRemove.Add(gobj_cur);
-                    GameObject gobj = explosionManager.DequeueObject(objName);
-                    Explosion_Base cExplosion = gobj.GetComponent<Explosion_Base>();
-                    cExplosion.SetPosition(position);
-                    objectsToAdd.Add(gobj);
-                }
-                else
-                {
-                    Debug.Log(gobj_cur.name + " == " + objName);
-                }
-            }
-        }
-
-        // ExplosionManager経由でリストを更新
-        explosionManager.AddToExplosionList(objectsToAdd);
-        explosionManager.RemoveFromExplosionList(objectsToRemove);
-
-        // 削除対象オブジェクトをキューに戻す
-        foreach (GameObject obj in objectsToRemove)
-        {
-            explosionManager.EnqueueObject(obj);
-        }
+public class BrokenBlockManager_Online : BrokenBlockManager
+{
+    protected override void InsBrokenBlock_RPC(int x, int y, int z){
+        photonView.RPC(nameof(InsBrokenBlock), RpcTarget.All, x, y, z);
     }
-
-    public override void UpdateGroundExplosion(GameObject gObj)
-    {
-        // エンキューすると位置情報が変わるので同期する位置情報は退避しておく
-        Vector3 pos = gObj.transform.position;
-        explosionManager.EnqueueObject(gObj);
-        if (false == PhotonNetwork.IsMasterClient){
-            return;
-        }
-        photonView.RPC(nameof(UpdateGroundExplosion_RPC), RpcTarget.All, gObj.name, pos);
-    }
-
-    [PunRPC]
-    public void UpdateGroundExplosion_RPC(string matname, Vector3 v3)
-    {
-        explosionManager.UpdateGroundExplosion(matname, v3);
-    }
-
+ 
 
 }

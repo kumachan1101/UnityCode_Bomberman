@@ -6,6 +6,8 @@ public class Bom_Base : MonoBehaviour
     public GameObject ExplosionPrefab;
     protected Field_Block_Base cField;
 
+    private BrokenBlockManager cBrokenBlockManager;
+
     protected Library_Base cLibrary;
 
     public int iExplosionNum;
@@ -21,7 +23,9 @@ public class Bom_Base : MonoBehaviour
     }
 
     public void AwakeCommon(){
-        cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+        GameObject gField = GameObject.Find("Field");
+        cBrokenBlockManager = gField.GetComponent<BrokenBlockManager>();
+        cField = gField.GetComponent<Field_Block_Base>();
         cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
         moveManager = gameObject.AddComponent<Bom_Base_MoveManager>();
         collisionManager = gameObject.AddComponent<Bom_Base_CollisionManager>();
@@ -200,7 +204,7 @@ public class Bom_Base : MonoBehaviour
     /// </summary>
     protected virtual bool CanContinueExplosion(Vector3 position)
     {
-        if(ShouldCheckIsBroken() && cField.IsBroken(position)){
+        if(ShouldCheckIsBroken() && cBrokenBlockManager.IsBroken(position)){
             return false;
         }
         return true;

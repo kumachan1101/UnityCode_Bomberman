@@ -5,8 +5,8 @@ public class ItemRainbow : Item{
         if(null != cPlayerBom){
             string sMaterialType = cPlayerBom.Get<string>(GetKind.MaterialType);
             MaterialManager cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-            Field_Block_Base cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
-            cField.Rainbow_RPC(cMaterialMng.GetMaterialOfExplosion(sMaterialType));
+            ExplosionManager cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
+            cExplosionManager.Rainbow_RPC(cMaterialMng.GetMaterialOfExplosion(sMaterialType));
         }
     }
 }
