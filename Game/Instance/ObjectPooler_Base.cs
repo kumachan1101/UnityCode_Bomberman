@@ -17,13 +17,6 @@ public class ObjectPooler_Base : MonoBehaviour
     protected Dictionary<string, GameObject> prefabByTag;
     protected Dictionary<string, Queue<GameObject>> objectPoolByTag;
 
-	protected MaterialManager materialManager;
-
-
-    protected virtual void Start()
-    {
-		materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-    }
     protected GameObject CreateObject(GameObject prefab)
     {
         // ローカルでオブジェクトをインスタンス化
@@ -121,95 +114,5 @@ public class ObjectPooler_Base : MonoBehaviour
         Debug.LogWarning("No available objects with tag \"" + tag + "\".");
         return null;
     }
-
-
-/*
-    public void InitializePool()
-    {
-        objectPoolQueue = new Queue<GameObject>();
-        prefabByTag = new Dictionary<string, GameObject>();
-
-        foreach (Pool pool in pools)
-        {
-            prefabByTag[pool.tag] = pool.prefab;
-
-            for (int i = 0; i < pool.size; i++)
-            {
-                GameObject obj = CreateObject(pool.prefab);
-                obj.GetComponent<Explosion_Base>().SetID(i);
-				SetObjectActive_RPC(obj, false);
-                objectPoolQueue.Enqueue(obj);
-            }
-        }
-    }
-    public void EnqueueObject(string tag, GameObject obj)
-    {
-        if (obj != null)
-        {
-            obj.transform.position = new Vector3(0, -2, 0); // オブジェクトの位置を変更
-            SetObjectActive_RPC(obj, false);
-            objectPoolQueue.Enqueue(obj); // キューにエンキュー
-        }
-        else
-        {
-            if(obj == null){
-                Debug.LogWarning("enqueue a null");
-            }
-            if(false == obj.activeInHierarchy){
-                Debug.LogWarning("inactive object.");
-            }
-            
-        }
-    }
-
-    public GameObject DequeueObject(string tag)
-    {
-        foreach (var obj in objectPoolQueue)
-        {
-            if (!obj.activeInHierarchy && prefabByTag.ContainsKey(tag))
-            {
-                objectPoolQueue.Dequeue();
-				SetObjectActive_RPC(obj, true);
-
-                Renderer renderer = obj.GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    Material newMaterial = materialManager.GetMaterialOfTypeExplosion(tag); // タグに対応するマテリアルを取得する
-                    renderer.material = newMaterial;
-                }
-
-                return obj;
-            }
-        }
-
-        Debug.LogWarning("No available objects with tag \"" + tag + "\".");
-        return null;
-    }
-    public GameObject DequeueObject(string tag)
-    {
-        int queueCount = objectPoolQueue.Count;
-        for (int i = 0; i < queueCount; i++)
-        {
-            GameObject obj = objectPoolQueue.Dequeue(); // 先頭から取り出す
-
-            // GameObjectの名前にtagが含まれているかどうかをチェック
-            if (obj.name.Contains(tag))
-            {
-                SetObjectActive_RPC(obj, true);
-                return obj; // 条件に合うオブジェクトを返す
-            }
-            objectPoolQueue.Enqueue(obj); // 条件に合わない場合、キューに戻す
-        }
-
-        Debug.LogWarning("No available objects with tag \"" + tag + "\".");
-        return null;
-    }
-
-
-    public List<GameObject> GetAllObjectsInPool()
-    {
-        return objectPoolQueue.ToList();
-    }
-*/
 
 }

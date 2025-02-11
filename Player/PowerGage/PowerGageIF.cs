@@ -53,7 +53,7 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 	}
 
 	protected void DestroySync(){
-		Debug.Log(gCanvas);
+		//Debug.Log(gCanvas);
 		Destroy(gCanvas);
 	}
 	protected IEnumerator RetrySyncSetDamage(int iDamage){

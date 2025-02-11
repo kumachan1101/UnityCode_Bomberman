@@ -1,192 +1,89 @@
-/*
 
 using System.Collections.Generic;
 using UnityEngine;
-public class ExplosionManager : MonoBehaviour
+using Photon.Pun;
+using System.Linq;
+public enum PoolerType
 {
-    public List<GameObject> ExplosionList = new List<GameObject>();
-
-    private ObjectPooler_Base objectPooler;
-    public void Initialize(ObjectPooler_Base pooler)
-    {
-        objectPooler = pooler;
-    }
-
-    public void SetupStage()
-    {
-        objectPooler.pools.Clear();
-        ConfigurePools();
-        objectPooler.InitializePool(); // プールを再生成
-    }
-    virtual protected void ConfigurePools()
-    {
-        AddPool(ExplosionTypes.Explosion1, 1000);
-        AddPool(ExplosionTypes.Explosion2, 1000);
-        AddPool(ExplosionTypes.Explosion3, 1000);
-        AddPool(ExplosionTypes.Explosion4, 1000);
-    }
-
-    private void AddPool(string tag, int size)
-    {
-        GameObject prefab = Resources.Load<GameObject>(tag);
-        ObjectPooler_Base.Pool newPool = new ObjectPooler_Base.Pool { tag = tag, prefab = prefab, size = size };
-        objectPooler.pools.Add(newPool);
-    }
-
-    public void UpdateGroundExplosion(string objName, Vector3 position)
-    {
-        GameObject delobj = null;
-        GameObject gtemp = DequeueObject(objName.Replace("(Clone)",""));
-        gtemp.transform.position = position;
-        foreach (GameObject obj in ExplosionList)
-        {
-            if (obj != null && obj.transform.position == position){
-                if(obj.name != objName)
-                {
-                    delobj = obj; // 後で削除
-                    EnqueueObject(obj);      // オブジェクトをキューに戻す
-                    break;
-                }
-                else
-                {
-                    EnqueueObject(gtemp); // マテリアルが一致する場合は再利用
-                    return;
-                }
-            }
-        }
-        if(null != delobj){
-            ExplosionList.Remove(delobj);
-        }
-        ExplosionList.Add(gtemp); // 新しいオブジェクトを追加
-    }
-
-    public string GetExplosionType(string input)
-    {
-        if (input.Contains(ExplosionTypes.Explosion1))
-        {
-            return ExplosionTypes.Explosion1;
-        }
-        else if (input.Contains(ExplosionTypes.Explosion2))
-        {
-            return ExplosionTypes.Explosion2;
-        }
-        else if (input.Contains(ExplosionTypes.Explosion3))
-        {
-            return ExplosionTypes.Explosion3;
-        }
-        else if (input.Contains(ExplosionTypes.Explosion4))
-        {
-            return ExplosionTypes.Explosion4;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-
-	public bool IsMatch(Vector3 targetPosition, Material targetMaterial)
-	{
-		foreach (GameObject obj in ExplosionList)
-		{
-			if (obj != null && obj.transform.position == targetPosition)
-			{
-				Renderer renderer = obj.GetComponent<Renderer>();
-				if (renderer != null && renderer.material.name.Replace(" (Instance)", "") == targetMaterial.name)
-				{
-					return true; // 位置とマテリアルが一致する場合
-				}
-				else{
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
-
-    public GameObject DequeueObject(string tag)
-    {
-        return objectPooler.DequeueObject(tag);
-    }
-
-    public void EnqueueObject(GameObject obj)
-    {
-        string tag = GetExplosionType(obj.name);
-        objectPooler.EnqueueObject(tag, obj);
-    }
-
-
-    // ExplosionListにオブジェクトを追加するメソッド
-    public void AddToExplosionList(List<GameObject> objectsToAdd)
-    {
-        ExplosionList.AddRange(objectsToAdd);
-    }
-
-    // ExplosionListからオブジェクトを削除するメソッド
-    public void RemoveFromExplosionList(List<GameObject> objectsToRemove)
-    {
-        foreach (GameObject obj in objectsToRemove)
-        {
-            ExplosionList.Remove(obj);
-        }
-    }
-
-    // ExplosionListを取得するメソッド（必要なら条件付きで許可）
-    public IEnumerable<GameObject> GetExplosionList()
-    {
-        return ExplosionList;
-    }
-
-
+    Local,
+    Tower
 }
 
-*/
+public static class ObjectPoolerFactory
+{
+    public static ObjectPooler_Base Create(GameObject obj, PoolerType type)
+    {
+        switch (type)
+        {
+            case PoolerType.Local:
+                return obj.AddComponent<ObjectPooler_Local>();
+            case PoolerType.Tower:
+                return obj.AddComponent<ObjectPooler_Tower>();
+            default:
+                throw new System.ArgumentException("Invalid PoolerType");
+        }
+    }
+}
 
-using System.Collections.Generic;
-using UnityEngine;
 
-public class ExplosionManager : MonoBehaviour
+public class ExplosionManager : MonoBehaviourPunCallbacks
 {
     private ExplosionTracker explosionTracker;
     private ExplosionPoolManager explosionPoolManager;
 
-    public void Initialize()
+    public void Initialize(PoolerType type)
     {
-        ObjectPooler_Base pooler = this.gameObject.AddComponent<ObjectPooler_Local>();
+        ObjectPooler_Base pooler = ObjectPoolerFactory.Create(this.gameObject, type);
         explosionPoolManager = new ExplosionPoolManager(pooler);
         explosionTracker = new ExplosionTracker();
     }
 
     public void UpdateGroundExplosion(string objName, Vector3 position)
     {
-        GameObject delobj = null;
         GameObject gtemp = DequeueObject(objName.Replace("(Clone)", ""));
         gtemp.transform.position = position;
-        
-        foreach (GameObject obj in explosionTracker.ExplosionList)
+
+        if (explosionTracker.HandleExplosionUpdate(objName, gtemp, out GameObject delobj))
         {
-            if (obj != null && obj.transform.position == position)
-            {
-                if (obj.name != objName)
-                {
-                    delobj = obj;
-                    EnqueueObject(obj);
-                    break;
-                }
-                else
-                {
-                    EnqueueObject(gtemp);
-                    return;
-                }
-            }
+            EnqueueObject(gtemp); // 名前と位置が一致した場合のみエンキュー
+            return;
         }
-        
+
         if (delobj != null)
         {
-            explosionTracker.RemoveFromExplosionList(delobj);
+            EnqueueObject(delobj);
         }
-        explosionTracker.AddToExplosionList(gtemp);
+    }
+
+    public void Rainbow(string objname)
+    {
+        var explosionsToRemove = new List<GameObject>();
+        var explosionsToAdd = new List<GameObject>();
+
+        foreach (var obj in GetExplosionList().Where(o => o != null && o.name != objname))
+        {
+            GameObject gobj = DequeueObject(objname);
+            if (null != gobj)
+            {
+                explosionsToAdd.Add(gobj);
+                gobj.GetComponent<Explosion_Base>().SetPosition(obj.transform.position);
+            }
+
+            explosionsToRemove.Add(obj);
+        }
+
+        UpdateExplosionList(explosionsToAdd, explosionsToRemove);
+
+        foreach (var obj in explosionsToRemove)
+        {
+            EnqueueObject(obj);
+        }
+    }
+
+    private void UpdateExplosionList(List<GameObject> toAdd, List<GameObject> toRemove)
+    {
+        AddToExplosionList(toAdd);
+        RemoveFromExplosionList(toRemove);
     }
 
     public GameObject DequeueObject(string tag)
@@ -196,7 +93,7 @@ public class ExplosionManager : MonoBehaviour
 
     public void EnqueueObject(GameObject obj)
     {
-        string tag = GetExplosionType(obj.name);
+        //string tag = GetExplosionType(obj.name);
         explosionPoolManager.EnqueueObject(tag, obj);
     }
 
@@ -229,6 +126,32 @@ public class ExplosionManager : MonoBehaviour
 public class ExplosionTracker
 {
     public List<GameObject> ExplosionList { get; private set; } = new List<GameObject>();
+
+    public bool HandleExplosionUpdate(string objName, GameObject gtemp, out GameObject delobj)
+    {
+        delobj = null;
+
+        foreach (GameObject obj in ExplosionList)
+        {
+            if (obj != null && obj.transform.position == gtemp.transform.position)
+            {
+                if (obj.name != objName)
+                {
+                    delobj = obj;
+                    RemoveFromExplosionList(delobj);
+                    AddToExplosionList(gtemp);
+                    return false; // そのまま続行
+                }
+                else
+                {
+                    return true; // 名前と位置が一致 → エンキュー対象
+                }
+            }
+        }
+
+        AddToExplosionList(gtemp);
+        return false;
+    }
 
     public void AddToExplosionList(GameObject obj)
     {
@@ -286,6 +209,8 @@ public class ExplosionTracker
     {
         return ExplosionList;
     }
+
+
 }
 
 public class ExplosionPoolManager
@@ -333,12 +258,12 @@ public class ExplosionPoolManager
 
     public GameObject DequeueObject(string tag)
     {
-        return objectPooler.DequeueObject(tag);
+        return objectPooler.DequeueObject(GetExplosionType(tag));
     }
 
     public void EnqueueObject(string tag, GameObject obj)
     {
-        objectPooler.EnqueueObject(tag, obj);
+        objectPooler.EnqueueObject(GetExplosionType(obj.name), obj);
     }
 
     public string GetExplosionType(string input)

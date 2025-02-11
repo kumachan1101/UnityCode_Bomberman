@@ -5,13 +5,13 @@ abstract public class InstanceManager_Base : MonoBehaviour
 {
     protected GameObject prefab;
     protected string resource;
-	protected Field_Block_Base cField;
+	protected ExplosionManager cExplosionManager;
     public GameObject gTemp;
 
     protected Queue<GameObject> instanceQueue = new Queue<GameObject>();
 	void Start()
 	{
-		 cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+		 cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
 	}
 
     public GameObject InstantiateInstance(Vector3 position)
@@ -42,7 +42,7 @@ abstract public class InstanceManager_Base : MonoBehaviour
     public void InstantiateInstancePool_Base(Vector3 position)
 	{
 		// Field_Block_Base 経由でデキューしてオブジェクトを取得
-		GameObject explosion = cField.DequeueObject(prefab.name);
+		GameObject explosion = cExplosionManager.DequeueObject(prefab.name);
 
 		if (explosion != null)
 		{
@@ -67,7 +67,7 @@ abstract public class InstanceManager_Base : MonoBehaviour
             GameObject gtemp = instanceQueue.Dequeue(); // キューから取り出し
 
             // キューに取り出したオブジェクトをエンキューする
-            cField.EnqueueObject(gtemp);
+            cExplosionManager.EnqueueObject(gtemp);
         }
     }
 	

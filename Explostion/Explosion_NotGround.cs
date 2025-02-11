@@ -5,10 +5,10 @@ using UnityEngine.SceneManagement;
 public class Explosion_NotGround : Explosion_Base
 {
     protected override void hide(){
-		if(null == cField){
-			cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+		if(null == cExplosionManager){
+			cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
 		}
-        cField.EnqueueObject(this.gameObject);
+        cExplosionManager.EnqueueObject(this.gameObject);
     }
 
 }

@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using System.Collections.Generic;
+using System;
 
 public interface IBomFactory
 {
@@ -26,6 +27,27 @@ public class BomControl : MonoBehaviourPunCallbacks
 
     protected void AddBomComponents(GameObject gBom, BOM_KIND bomKind)
     {
+        var bomActions = new Dictionary<BOM_KIND, Func<GameObject, Bom_Base>>
+        {
+            { BOM_KIND.BOM_KIND_BIGBAN, bomFactory.CreateBomBigBan },
+            { BOM_KIND.BOM_KIND_EXPLODE, bomFactory.CreateBomExplode }
+        };
+
+        if (bomActions.TryGetValue(bomKind, out var func))
+        {
+            func(gBom);
+        }
+        else
+        {
+            bomFactory.CreateBom(gBom);
+        }
+    }
+
+
+
+/*
+    protected void AddBomComponents(GameObject gBom, BOM_KIND bomKind)
+    {
         if (bomKind == BOM_KIND.BOM_KIND_BIGBAN)
         {
             bomFactory.CreateBomBigBan(gBom);
@@ -39,6 +61,7 @@ public class BomControl : MonoBehaviourPunCallbacks
             bomFactory.CreateBom(gBom);
         }
     }
+*/
 /*
     protected virtual Bom_Base AddComponent_BomExplode(GameObject gBom){
         return null;

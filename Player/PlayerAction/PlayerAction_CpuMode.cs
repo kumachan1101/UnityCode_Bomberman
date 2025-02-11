@@ -7,12 +7,12 @@ public class PlayerAction_CpuMode : PlayerAction
 	private int randomDirection;
 	private float changeDirectionInterval = 3f; // 向きを変える間隔
 	private Dictionary<int, Vector3> randomMovementBindings;
-    private Field_Block_Base cField;
+    private ExplosionManager cExplosionManager;
     protected Material cMaterial;
     private float bombCooldown = 3f; // 爆弾を置くクールダウン時間
     private float bombTimer = 0f; // 次に爆弾を置けるまでの時間
 	protected override void InitDiff() {
-        cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+        cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
         MaterialManager materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
 		string MaterialType = materialManager.GetBomMaterialByPlayerName(this.gameObject.name);
         cMaterial = materialManager.GetMaterialOfType(MaterialType);
@@ -79,7 +79,7 @@ public class PlayerAction_CpuMode : PlayerAction
 
 		// 現在位置の地面に爆風があるかどうかではなく、進行先の地面に爆風があるかをチェック
 		Vector3 nextGroundPos = new Vector3(nextPos.x, nextPos.y - 1, nextPos.z);
-        bool canMove = cField.IsMatch(nextGroundPos, cMaterial);
+        bool canMove = cExplosionManager.IsMatch(nextGroundPos, cMaterial);
 
 		// 範囲外に出ようとしていないか確認
 		if (Library_Base.IsPositionOutOfBounds(nextPos))

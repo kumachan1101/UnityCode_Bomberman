@@ -90,6 +90,4 @@ public class Field_Block_Tower : MonoBehaviour
         cTower.SetMaterialType(materialType);
     }
 
-
-
 }

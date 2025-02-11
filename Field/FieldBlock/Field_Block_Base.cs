@@ -4,7 +4,15 @@ using UnityEngine;
 using Photon.Pun;
 using System.Collections;
 
-public class Field_Block_Base : MonoBehaviourPunCallbacks
+public static class BlockManagerFactory
+{
+    public static T Create<T>(GameObject obj) where T : Component
+    {
+        return obj.AddComponent<T>();
+    }
+}
+
+public abstract class Field_Block_Base : MonoBehaviourPunCallbacks
 {
     private bool bSetUp;
 
@@ -16,32 +24,47 @@ public class Field_Block_Base : MonoBehaviourPunCallbacks
     private BrokenBlockManager brokenBlockManager;
     private ObjMoveBlockManager objMoveBlockManager;
 
-    protected virtual void ClearBrokenList_RPC() { }
+    //protected virtual void ClearBrokenList_RPC() { }
     protected virtual void InsBrokenBlock_RPC(int x, int y, int z) { }
     protected virtual void InsObjMove_RPC(int x, int y, int z, Library_Base.Direction randomDirection) { }
     public virtual void Rainbow_RPC(string sMaterialType) { }
-
     void Awake()
     {
-        explosionManager = new GameObject("ExplosionManager").AddComponent<ExplosionManager>();
-        explosionManager.Initialize();
-        //explosionManager.Initialize(GetComponent<ObjectPooler_Base>());
+        explosionManager = CreateExplosionManager();
         cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
 
-        // Field_Block_BaseのGameObjectに管理クラスを追加
-        groundBlockManager = gameObject.AddComponent<GroundBlockManager>();
-        fixedWallBlockManager = gameObject.AddComponent<FixedWallBlockManager>();
-        brokenBlockManager = gameObject.AddComponent<BrokenBlockManager>();
-        objMoveBlockManager = gameObject.AddComponent<ObjMoveBlockManager>();
+        // Field_Block_Base の GameObject に管理クラスを追加
+        InitializeBlockManagers();
 
-        // 初期化処理
+        bSetUp = false;
+    }
+
+    // `ExplosionManager` を生成し、適切な `PoolerType` で初期化
+    private ExplosionManager CreateExplosionManager()
+    {
+        var obj = new GameObject("ExplosionManager");
+        var manager = obj.AddComponent<ExplosionManager>();
+
+        PoolerType type = (GetComponent<Field_Block_Tower>() != null) ? PoolerType.Tower : PoolerType.Local;
+        manager.Initialize(type);
+
+        return manager;
+    }
+
+    // ブロック関連のマネージャーを `Factory` で追加・初期化
+    private void InitializeBlockManagers()
+    {
+        groundBlockManager = BlockManagerFactory.Create<GroundBlockManager>(gameObject);
+        fixedWallBlockManager = BlockManagerFactory.Create<FixedWallBlockManager>(gameObject);
+        brokenBlockManager = BlockManagerFactory.Create<BrokenBlockManager>(gameObject);
+        objMoveBlockManager = BlockManagerFactory.Create<ObjMoveBlockManager>(gameObject);
+
         groundBlockManager.Initialize();
         fixedWallBlockManager.Initialize();
         brokenBlockManager.Initialize();
         objMoveBlockManager.Initialize();
-
-        bSetUp = false;
     }
+
 
     void Start()
     {
@@ -56,7 +79,6 @@ public class Field_Block_Base : MonoBehaviourPunCallbacks
     }
     public void SetupStage()
     {
-        //explosionManager.SetupStage();
         bSetUp = true;
     }
     public bool GetSetUp()
@@ -75,6 +97,7 @@ public class Field_Block_Base : MonoBehaviourPunCallbacks
     {
         brokenBlockManager.InsBrokenBlock(x, y, z);
     }
+
 
     public void AddBrokenBlock(int randomRangeMax)
     {
@@ -108,7 +131,6 @@ public class Field_Block_Base : MonoBehaviourPunCallbacks
             }
         }
     }
-
     [PunRPC]
     public void InsObjMove(int x, int y, int z, Library_Base.Direction randomDirection)
     {
@@ -143,15 +165,8 @@ public class Field_Block_Base : MonoBehaviourPunCallbacks
     {
         return objMoveBlockManager.IsMatchObjMove(targetPosition);
     }
+    public abstract void UpdateGroundExplosion(GameObject gObj);
 
-    public bool IsMatch(Vector3 targetPosition, Material targetMaterial)
-    {
-        return explosionManager.IsMatch(targetPosition, targetMaterial);
-    }
-
-    public virtual void UpdateGroundExplosion(GameObject gObj) { }
-    public virtual GameObject DequeueObject(string tag) { return null; }
-    public virtual void EnqueueObject(GameObject obj) { }
 }
 
 public class GroundBlockManager : MonoBehaviour
