@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+
 public class PlayerObjectGenerator
 {
     // キャンバスを生成
@@ -74,19 +74,71 @@ public class StandardPlayerFactory : IPlayerFactory
     }
 }
 
+public class PlayerPositionManager_CpuMode : PlayerPositionManager {
 
-public class Field_Player_CpuMode : Field_Player_Base {
-    protected virtual void GetCPUPlayerInfo(ref string canvasName, ref string playerName){}
-    public virtual void SetPower(Slider cSlider){}
+    public override void SetPlayerPositions()
+    {
+        int xmax = GameManager.xmax;
+        int zmax = GameManager.zmax;
+
+        // プレイヤー数を4以上のランダムな値に設定（例: 4〜10人）
+        int playerCount = Random.Range(4, 20);
+
+        // プレイヤー位置のリストを初期化
+        playerPositions = new Vector3[playerCount];
+
+        for (int i = 0; i < playerCount; i++)
+        {
+            Vector3 randomPosition;
+
+            // 他のプレイヤーと被らないようにランダムな位置を選定
+            do
+            {
+                randomPosition = new Vector3(
+                    Random.Range(3, xmax - 3), // フィールドの端を避ける
+                    0.5f,
+                    Random.Range(3, zmax - 3)
+                );
+            } while (IsPositionOccupied(randomPosition));
+
+            playerPositions[i] = randomPosition;
+        }
+    }
+
+
+	// 他のプレイヤー位置と重複しないかチェックする関数
+	private bool IsPositionOccupied(Vector3 position)
+	{
+	    foreach (Vector3 existingPosition in playerPositions)
+	    {
+	        if (existingPosition == position)
+	        {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+}
+
+public class PlayerPowerManager_CpuMode: PlayerPowerManager
+{
+    public override int GetPower(){
+        return 20;
+    }
+
+}
+
+public class PlayerSpawnManager_CpuMode : PlayerSpawnManager {
 
 	protected override bool PreAddDummyPlayer(){
 		cPlayerCountManager.AddPlayerCount();
 		return true;
 	}
-
-    public virtual string GetBomMaterial(Vector3 target, int index)
-    {
-		return "";
+    protected override void PlayerAddConponent (){
+        cPlayerPositionManager = gameObject.AddComponent<PlayerPositionManager_CpuMode>();
+        gameObject.AddComponent<PlayerPowerManager_CpuMode>();
+    
+        
     }
 
     public override void AddDummyPlayer(int playerNo, Vector3 position)
@@ -97,7 +149,7 @@ public class Field_Player_CpuMode : Field_Player_Base {
 
     public override void SpawnPlayerObjects(int playerNo)
     {
-        Vector3 position = GetPlayerPosition(GetIndex(), playerNo - 1); // プレイヤー位置を取得
+        Vector3 position = cPlayerPositionManager.GetPlayerPosition(playerNo - 1); // プレイヤー位置を取得
         var standardFactory = new StandardPlayerFactory();
         CreateAndSetupPlayer(playerNo, position, standardFactory);
     }
@@ -202,5 +254,6 @@ public class Field_Player_CpuMode : Field_Player_Base {
             }
         }
     }
+
 
 }

@@ -4,7 +4,7 @@ using Photon.Pun;
 public class Bom_Online : Bom_Base
 {
     private PhotonView cPhotonView;
-    override protected void AddComponentInstanceManager(){
+    protected override void AddComponentInstanceManager(){
         cInsManager = gameObject.AddComponent<InstanceManager_Online>();
         cPhotonView = GetComponent<PhotonView>();
         cInsManager.SetPothonView(cPhotonView.ViewID);

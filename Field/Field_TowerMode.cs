@@ -33,8 +33,8 @@ public class Field_TowerMode :Field_Event{
             if (tower.name == "Tower1")
             {
                 cGameManager.GameOver();
-                Debug.Log(tower);
-                Debug.Log("GameOver");
+                //Debug.Log(tower);
+                //Debug.Log("GameOver");
             }
             else{
                 if(cGameManager.IsGameOver()){
@@ -43,7 +43,7 @@ public class Field_TowerMode :Field_Event{
                 removedTowerCount++;
                 if (removedTowerCount >= 3){
                     cGameManager.GameTowerWin();
-                    Debug.Log("GameTowerWin");
+                    //Debug.Log("GameTowerWin");
                 }
             }
         }

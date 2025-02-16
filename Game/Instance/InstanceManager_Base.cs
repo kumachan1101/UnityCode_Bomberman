@@ -41,7 +41,7 @@ abstract public class InstanceManager_Base : MonoBehaviour
 
     public void InstantiateInstancePool_Base(Vector3 position)
 	{
-		// Field_Block_Base 経由でデキューしてオブジェクトを取得
+		// BlockCreateManager 経由でデキューしてオブジェクトを取得
 		GameObject explosion = cExplosionManager.DequeueObject(prefab.name);
 
 		if (explosion != null)

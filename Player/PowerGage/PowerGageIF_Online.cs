@@ -45,10 +45,6 @@ public class PowerGageIF_Online : PowerGageIF
 		}
 	}
 
-    protected override PowerGage CreatePowerGage(GameObject sliderObject)
-    {
-        return sliderObject.AddComponent<PowerGage_Online>();
-    }
 	protected override void SetDamage_RPC(int iDamage){
 		if(false == GetComponent<PhotonView>().IsMine){
 			return;

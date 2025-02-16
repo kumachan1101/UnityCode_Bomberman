@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Field_Block_Tower : MonoBehaviour
+public class BlockCreateManager_Tower : MonoBehaviour
 {
     private int playercnt = 4;
     // GameManager.xmax と GameManager.zmax を使用して初期化

@@ -3,7 +3,7 @@ using UnityEngine;
 public class Explosion_Base : MonoBehaviour
 {
     protected ExplosionManager cExplosionManager;
-    protected Field_Block_Base cField;
+    protected BlockCreateManager cField;
     protected bool bField = false;
     private SoundManager soundManager;
 
@@ -21,7 +21,7 @@ public class Explosion_Base : MonoBehaviour
         }
         */
 		cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
-        cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+        cField = GameObject.Find("Field").GetComponent<BlockCreateManager>();
         //Invoke(nameof(hide), 1f);
         soundManager.PlaySoundEffect("EXPLOISON");
         if (Library_Base.IsPositionOutOfBounds(transform.position)){
@@ -47,7 +47,7 @@ public class Explosion_Base : MonoBehaviour
 			cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
 		}
         if(null == cField){
-            cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+            cField = GameObject.Find("Field").GetComponent<BlockCreateManager>();
         }
         SetPosition(new Vector3(transform.position.x, transform.position.y-1, transform.position.z));
         bool bRet = cField.IsMatchObjMove(transform.position);

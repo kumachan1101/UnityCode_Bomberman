@@ -104,6 +104,7 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
         int playerCount = PhotonNetwork.PlayerList.Length; // ルームにいる人数を確認
         string roomName = PhotonNetwork.CurrentRoom.Name;
         GameObject gField = GameObject.Find("Field");
+        gField.GetComponent<PlayerPositionManager>().SetPlayerPositions();
 
         foreach (var roomButton in roomButtonList) {
             if (roomButton.RoomName == roomName) {
@@ -131,7 +132,7 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
 
     // プレイヤーオブジェクトの処理
     private void HandlePlayerObjects(int playerCount, GameObject gField) {
-        Field_Player_Base cFieldPlayer = gField.GetComponent<Field_Player_Base>();
+        PlayerSpawnManager cFieldPlayer = gField.GetComponent<PlayerSpawnManager>();
         cFieldPlayer.SpawnPlayerObjects(playerCount);
     }
 
@@ -144,7 +145,7 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
 
     // 最大プレイヤー数に達した際の処理
     private void HandleMaxPlayers(GameObject gField) {
-        Field_Block_Base cField = gField.GetComponent<Field_Block_Base>();
+        BlockCreateManager cField = gField.GetComponent<BlockCreateManager>();
         GameObject gGameEndCanvasLocal = GameObject.Find("GameEndCanvas_Local(Clone)");
         Destroy(gGameEndCanvasLocal);
 

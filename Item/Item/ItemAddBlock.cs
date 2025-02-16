@@ -2,7 +2,7 @@
 using UnityEngine;
 public class ItemAddBlock : Item{
     public override void Reflection(GameObject gObj){
-        Field_Block_Base cField = GameObject.Find("Field").GetComponent<Field_Block_Base>();
+        BlockCreateManager cField = GameObject.Find("Field").GetComponent<BlockCreateManager>();
         cField.AddBrokenBlock(20);
     }
 }

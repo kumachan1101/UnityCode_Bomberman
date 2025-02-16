@@ -13,7 +13,7 @@ public static class BlockManagerFactory
     }
 }
 
-public abstract class Field_Block_Base : MonoBehaviourPunCallbacks
+public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
 {
     private bool bSetUp;
     protected Library_Base cLibrary;
@@ -33,6 +33,14 @@ public abstract class Field_Block_Base : MonoBehaviourPunCallbacks
         InitializeBlockManagers();
 
         bSetUp = false;
+    }
+
+    void Start()
+    {
+        CreateFixedBlock();
+        CreateField();
+        SetupStage();
+        GetComponent<PlayerSpawnManager>().RequestPlayerSpawn();
     }
 
     // `ExplosionManager` を生成し、適切な `PoolerType` で初期化
@@ -78,12 +86,6 @@ public abstract class Field_Block_Base : MonoBehaviourPunCallbacks
     {
         return BlockManagerFactory.Create<T>(gameObject);
     }
-    void Start()
-    {
-        CreateFixedBlock();
-        CreateField();
-        SetupStage();
-    }
 
     public void CreateField()
     {
@@ -124,7 +126,7 @@ public abstract class Field_Block_Base : MonoBehaviourPunCallbacks
     protected void CreateFixedBlock()
     {
         SetFieldRange();
-        GetComponent<Field_Player_Base>().SetPlayerPositions();
+        //GetComponent<PlayerPositionManager>().SetPlayerPositions();
 
         fixedWallBlockManager.CreateFixedWall();
         groundBlockManager.CreateGroundBlock();

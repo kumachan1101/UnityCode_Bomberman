@@ -2,7 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using System.Collections.Generic;
 
-public class Field_Block_Online : Field_Block_Base {
+public class BlockCreateManager_Online : BlockCreateManager {
 
     void Start()
     {
@@ -32,7 +32,7 @@ public class Field_Block_Online : Field_Block_Base {
         GameObject gExplosionManager = GameObject.Find("ExplosionManager");
         var manager = gExplosionManager.AddComponent<ExplosionManager_Online>();
 
-        PoolerType type = (GetComponent<Field_Block_Tower>() != null) ? PoolerType.Tower : PoolerType.Local;
+        PoolerType type = (GetComponent<BlockCreateManager_Tower>() != null) ? PoolerType.Tower : PoolerType.Local;
         manager.Initialize(type);
 
         return manager;

@@ -3,10 +3,12 @@ using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
-public class Field_Player_Tower :Field_Event
+public class PlayerSpawnManager_Tower :Field_Event
 {
     private Button button; // 対象のボタンをInspectorで設定
-    private Field_Player_Base cField;
+    private PlayerSpawnManager cField;
+
+    private PlayerPositionManager cPlayerPositionManager;
     private PlayerCountManager cPlayerCountManager;
     private GameManager cGameManager;
     private static bool listenersRegistered = false;
@@ -17,7 +19,8 @@ public class Field_Player_Tower :Field_Event
 
     protected override void Init() {
         GameObject gFeild = GameObject.Find("Field");
-        cField = gFeild.GetComponent<Field_Player_Base>();
+        cField = gFeild.GetComponent<PlayerSpawnManager>();
+        cPlayerPositionManager = gFeild.AddComponent<PlayerPositionManager_CpuMode>();
         cPlayerCountManager = gFeild.GetComponent<PlayerCountManager>();
         cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         button = GetComponent<Button>();
@@ -117,7 +120,7 @@ public class Field_Player_Tower :Field_Event
     private void EnsurePlayerExists(object obj)
     {
         if(cGameManager.IsGameOver()){
-            Debug.Log("EnsurePlayerExists GameOver");
+            //Debug.Log("EnsurePlayerExists GameOver");
             return;
         }
         if (obj is Player_Base gPlayer)
@@ -133,16 +136,7 @@ public class Field_Player_Tower :Field_Event
     private IEnumerator CallAddDummyPlayerWithDelay(int iPlayerNo)
     {
         yield return new WaitForSeconds(2f); // Wait for 1 second
-        cField.AddDummyPlayer(iPlayerNo, cField.GetPlayerPosition(cField.GetIndex(), iPlayerNo - 1));
+        cField.AddDummyPlayer(iPlayerNo, cPlayerPositionManager.GetPlayerPosition(iPlayerNo - 1));
         //GameObject.Find("Tower" + iPlayerNo).GetComponent<PowerGageIF>().SetDamage(2);
-    }
-    string GetCurrentSceneInfo()
-    {
-        Scene currentScene = SceneManager.GetActiveScene(); // 現在のシーンを取得
-        string sceneName = currentScene.name;              // シーン名
-        int sceneIndex = currentScene.buildIndex;          // ビルドインデックス
-
-        Debug.Log($"現在のシーン名: {sceneName}, インデックス: {sceneIndex}");
-        return sceneName;
     }
 }

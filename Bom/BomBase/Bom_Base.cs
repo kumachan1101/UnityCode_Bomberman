@@ -4,7 +4,7 @@ using UnityEngine;
 public class Bom_Base : MonoBehaviour
 {
     public GameObject ExplosionPrefab;
-    protected Field_Block_Base cField;
+    protected BlockCreateManager cField;
 
     private BrokenBlockManager cBrokenBlockManager;
 
@@ -25,7 +25,7 @@ public class Bom_Base : MonoBehaviour
     public void AwakeCommon(){
         GameObject gField = GameObject.Find("Field");
         cBrokenBlockManager = gField.GetComponent<BrokenBlockManager>();
-        cField = gField.GetComponent<Field_Block_Base>();
+        cField = gField.GetComponent<BlockCreateManager>();
         cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
         moveManager = gameObject.AddComponent<Bom_Base_MoveManager>();
         collisionManager = gameObject.AddComponent<Bom_Base_CollisionManager>();

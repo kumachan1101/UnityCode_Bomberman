@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Field_Block_Random : Field_Block_CpuMode {
+public class BlockCreateManager_Random : BlockCreateManager_CpuMode {
     protected override void SetFieldRange() {
         // ランダムなフィールドサイズを設定
         int width = Random.Range(8, 15); // 8から15の範囲でランダムに幅を決定

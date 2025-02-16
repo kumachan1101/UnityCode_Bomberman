@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class Field_Block_CpuMode : Field_Block_Base {
+public class BlockCreateManager_CpuMode : BlockCreateManager {
 
     protected override void CreateAndInitializeBrokenBlockManager()
     {
@@ -20,7 +20,7 @@ public class Field_Block_CpuMode : Field_Block_Base {
         GameObject gExplosionManager = GameObject.Find("ExplosionManager");
         var manager = gExplosionManager.AddComponent<ExplosionManager_CpuMode>();
 
-        PoolerType type = (GetComponent<Field_Block_Tower>() != null) ? PoolerType.Tower : PoolerType.Local;
+        PoolerType type = (GetComponent<BlockCreateManager_Tower>() != null) ? PoolerType.Tower : PoolerType.Local;
         manager.Initialize(type);
 
         return manager;

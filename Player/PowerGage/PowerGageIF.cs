@@ -16,7 +16,11 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 			}
 		}
 	}
-	protected abstract PowerGage CreatePowerGage(GameObject sliderObject);
+    protected virtual PowerGage CreatePowerGage(GameObject sliderObject)
+    {
+        return sliderObject.AddComponent<PowerGage>();
+    }
+
 
 	public void SetPowerGage(PowerGage cObj){
 		cPowerGage = cObj;

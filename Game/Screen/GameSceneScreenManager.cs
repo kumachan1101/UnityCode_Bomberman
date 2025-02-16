@@ -11,7 +11,7 @@ public class GameSceneScreenManager : BaseScreenManager
 
     private void CreateStage()
     {
-        string prefabName = "Field100";
+        string prefabName = "FieldCpuMode";
         GameObject prefab = (GameObject)Resources.Load(prefabName);
         GameObject gField = Instantiate(prefab);
         gField.name = "Field";
