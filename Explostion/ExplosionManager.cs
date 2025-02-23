@@ -102,12 +102,12 @@ public class ExplosionManager : MonoBehaviourPunCallbacks
     {
         return explosionPoolManager.GetExplosionType(input);
     }
-
+/*
     public bool IsMatch(Vector3 targetPosition, Material targetMaterial)
     {
         return explosionTracker.IsMatch(targetPosition, targetMaterial);
     }
-
+*/
     public IEnumerable<GameObject> GetExplosionList()
     {
         return explosionTracker.GetExplosionList();
@@ -233,7 +233,7 @@ public class ExplosionManager_Online : ExplosionManager
 
 public class ExplosionTracker
 {
-    public List<GameObject> ExplosionList { get; private set; } = new List<GameObject>();
+    static public List<GameObject> ExplosionList { get; private set; } = new List<GameObject>();
 
     public bool HandleExplosionUpdate(string objName, GameObject gtemp, out GameObject delobj)
     {
@@ -293,7 +293,7 @@ public class ExplosionTracker
         }
     }
 
-    public bool IsMatch(Vector3 targetPosition, Material targetMaterial)
+    static public bool IsMatch(Vector3 targetPosition, Material targetMaterial)
     {
         foreach (GameObject obj in ExplosionList)
         {

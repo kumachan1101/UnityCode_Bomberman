@@ -130,7 +130,7 @@ public class PlayerPowerManager_CpuMode: PlayerPowerManager
 
 public class PlayerSpawnManager_CpuMode : PlayerSpawnManager {
 
-	protected override bool PreAddDummyPlayer(){
+	protected override bool PreSpawnDummyPlayer(){
 		cPlayerCountManager.AddPlayerCount();
 		return true;
 	}
@@ -141,13 +141,13 @@ public class PlayerSpawnManager_CpuMode : PlayerSpawnManager {
         
     }
 
-    public override void AddDummyPlayer(int playerNo, Vector3 position)
+    public override void SpawnDummyPlayer(int playerNo, Vector3 position)
     {
         var dummyFactory = new DummyPlayerFactory();
         CreateAndSetupPlayer(playerNo, position, dummyFactory);
     }
 
-    public override void SpawnPlayerObjects(int playerNo)
+    public override void SpawnPlayer(int playerNo)
     {
         Vector3 position = cPlayerPositionManager.GetPlayerPosition(playerNo - 1); // プレイヤー位置を取得
         var standardFactory = new StandardPlayerFactory();
@@ -158,7 +158,7 @@ public class PlayerSpawnManager_CpuMode : PlayerSpawnManager {
     {
         string canvasName = "";
         string playerName = "";
-        GetPlayerNames(playerNo, ref canvasName, ref playerName);
+        cPlayerNameManager.GetPlayerNames(playerNo, ref canvasName, ref playerName);
 
         PlayerObjectGenerator generator = new PlayerObjectGenerator();
         GameObject canvas = generator.InstantiateCanvas("CanvasPowerGage");

@@ -1,6 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
-public class Field_CpuMode :Field_Event{
+public class Field_Event_CpuMode :Field_Event{
 
     private GameManager cGameManager;
 

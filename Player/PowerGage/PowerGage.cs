@@ -35,30 +35,6 @@ public class PowerGage : MonoBehaviour
 		return false;
 	}
 
-	public void SetSliderPos(int iPlayerPos){
-		RectTransform sliderRectTransform = cSlider.GetComponent<RectTransform>(); // SliderのRectTransformを取得します。
-		Vector3 newPosition = sliderRectTransform.anchoredPosition; // ローカル座標
-		newPosition.y = newPosition.y - (iPlayerPos - 1) * 20;
-		sliderRectTransform.anchoredPosition = newPosition; // 新しい座標を設定します。
-	}
-
-	public void SetSliderColor(Color sliderColor){
-        // スライダーの色を変更
-        Image fillImage = cSlider.fillRect.GetComponent<Image>(); // Fill部分のImageコンポーネントを取得します。
-        if (fillImage != null)
-        {
-            fillImage.color = sliderColor; // Fill部分の色を設定します。
-        }
-
-        // 必要に応じてBackgroundの色も変更
-        Image backgroundImage = cSlider.GetComponentInChildren<Image>(); // 子要素のImageを取得
-        if (backgroundImage != null)
-        {
-            backgroundImage.color = Color.gray; // 背景色を設定します（例: グレー）。
-        }
-
-	}
-
     // スライダーの長さを変更するメソッド
     public void ChangeSliderLength(float newLength)
     {

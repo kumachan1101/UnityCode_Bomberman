@@ -1,37 +1,39 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 using System.Collections.Generic;
-using System;
-using Unity.Collections.LowLevel.Unsafe;
 
-[System.Serializable]
-public class PlayerAction : MonoBehaviour
+public interface IPlayerActionStrategy
 {
-    [SerializeField] protected PlayerMovement playerMovement;
-    private PlayerInput playerInput;
+    void UpdateStrategy(PlayerInput playerInput, PlayerMovement playerMovement);
+    void DropBom();
+}
 
-    private PlayerBomToBomControl cPlayerBomToBomControl;
 
-    // 入力と方向の紐付けを行うDictionaryを用意
+public abstract class BasePlayerActionStrategy : IPlayerActionStrategy
+{
+    private PlayerBomToBomControl bomControl;
+    
+    protected BasePlayerActionStrategy(PlayerBomToBomControl bomControl)
+    {
+        this.bomControl = bomControl;
+    }
+
+    public abstract void UpdateStrategy(PlayerInput playerInput, PlayerMovement playerMovement);
+    
+    public void DropBom()
+    {
+        Vector3 position = Library_Base.GetPos(bomControl.transform.position);
+        Vector3 direction = bomControl.transform.forward;
+        bomControl.RequestDropBom(position, direction);
+    }
+}
+
+
+public class PlayerActionStrategy : BasePlayerActionStrategy
+{
     private Dictionary<InputAction, Vector3> movementBindings;
-    private Dictionary<InputAction, Action> actionBindings;
 
-    public void Start()
-    {
-        InitCommon();
-        InitDiff();
-    }
-
-    private void InitCommon()
-    {
-        InitializeBindings();
-        playerMovement = this.gameObject.AddComponent<PlayerMovement>();
-        playerInput = new PlayerInput();
-        cPlayerBomToBomControl = this.gameObject.AddComponent<PlayerBomToBomControl>();
-    }
-
-    protected virtual void InitDiff() { }
-
-    protected virtual void InitializeBindings()
+    public PlayerActionStrategy(PlayerBomToBomControl bomControl) : base(bomControl)
     {
         movementBindings = new Dictionary<InputAction, Vector3>
         {
@@ -40,95 +42,81 @@ public class PlayerAction : MonoBehaviour
             { InputAction.Left, Vector3.left },
             { InputAction.Right, Vector3.right }
         };
+    }
 
-        actionBindings = new Dictionary<InputAction, Action>
+    public override void UpdateStrategy(PlayerInput playerInput, PlayerMovement playerMovement)
+    {
+        Vector3? moveDirection = GetMoveDirection(playerInput);
+        if (moveDirection.HasValue)
         {
-            { InputAction.Enter, DropBom }
-        };
-    }
-
-    void Update()
-    {
-        UpdatePlayer();
-    }
-
-    protected virtual bool IsAvailable()
-    {
-        return true;
-    }
-
-    protected void UpdatePlayer()
-    {
-        if (!IsAvailable())
+            playerMovement.Move(moveDirection.Value);
+        }
+        else
         {
-            return;
+            playerMovement.MoveClear();
         }
 
-        playerInput.UpdateInput();
-        UpdatePlayerMovement();
-        UpdatePlayerActions();
+        if (playerInput.IsInputActive(InputAction.Enter))
+        {
+            DropBom();
+        }
     }
 
-    protected virtual void UpdatePlayerMovement()
+    private Vector3? GetMoveDirection(PlayerInput playerInput)
     {
-        // ジョイスティックの移動ベクトルを取得し動作に反映
         Vector3 joystickMove = playerInput.GetJoystickVector();
         if (joystickMove != Vector3.zero)
         {
-            PerformPlayerAction(joystickMove);
-            return;
+            return joystickMove;
         }
 
-        // キー入力の方向を処理
         foreach (var binding in movementBindings)
         {
             if (playerInput.IsInputActive(binding.Key))
             {
-                PerformPlayerAction(binding.Value);
-                return;
+                return binding.Value;
             }
         }
 
-        // どの方向にも動かない場合の処理
-        MoveClear();
+        return null;
     }
+}
 
-    protected virtual void UpdatePlayerActions()
+
+public class PlayerAction : MonoBehaviour
+{
+    private PlayerMovement playerMovement;
+    private PlayerInput playerInput;
+    protected PlayerBomToBomControl cPlayerBomToBomControl;
+    protected IPlayerActionStrategy playerStrategy;
+
+    public void Start()
     {
-        foreach (var binding in actionBindings)
-        {
-            if (playerInput.IsInputActive(binding.Key))
-            {
-                binding.Value.Invoke();
-            }
-        }
+        cPlayerBomToBomControl = gameObject.AddComponent<PlayerBomToBomControl>();
+        playerInput = new PlayerInput();
+        playerMovement = gameObject.AddComponent<PlayerMovement>();
+
+        CreatePlayerStrategy();
     }
 
-    public virtual void UpdateKey() { }
+    protected virtual void CreatePlayerStrategy()
+    {
+        playerStrategy = new PlayerActionStrategy(cPlayerBomToBomControl);
+    }
+
+    protected virtual bool IsAvailable() => true;
+
+    void Update()
+    {
+        if (!IsAvailable()) return;
+
+        playerInput.UpdateInput();
+        playerStrategy.UpdateStrategy(playerInput, playerMovement);
+    }
 
     public void DropBom()
     {
-        Vector3 position = Library_Base.GetPos(transform.position);
-        Vector3 direction = transform.forward;
-        cPlayerBomToBomControl.RequestDropBom(position, direction);
-    }
-
-    public void MoveClear()
-    {
-        playerMovement.MoveClear();
-    }
-
-    public void PerformPlayerAction(Vector3 moveDirection)
-    {
-        MoveClear();
-        playerMovement.Move(moveDirection);
-    }
-
-    public void SpeedUp()
-    {
-        if(null == playerMovement){
-            return;
-        }
-        playerMovement.SpeedUp();
+        playerStrategy.DropBom();
     }
 }
+

@@ -36,7 +36,7 @@ public class PlayerSpawnManager_Online : PlayerSpawnManager {
         if(iPlayerCnt >= 5){
             return false;
         }
-        bool bIsMine = PreAddDummyPlayer();
+        bool bIsMine = PreSpawnDummyPlayer();
         if (!bIsMine)
         {
             return false;
@@ -59,7 +59,7 @@ public class PlayerSpawnManager_Online : PlayerSpawnManager {
         return PhotonNetwork.Instantiate(playerName, position, Quaternion.identity,0, new object[] { iCanvasInsID, iPlayerNo ,script});
     }
 
-	protected override bool PreAddDummyPlayer(){
+	protected override bool PreSpawnDummyPlayer(){
 		cPlayerCountManager.AddPlayerCount();
 		return GetComponent<PhotonView>().IsMine;
 	}
@@ -108,25 +108,25 @@ public class PlayerSpawnManager_Online : PlayerSpawnManager {
         return;
     }
 
-    public override void AddDummyPlayer(int iPlayerNo, Vector3 v3)
+    public override void SpawnDummyPlayer(int iPlayerNo, Vector3 v3)
     {
         if(false == IsAddDummyPlayer(iPlayerNo)){
             return;
         }
         string canvasName = "";
         string playerName = "";
-        GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
+        cPlayerNameManager.GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
 		
         GameObject gCanvas = InstantiateCanvas("CanvasPowerGage",cPlayerCountManager.GetPlayerCount(), iPlayerNo);
         GameObject gPlayer = InstantiatePlayer("Player", v3, gCanvas.GetComponent<PhotonView>().ViewID, iPlayerNo,"Player_Online_Dummy");
     }
 
 
-    public override void SpawnPlayerObjects(int iPlayerNo)
+    public override void SpawnPlayer(int iPlayerNo)
     {
         string canvasName = "";
         string playerName = "";
-        GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
+        cPlayerNameManager.GetPlayerNames(iPlayerNo, ref canvasName, ref playerName);
 
         GameObject gCanvas = InstantiateCanvas("CanvasPowerGage",cPlayerCountManager.GetPlayerCount(), iPlayerNo);
         //Debug.Log(gCanvas.GetComponent<PhotonView>().ViewID);

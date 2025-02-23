@@ -1,5 +1,5 @@
 using UnityEngine;
-public class Field_TowerMode :Field_Event{
+public class Field_Event_TowerMode :Field_Event{
 
     private GameManager cGameManager;
     private int removedTowerCount = 0;  // 削除されたタワーのカウント

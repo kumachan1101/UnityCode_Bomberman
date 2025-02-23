@@ -112,7 +112,7 @@ public class PlayerSpawnManager_Tower :Field_Event
         GameObject gObj = GameObject.Find("Tower1");
         if(null != gObj){
             cPlayerCountManager.AddPlayerCount();
-            cField.SpawnPlayerObjects(1);
+            cField.SpawnPlayer(1);
             gObj.GetComponent<PowerGageIF>().SetDamage(2);
         }
     }
@@ -136,7 +136,7 @@ public class PlayerSpawnManager_Tower :Field_Event
     private IEnumerator CallAddDummyPlayerWithDelay(int iPlayerNo)
     {
         yield return new WaitForSeconds(2f); // Wait for 1 second
-        cField.AddDummyPlayer(iPlayerNo, cPlayerPositionManager.GetPlayerPosition(iPlayerNo - 1));
+        cField.SpawnDummyPlayer(iPlayerNo, cPlayerPositionManager.GetPlayerPosition(iPlayerNo - 1));
         //GameObject.Find("Tower" + iPlayerNo).GetComponent<PowerGageIF>().SetDamage(2);
     }
 }

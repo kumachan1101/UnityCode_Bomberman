@@ -7,6 +7,6 @@ public class ItemAddDummy : Item{
         //座標はアイテム取得者と同じ座標を設定する
         PlayerSpawnManager cField = GameObject.Find("Field").GetComponent<PlayerSpawnManager>();
         int playercnt = Library_Base.ExtractNumberFromString(gObj.name);
-        cField.AddDummyPlayer(playercnt, gObj.transform.position);
+        cField.SpawnDummyPlayer(playercnt, gObj.transform.position);
     }
 }

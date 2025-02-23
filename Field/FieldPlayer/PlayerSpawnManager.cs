@@ -23,28 +23,24 @@ public class PlayerSpawnManager : MonoBehaviourPunCallbacks
     public void RequestPlayerSpawn(){
 
         cPlayerPositionManager.SetPlayerPositions();
-        SpawnPlayerObjects(1);    
+        SpawnPlayer(1);
+        cPlayerNameManager.SetPlayerName("Player1");
         int iPlayerCnt = cPlayerPositionManager.GetPlayerCount();
         
         for(int i = 2; i <= iPlayerCnt; i++) {
             cPlayerCountManager.SetPlayerCount(i);
             int iPlayerNo = Random.Range(2, 4);
-            SpawnPlayerObjects(iPlayerNo);    
+            SpawnPlayer(iPlayerNo);    
         }
     }
 
-    public virtual void AddDummyPlayer(int iPlayerNo, Vector3 v3){}
-    public virtual void SpawnPlayerObjects(int iPlayerNo){}
+    public virtual void SpawnDummyPlayer(int iPlayerNo, Vector3 v3){}
+    public virtual void SpawnPlayer(int iPlayerNo){}
 
     protected virtual void PlayerAddConponent (){}
 
-	protected virtual bool PreAddDummyPlayer(){return false;}
+	protected virtual bool PreSpawnDummyPlayer(){return false;}
 
-    protected void GetPlayerNames(int iPlayerNo, ref string canvasName, ref string playerName)
-    {
-        canvasName = "Canvas" + iPlayerNo;
-        playerName = "Player" + iPlayerNo;
-    }
 
 }
 
@@ -90,4 +86,11 @@ public class PlayerNameManager : MonoBehaviour
 
     public string GetPlayerName() => playerName;
     public void SetPlayerName(string name) => playerName = name;
+
+    public void GetPlayerNames(int iPlayerNo, ref string canvasName, ref string playerName)
+    {
+        canvasName = "Canvas" + iPlayerNo;
+        playerName = "Player" + iPlayerNo;
+    }
+
 }

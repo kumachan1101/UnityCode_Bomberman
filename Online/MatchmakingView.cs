@@ -133,7 +133,7 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
     // プレイヤーオブジェクトの処理
     private void HandlePlayerObjects(int playerCount, GameObject gField) {
         PlayerSpawnManager cFieldPlayer = gField.GetComponent<PlayerSpawnManager>();
-        cFieldPlayer.SpawnPlayerObjects(playerCount);
+        cFieldPlayer.SpawnPlayer(playerCount);
     }
 
     // 最大プレイヤー数に達したかどうかを確認して、処理を行う
