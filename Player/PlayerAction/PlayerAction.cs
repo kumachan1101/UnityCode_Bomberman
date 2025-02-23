@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public interface IPlayerActionStrategy
 {
-    void UpdateStrategy(PlayerInput playerInput, PlayerMovement playerMovement);
+    void UpdateStrategy(PlayerMovement playerMovement);
     void DropBom();
 }
 
@@ -12,13 +12,15 @@ public interface IPlayerActionStrategy
 public abstract class BasePlayerActionStrategy : IPlayerActionStrategy
 {
     private PlayerBomToBomControl bomControl;
-    
+    protected PlayerInput playerInput;
+
     protected BasePlayerActionStrategy(PlayerBomToBomControl bomControl)
     {
         this.bomControl = bomControl;
+        playerInput = new PlayerInput();
     }
 
-    public abstract void UpdateStrategy(PlayerInput playerInput, PlayerMovement playerMovement);
+    public abstract void UpdateStrategy(PlayerMovement playerMovement);
     
     public void DropBom()
     {
@@ -44,8 +46,9 @@ public class PlayerActionStrategy : BasePlayerActionStrategy
         };
     }
 
-    public override void UpdateStrategy(PlayerInput playerInput, PlayerMovement playerMovement)
+    public override void UpdateStrategy(PlayerMovement playerMovement)
     {
+        playerInput.UpdateInput();
         Vector3? moveDirection = GetMoveDirection(playerInput);
         if (moveDirection.HasValue)
         {
@@ -86,14 +89,13 @@ public class PlayerActionStrategy : BasePlayerActionStrategy
 public class PlayerAction : MonoBehaviour
 {
     private PlayerMovement playerMovement;
-    private PlayerInput playerInput;
+
     protected PlayerBomToBomControl cPlayerBomToBomControl;
     protected IPlayerActionStrategy playerStrategy;
 
     public void Start()
     {
         cPlayerBomToBomControl = gameObject.AddComponent<PlayerBomToBomControl>();
-        playerInput = new PlayerInput();
         playerMovement = gameObject.AddComponent<PlayerMovement>();
 
         CreatePlayerStrategy();
@@ -110,8 +112,7 @@ public class PlayerAction : MonoBehaviour
     {
         if (!IsAvailable()) return;
 
-        playerInput.UpdateInput();
-        playerStrategy.UpdateStrategy(playerInput, playerMovement);
+        playerStrategy.UpdateStrategy(playerMovement);
     }
 
     public void DropBom()

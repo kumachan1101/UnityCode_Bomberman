@@ -22,7 +22,7 @@ public class CpuPlayerActionStrategy : BasePlayerActionStrategy
         };
     }
 
-    public override void UpdateStrategy(PlayerInput playerInput, PlayerMovement playerMovement)
+    public override void UpdateStrategy(PlayerMovement playerMovement)
     {
         if(ShouldChangeDirection()){
             randomDirection = GetNewRandomDirection();
