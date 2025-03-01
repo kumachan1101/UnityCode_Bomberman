@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
 public class GameManager : MonoBehaviour
 {
     private static GameManager instance = null;
@@ -13,7 +12,6 @@ public class GameManager : MonoBehaviour
     public static int zmax;
 
     [SerializeField] private int maxStage;
-
 
     public static GameManager Instance
     {
@@ -44,7 +42,6 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // Resourceフォルダにあるステージ数を取得
         maxStage = GetMaxStage();
     }
 
@@ -53,8 +50,8 @@ public class GameManager : MonoBehaviour
         CancelInvoke("SwitchGameScene"); 
         CancelInvoke("SwitchTowerScene"); 
         CancelInvoke("SwitchGameOver");
+        CancelInvoke("SwitchGameTowerOnline");
 
-        // すでに存在するScreenManagerを削除
         if (currentScreenManager != null)
         {
             Destroy(currentScreenManager);
@@ -73,6 +70,9 @@ public class GameManager : MonoBehaviour
                 break;
             case "GameTower":
                 currentScreenManager = gameObject.AddComponent<GameTowerSceneManager>();
+                break;
+            case "GameTowerOnline":
+                currentScreenManager = gameObject.AddComponent<GameTowerOnlineScreenManager>();
                 break;
             default:
                 Debug.Log("未定義のシーンです: " + scene.name);
@@ -99,6 +99,7 @@ public class GameManager : MonoBehaviour
             GameOver();
         }
     }
+    
     public void GameWin()
     {
         int stage = NextStage();
@@ -111,6 +112,7 @@ public class GameManager : MonoBehaviour
             GameOver();
         }
     }
+    
     public void ReturnTitle()
     {
         iStage = 0;
@@ -123,12 +125,11 @@ public class GameManager : MonoBehaviour
         Invoke("SwitchGameOver", 5f);
     }
 
-    public bool IsGameOver(){
-        if(iStage == 0){
-            return true;
-        }
-        return false;
+    public bool IsGameOver()
+    {
+        return iStage == 0;
     }
+
     public void SwitchTowerScene()
     {
         iStage = NextStage();
@@ -140,10 +141,17 @@ public class GameManager : MonoBehaviour
         iStage = NextStage();
         SceneManager.LoadScene("GameScene");
     }
+    
     public void SwitchGameOnline()
     {
         iStage = NextStage();
         SceneManager.LoadScene("GameOnline");
+    }
+
+    public void SwitchGameTowerOnline()
+    {
+        iStage = NextStage();
+        SceneManager.LoadScene("GameTowerOnline");
     }
 
     public void SwitchGameOver()

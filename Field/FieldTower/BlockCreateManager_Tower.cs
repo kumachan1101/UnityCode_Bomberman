@@ -1,25 +1,29 @@
 using UnityEngine;
-
-public class BlockCreateManager_Tower : MonoBehaviour
+using Photon.Pun;
+public class BlockCreateManager_Tower : MonoBehaviourPunCallbacks
 {
     private int playercnt = 4;
     // GameManager.xmax と GameManager.zmax を使用して初期化
     protected Vector3[] v3TowerPos;
     public GameObject towerPrefab; // タワーのPrefab（Inspectorで設定）
-    private MaterialManager materialManager;
+    protected MaterialManager materialManager;
 
     void Start()
     {
-		materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-
+        InitComponent();
         SetPositions();
         for (int i = 0; i < playercnt; i++)
         {
             SpawnTowerObjects(i);
         }
+        CreateButtonCanvas();
     }
 
-    private void SetPositions()
+    protected void InitComponent(){
+        materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+    }
+
+    public void SetPositions()
     {
         int xmax = GameManager.xmax;
         int zmax = GameManager.zmax;
@@ -34,29 +38,37 @@ public class BlockCreateManager_Tower : MonoBehaviour
     }
 
     public virtual int GetPower(){
-        return 10;
+        return 3;
     }
 
-    private void SpawnTowerObjects(int index)
+    public virtual void SpawnTowerObjects(int index)
     {
         if (!IsValidTowerIndex(index))
         {
             Debug.LogError("Invalid index for tower position: " + index);
             return;
         }
-
+        SetpUpSpawnTowerObjects(index);
+    }
+    [PunRPC]
+    public void SetpUpSpawnTowerObjects(int index){
         GameObject newTower = CreateTower(index);
         GameObject gCanvas = CreateCanvas(index);
         SetupTowerCanvasIntegration(newTower, gCanvas, index);
         ConfigureTowerMaterial(newTower);
     }
 
-    private bool IsValidTowerIndex(int index)
+    protected bool IsValidTowerIndex(int index)
     {
         return index >= 0 && index < v3TowerPos.Length;
     }
 
-    private GameObject CreateTower(int index)
+    public virtual GameObject CreateTower_RPC(int index){
+        return CreateTower(index);
+    }
+
+    [PunRPC]
+    protected virtual GameObject CreateTower(int index)
     {
         GameObject newTower = Instantiate(towerPrefab, v3TowerPos[index], Quaternion.identity);
         newTower.name = "Tower" + (index + 1);
@@ -76,14 +88,21 @@ public class BlockCreateManager_Tower : MonoBehaviour
 
         return gCanvas;
     }
+    public void CreateButtonCanvas()
+    {
+        GameObject playerPrefab = Resources.Load<GameObject>("CanvasButtonTower");
+        GameObject gCanvas = Instantiate(playerPrefab);
+        gCanvas.transform.position = new Vector3(0, 0, 0);
+    }
 
-    private void SetupTowerCanvasIntegration(GameObject tower, GameObject canvas, int index)
+
+    protected virtual void SetupTowerCanvasIntegration(GameObject tower, GameObject canvas, int index)
     {
         PowerGageIF cPowerGageIF = tower.AddComponent<PowerGageIF_Tower>();
         cPowerGageIF.SetCanvasInsID(canvas.GetInstanceID());
     }
 
-    private void ConfigureTowerMaterial(GameObject tower)
+    protected void ConfigureTowerMaterial(GameObject tower)
     {
         string materialType = materialManager.GetBomMaterialByPlayerName(tower.name);
         Tower cTower = tower.GetComponent<Tower>();

@@ -1,28 +1,32 @@
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System.Collections;
-public class PlayerSpawnManager_Tower :Field_Event
+using System.Text.RegularExpressions;
+public class Field_Event_Tower :Field_Event
 {
     private Button button; // 対象のボタンをInspectorで設定
     private PlayerSpawnManager cField;
-
-    private PlayerPositionManager cPlayerPositionManager;
     private PlayerCountManager cPlayerCountManager;
-    private GameManager cGameManager;
+    private PlayerNameManager cPlayerNameManager;
     private static bool listenersRegistered = false;
 
     Color gold;
     Color gray;
     private Image buttonImage;
+    private int iPlayerNo;
+    private string PlayerTowerName;
 
     protected override void Init() {
         GameObject gFeild = GameObject.Find("Field");
         cField = gFeild.GetComponent<PlayerSpawnManager>();
-        cPlayerPositionManager = gFeild.AddComponent<PlayerPositionManager_CpuMode>();
+        //cPlayerPositionManager = gFeild.AddComponent<PlayerPositionManager_CpuMode>();
         cPlayerCountManager = gFeild.GetComponent<PlayerCountManager>();
-        cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        cPlayerNameManager = gFeild.GetComponent<PlayerNameManager>();
+        string PlayerName = GetPlayerName();
+        string sPlayerNo = ExtractTrailingNumber(PlayerName);
+        int.TryParse(sPlayerNo, out iPlayerNo);
+        PlayerTowerName = MakeTowerName(sPlayerNo);
+        
         button = GetComponent<Button>();
         if (button == null){
             return;
@@ -30,12 +34,6 @@ public class PlayerSpawnManager_Tower :Field_Event
         button.onClick.RemoveListener(PushButton);
         button.onClick.AddListener(() => PushButton());
 
-        GameObject parentObject = transform.parent.gameObject;
-        string parentName = parentObject.name;
-        if("CanvasPowerGageTower1" != parentObject.name){
-            button.gameObject.SetActive(false);
-            return;
-        }
         buttonImage = button.GetComponent<Image>();
         gold = new Color(1f, 0.84f, 0f);
         gray = new Color(0.6627f, 0.6627f, 0.6627f);
@@ -76,10 +74,33 @@ public class PlayerSpawnManager_Tower :Field_Event
     }
 
 
-    private bool JudgeMyPlayer(object obj){
-        if (obj.GetType() == typeof(Player))
+
+    private string ExtractTrailingNumber(string input)
+    {
+        Match match = Regex.Match(input, @"\d+$");
+        return match.Success ? match.Value : "";
+    }
+
+    private string GetPlayerName(){
+        return cPlayerNameManager.GetPlayerName();
+    }
+    private string MakeTowerName(string number)
+    {
+        return "Tower" + number;
+    }
+
+    private bool JudgeMyPlayer(object obj)
+    {
+        if (obj.GetType() == typeof(Player) || obj.GetType() == typeof(Player_Online))
         {
-            return true;
+            // objの名称から数字のみを抽出
+            string objName = obj.ToString();
+            string numberStr = Regex.Replace(objName, @"\D", ""); // 数字以外を除去
+
+            if (int.TryParse(numberStr, out int extractedNumber))
+            {
+                return extractedNumber == iPlayerNo;
+            }
         }
         return false;
     }
@@ -101,42 +122,17 @@ public class PlayerSpawnManager_Tower :Field_Event
         if(JudgeMyPlayer(obj)){
             SetToneUp();
         }
-        else{
-            EnsurePlayerExists(obj);
-        }
 	}
 
     public void PushButton()
     {
         SetToneDown();
-        GameObject gObj = GameObject.Find("Tower1");
+        
+        GameObject gObj = GameObject.Find(PlayerTowerName);
         if(null != gObj){
             cPlayerCountManager.AddPlayerCount();
-            cField.SpawnPlayer(1);
+            cField.SpawnPlayer(iPlayerNo);
             gObj.GetComponent<PowerGageIF>().SetDamage(2);
         }
-    }
-
-    private void EnsurePlayerExists(object obj)
-    {
-        if(cGameManager.IsGameOver()){
-            //Debug.Log("EnsurePlayerExists GameOver");
-            return;
-        }
-        if (obj is Player_Base gPlayer)
-        {
-            for(int iPlayerNo = 2; iPlayerNo <= 4; iPlayerNo++) {
-                if(gPlayer.name == "Player"+iPlayerNo && GameObject.Find("Tower"+iPlayerNo) != null){
-                    StartCoroutine(CallAddDummyPlayerWithDelay(iPlayerNo));
-                    //GameObject.Find("Tower"+iPlayerNo).GetComponent<PowerGageIF>().SetDamage(2);
-                }
-            }
-        }
-    }
-    private IEnumerator CallAddDummyPlayerWithDelay(int iPlayerNo)
-    {
-        yield return new WaitForSeconds(2f); // Wait for 1 second
-        cField.SpawnDummyPlayer(iPlayerNo, cPlayerPositionManager.GetPlayerPosition(iPlayerNo - 1));
-        //GameObject.Find("Tower" + iPlayerNo).GetComponent<PowerGageIF>().SetDamage(2);
     }
 }

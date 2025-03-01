@@ -15,21 +15,6 @@ public class BomControl_Online : BomControl
     {
         SetFactory(new OnlineBomFactory());
     }
-/*
-    protected override Bom_Base AddComponent_Bom(GameObject gBom){
-        Bom_Base cBom = gBom.AddComponent<Bom_Online>();
-        return cBom;
-    }
-
-    protected override Bom_Base AddComponent_BomExplode(GameObject gBom){
-        Bom_Base cBom = gBom.AddComponent<BomExplode_Online>();
-        return cBom;
-    }
-    protected override Bom_Base AddComponent_BomBigBan(GameObject gBom){
-        Bom_Base cBom = gBom.AddComponent<BomBigBan_Online>();
-        return cBom;
-    }
-*/
 
 	protected override void MakeBom_RPC(BomParameters bomParams){
 		tempBom = PhotonNetwork.Instantiate("Bom", bomParams.position, Quaternion.identity);
@@ -66,20 +51,6 @@ public class BomControl_Online : BomControl
 					Debug.LogWarning("Renderer component not found on the game object or its children.");
 				}
 				AddBomComponents(obj, bomParams.bomKind);
-				/*
-				if (bomParams.bomKind == BOM_KIND.BOM_KIND_BIGBAN)
-				{
-					AddComponent_BomBigBan(obj);
-				}
-				else if (bomParams.bomKind == BOM_KIND.BOM_KIND_EXPLODE)
-				{
-					AddComponent_BomExplode(obj);
-				}
-				else
-				{
-					AddComponent_Bom(obj);
-				}
-				*/
 
 				Bom_Base bomBase = obj.GetComponent<Bom_Base>();
 				if (bomBase != null)

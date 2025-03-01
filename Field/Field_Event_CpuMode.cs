@@ -3,6 +3,7 @@ using Photon.Pun;
 public class Field_Event_CpuMode :Field_Event{
 
     private GameManager cGameManager;
+    //private CanvasPowerGageManager manager;
 
     // プレイヤーの追加・削除イベントリスナーを登録
     protected override void RegisterListeners()
@@ -20,6 +21,7 @@ public class Field_Event_CpuMode :Field_Event{
 	protected override void Init()
 	{
 		cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        //manager = new CanvasPowerGageManager();
 	}
 
 
@@ -28,6 +30,7 @@ public class Field_Event_CpuMode :Field_Event{
     {
         //Debug.Log($"{player.name} がゲームに追加されました");
         GameTransision();  // ゲーム進行チェックを呼び出す
+        //manager.RearrangeCanvases();
     }
 
     // プレイヤー削除時の処理
@@ -35,6 +38,7 @@ public class Field_Event_CpuMode :Field_Event{
     {
         //Debug.Log($"{player.name} がゲームから削除されました");
         GameTransision();  // ゲーム進行チェックを呼び出す
+        //manager.RearrangeCanvases();
     }
 
     protected void GameTransision()

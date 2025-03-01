@@ -44,35 +44,6 @@ public class BomControl : MonoBehaviourPunCallbacks
     }
 
 
-
-/*
-    protected void AddBomComponents(GameObject gBom, BOM_KIND bomKind)
-    {
-        if (bomKind == BOM_KIND.BOM_KIND_BIGBAN)
-        {
-            bomFactory.CreateBomBigBan(gBom);
-        }
-        else if (bomKind == BOM_KIND.BOM_KIND_EXPLODE)
-        {
-            bomFactory.CreateBomExplode(gBom);
-        }
-        else
-        {
-            bomFactory.CreateBom(gBom);
-        }
-    }
-*/
-/*
-    protected virtual Bom_Base AddComponent_BomExplode(GameObject gBom){
-        return null;
-    }
-    protected virtual Bom_Base AddComponent_BomBigBan(GameObject gBom){
-        return null;
-    }
-    protected virtual Bom_Base AddComponent_Bom(GameObject gBom){
-        return null;
-    }
-*/
     protected virtual void InitFactory(){}
     public virtual void Awake(){
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();

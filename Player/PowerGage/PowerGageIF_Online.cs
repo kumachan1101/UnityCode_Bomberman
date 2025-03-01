@@ -32,7 +32,7 @@ public class PowerGageIF_Online : PowerGageIF
 				return;
 			}
 
-			GameObject gCanvas = viewPlayer.gameObject;
+			gCanvas = viewPlayer.gameObject;
 			if (gCanvas == null)
 			{
 				Debug.LogError("GameObject Error");

@@ -40,21 +40,26 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 	}
 
 	protected virtual void SetDamage_RPC(int iDamage){}
+
+	protected virtual Component GetDestroyTarget() => GetComponent<Player_Base>();
+
 	[PunRPC]
-	public virtual void SyncSetDamage(int iDamage){
-        if(cPowerGage == null){
+	public virtual void SyncSetDamage(int iDamage)
+	{
+		if (cPowerGage == null)
+		{
 			Debug.Log("cPowerGage is null");
 			StartCoroutine(RetrySyncSetDamage(iDamage));
-            return;
-        }
+			return;
+		}
 		cPowerGage.SetDamage(iDamage);
-		if(cPowerGage.IsDead()){
-			GetComponent<Player_Base>().DestroySync();
+		if (cPowerGage.IsDead())
+		{
+			GetDestroyTarget()?.SendMessage("DestroySync");
 			DestroySync();
 		}
-		//Debug.Log($"Received RPC 'SyncSetDamage' at ViewID: {photonView.ViewID} with Damage: {iDamage}");
-		
 	}
+
 
 	protected void DestroySync(){
 		//Debug.Log(gCanvas);

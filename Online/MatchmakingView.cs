@@ -122,6 +122,8 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
         HandlePlayerObjects(playerCount, gField);
         CheckAndHandleMaxPlayers(playerCount, gField, roomButton);
     }
+    protected virtual void HandleTowerObjects(int playerCount, GameObject gField) {
+    }
 
     // プレイヤー数を更新
     private void UpdatePlayerCount(RoomButton roomButton, int playerCount, GameObject gField) {
@@ -137,9 +139,10 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
     }
 
     // 最大プレイヤー数に達したかどうかを確認して、処理を行う
-    private void CheckAndHandleMaxPlayers(int playerCount, GameObject gField, RoomButton roomButton) {
+    protected void CheckAndHandleMaxPlayers(int playerCount, GameObject gField, RoomButton roomButton) {
         if (roomButton.GetIsMax(playerCount)) {
             HandleMaxPlayers(gField);
+            HandleTowerObjects(playerCount, gField);
         }
     }
 

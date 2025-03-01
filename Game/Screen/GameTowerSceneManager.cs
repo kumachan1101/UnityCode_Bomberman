@@ -11,9 +11,13 @@ public class GameTowerSceneManager : BaseScreenManager
 
     private void CreateStage()
     {
-        string prefabName = "FieldTower";
+        string prefabName = GetPrehabName();
         GameObject prefab = (GameObject)Resources.Load(prefabName);
         GameObject gField = Instantiate(prefab);
         gField.name = "Field";
+    }
+
+    protected virtual string GetPrehabName(){
+        return "FieldTower";
     }
 }

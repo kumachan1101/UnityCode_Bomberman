@@ -16,7 +16,7 @@ public class PowerGage_Slider : MonoBehaviourPunCallbacks, IPunInstantiateMagicC
     }
 
 	public void SetPlayerCnt(int iCnt){
-		iPlayerNo_before = iPlayerCnt;
+		//iPlayerNo_before = iPlayerCnt;
 		iPlayerCnt = iCnt;
 	}
 	public void SetPlayerNo(int iNo){

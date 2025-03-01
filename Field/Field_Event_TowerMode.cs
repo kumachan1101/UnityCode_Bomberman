@@ -26,7 +26,7 @@ public class Field_Event_TowerMode :Field_Event{
     {
     }
 
-    private void Field_TowerMode_OnRemoved(object obj)
+    protected virtual void Field_TowerMode_OnRemoved(object obj)
     {
         if (obj is Tower tower)
         {
