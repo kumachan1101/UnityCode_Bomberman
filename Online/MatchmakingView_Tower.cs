@@ -7,7 +7,7 @@ public class MatchmakingView_Tower : MatchmakingView
 {
 
     protected override void HandleTowerObjects(int playerCount, GameObject gField) {
-        BlockCreateManager_Tower cBlockCreateManager = gField.GetComponent<BlockCreateManager_TowerOnline>();
+        TowerSpawnManager cBlockCreateManager = gField.GetComponent<TowerSpawnManager_Online>();
         for(int i = 0; i < playerCount; i++) {
             cBlockCreateManager.SetPositions();
             cBlockCreateManager.SpawnTowerObjects(i);

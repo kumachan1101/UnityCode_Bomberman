@@ -1,52 +1,59 @@
 using UnityEngine;
 using Photon.Pun;
-public class Field_Event_CpuMode :Field_Event{
 
+public class PlayerAddedRemoved : Field_Event
+{
     private GameManager cGameManager;
-    //private CanvasPowerGageManager manager;
+    private PlayerAddedRemovedHandler playerHandler;
+
+    protected override void Init()
+    {
+        cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        playerHandler = new PlayerAddedRemovedHandler(cGameManager);
+    }
 
     // プレイヤーの追加・削除イベントリスナーを登録
     protected override void RegisterListeners()
     {
-        Player_Base.onPlayerAdded.AddListener(Field_CpuMode_OnAdded);
-        Player_Base.onPlayerRemoved.AddListener(Field_CpuMode_OnRemoved);
+        Player_Base.onPlayerAdded.AddListener(playerHandler.OnAdded);
+        Player_Base.onPlayerRemoved.AddListener(playerHandler.OnRemoved);
     }
+
     protected override void UnregisterListeners()
     {
-        Player_Base.onPlayerAdded.RemoveListener(Field_CpuMode_OnAdded);
-        Player_Base.onPlayerRemoved.RemoveListener(Field_CpuMode_OnRemoved);
+        Player_Base.onPlayerAdded.RemoveListener(playerHandler.OnAdded);
+        Player_Base.onPlayerRemoved.RemoveListener(playerHandler.OnRemoved);
+    }
+}
+
+public class PlayerAddedRemovedHandler
+{
+    private GameManager cGameManager;
+
+    public PlayerAddedRemovedHandler(GameManager gameManager)
+    {
+        cGameManager = gameManager;
     }
 
-
-	protected override void Init()
-	{
-		cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        //manager = new CanvasPowerGageManager();
-	}
-
-
     // プレイヤー追加時の処理
-    private void Field_CpuMode_OnAdded(object obj)
+    public void OnAdded(object obj)
     {
-        //Debug.Log($"{player.name} がゲームに追加されました");
         GameTransision();  // ゲーム進行チェックを呼び出す
-        //manager.RearrangeCanvases();
     }
 
     // プレイヤー削除時の処理
-    private void Field_CpuMode_OnRemoved(object obj)
+    public void OnRemoved(object obj)
     {
-        //Debug.Log($"{player.name} がゲームから削除されました");
         GameTransision();  // ゲーム進行チェックを呼び出す
-        //manager.RearrangeCanvases();
     }
 
-    protected void GameTransision()
+    // ゲーム進行のチェック
+    private void GameTransision()
     {
         bool hasPlayer1 = false;
         bool hasPlayerDummy1 = false;
 
-        // "Player1(Clone)" または "PlayerDummy1" の存在を確認します
+        // "Player1(Clone)" または "PlayerDummy1" の存在を確認
         GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
         foreach (GameObject obj in allObjects)
         {
@@ -59,16 +66,16 @@ public class Field_Event_CpuMode :Field_Event{
                 hasPlayerDummy1 = true;
             }
 
-            // 必要な条件が満たされた場合、ループを終了します
+            // 必要な条件が満たされた場合、ループを終了
             if (hasPlayer1 || hasPlayerDummy1)
             {
                 break;
             }
         }
-        // ゲームクリアに必要な条件が満たされているかどうかを確認します
+
+        // ゲームクリア条件チェック
         if (hasPlayer1 || hasPlayerDummy1)
         {
-            // "Player2(Clone)", "Player3(Clone)", "Player4(Clone)", "PlayerDummy2", "PlayerDummy3", "PlayerDummy4" が存在しないかどうかを確認します
             if (GameObject.Find("Player2") == null &&
                 GameObject.Find("Player3") == null &&
                 GameObject.Find("Player4") == null &&
@@ -78,15 +85,10 @@ public class Field_Event_CpuMode :Field_Event{
             {
                 cGameManager.GameWin();
             }
-            else
-            {
-                //Debug.Log("ゲーム続行");
-            }
         }
         else
         {
             cGameManager.GameOver();
         }
     }
-
 }

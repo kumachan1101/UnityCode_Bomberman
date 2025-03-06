@@ -1,6 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
-public class BlockCreateManager_Tower : MonoBehaviourPunCallbacks
+public class TowerSpawnManager : MonoBehaviourPunCallbacks
 {
     private int playercnt = 4;
     // GameManager.xmax と GameManager.zmax を使用して初期化

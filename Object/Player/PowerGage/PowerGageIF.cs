@@ -1,21 +1,34 @@
 using UnityEngine;
 using Photon.Pun;
-using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.Events;
+
+[System.Serializable]
+public class GameObjectEvent : UnityEvent<GameObject> { }
+
 abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 {
 	protected PowerGage cPowerGage;
 	protected int iCanvasInsID;
 	protected GameObject gCanvas;
+    public static GameObjectEvent onPowerGageAdded = new GameObjectEvent();
+    public static GameObjectEvent onPowerGageRemoved = new GameObjectEvent();
+
 	void Start(){
 		if(cPowerGage == null){
 			gCanvas = Library_Base.FindGameObjectByInstanceID(iCanvasInsID);
 			if(gCanvas != null){
 				GameObject sliderObject = gCanvas.transform.Find("Slider").gameObject;
 				cPowerGage = CreatePowerGage(sliderObject);
+				onPowerGageAdded.Invoke(gCanvas);  // 自分が追加されたことを通知
 			}
 		}
 	}
+    void OnDestroy()
+    {
+        onPowerGageRemoved.Invoke(gCanvas);  // 自分が削除されたことを通知
+    }
+
     protected virtual PowerGage CreatePowerGage(GameObject sliderObject)
     {
         return sliderObject.AddComponent<PowerGage>();

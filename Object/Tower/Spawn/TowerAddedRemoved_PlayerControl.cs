@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Text.RegularExpressions;
-public class Field_Event_Tower :Field_Event
+public class TowerAddedRemoved_PlayerControl :Field_Event
 {
     private Button button; // 対象のボタンをInspectorで設定
     private PlayerSpawnManager cField;

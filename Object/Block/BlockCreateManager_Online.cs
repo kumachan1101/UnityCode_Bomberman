@@ -32,7 +32,7 @@ public class BlockCreateManager_Online : BlockCreateManager {
         GameObject gExplosionManager = GameObject.Find("ExplosionManager");
         var manager = gExplosionManager.AddComponent<ExplosionManager_Online>();
 
-        PoolerType type = (GetComponent<BlockCreateManager_Tower>() != null) ? PoolerType.Tower : PoolerType.Local;
+        PoolerType type = (GetComponent<TowerSpawnManager>() != null) ? PoolerType.Tower : PoolerType.Local;
         manager.Initialize(type);
 
         return manager;

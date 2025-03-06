@@ -4,7 +4,6 @@ public class Player_Online : Player_Base
     public override void AddPlayerComponent(){
         this.gameObject.AddComponent<PlayerAction_Online>();
     }
-
 	public override void DestroySync(){
 		PhotonView pv = this.gameObject.GetComponent<PhotonView>();
 		if (pv != null && pv.IsMine)
@@ -12,5 +11,4 @@ public class Player_Online : Player_Base
 			PhotonNetwork.Destroy(this.gameObject);
 		}
 	}
-
 }

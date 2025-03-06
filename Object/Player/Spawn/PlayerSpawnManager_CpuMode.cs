@@ -207,7 +207,7 @@ public class PlayerSpawnManager_CpuMode : PlayerSpawnManager {
             Debug.LogWarning("Failed to add PowerGageIF_CpuMode to the player.");
         }
 
-        RearrangeCanvases();
+        //RearrangeCanvases();
 
         var playerBase = player.GetComponent<Player_Base>();
         if (playerBase != null)

@@ -1,6 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
-public class BlockCreateManager_TowerOnline : BlockCreateManager_Tower
+public class TowerSpawnManager_Online : TowerSpawnManager
 {
     void Start()
     {
