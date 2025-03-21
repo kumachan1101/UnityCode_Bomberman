@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using System.Collections;
+using UnityEngine.Events;
+
 using System;
 
 public static class BlockManagerFactory
@@ -16,18 +18,24 @@ public static class BlockManagerFactory
 public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
 {
     private bool bSetUp;
-    protected Library_Base cLibrary;
     protected ExplosionManager explosionManager;
     protected GroundBlockManager groundBlockManager;
     protected FixedWallBlockManager fixedWallBlockManager;
     protected BrokenBlockManager brokenBlockManager;
     protected ObjMoveBlockManager objMoveBlockManager;
     protected virtual void InsObjMove_RPC(int x, int y, int z, Library_Base.Direction randomDirection) { }
+
     //public virtual void Rainbow_RPC(string sMaterialType) { }
+
+    protected EventDispatcher eventDispatcher;
+    protected void InitEvent(){
+         eventDispatcher = GameObject.Find("EventDispatcher").GetComponent<EventDispatcher>();        
+    }
+
     void Awake()
     {
+        InitEvent();
         explosionManager = CreateExplosionManager();
-        cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
 
         CreateBlockManagers();
         InitializeBlockManagers();
@@ -35,12 +43,9 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
         bSetUp = false;
     }
 
-    void Start()
-    {
-        CreateFixedBlock();
-        CreateField();
-        SetupStage();
-        GetComponent<PlayerSpawnManager>().RequestPlayerSpawn();
+    public void CompleteBlockCreate(){
+        var vEvent = new CompleteBlockCreateEvent();
+        eventDispatcher.DispatchEvent(vEvent);
     }
 
     // `ExplosionManager` を生成し、適切な `PoolerType` で初期化
@@ -87,7 +92,7 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
         return BlockManagerFactory.Create<T>(gameObject);
     }
 
-    public void CreateField()
+    public void CreateBrokenBlock()
     {
         AddBrokenBlock(5);
     }
@@ -96,16 +101,17 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
     {
         brokenBlockManager.AddBrokenBlock(randomRangeMax);
     }
-
+/*
     public void SetupStage()
     {
         bSetUp = true;
     }
+
     public bool GetSetUp()
     {
         return bSetUp;
     }
-
+*/
     [PunRPC]
     public void ClearBrokenList()
     {
@@ -317,3 +323,14 @@ public class ObjMoveBlockManager : MonoBehaviour
         return false;
     }
 }
+
+/*
+public class BlockCreateEventDispatcher : MonoBehaviour
+{
+    // イベント発行関数
+    public void DispatchBlockCreateEvent()
+    {
+        GetComponent<PlayerSpawnManager_CpuMode>().RequestPlayerSpawn();
+    }
+}
+*/

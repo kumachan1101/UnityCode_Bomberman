@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private int maxStage;
 
+    private bool bSetUp = false;
+
     public static GameManager Instance
     {
         get
@@ -33,12 +35,27 @@ public class GameManager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject);
             SceneManager.sceneLoaded += OnSceneLoaded;
+            InitEvent();
         }
         else
         {
             Destroy(gameObject);
         }
     }
+
+    protected void InitEvent (){
+        EventDispatcher eventDispatcher = GameObject.Find("EventDispatcher").GetComponent<EventDispatcher>();
+        eventDispatcher.RegisterListener<CompleteBlockCreateEvent>(OnCompleteBlockCreateEvent);
+    }
+
+    private void OnCompleteBlockCreateEvent(CompleteBlockCreateEvent eEvent){
+        bSetUp = true;  
+    } 
+    public bool GetSetUp()
+    {
+        return bSetUp;
+    }
+
 
     void Start()
     {
@@ -47,6 +64,7 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        bSetUp = false;
         CancelInvoke("SwitchGameScene"); 
         CancelInvoke("SwitchTowerScene"); 
         CancelInvoke("SwitchGameOver");

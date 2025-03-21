@@ -1,3 +1,4 @@
+/*
 public class BomConfigurationMaterialTypeManager : BomConfigurationManagerBase
 {
     public BomConfigurationMaterialTypeManager() => configuration = new BomConfigurationMaterialType1();
@@ -6,6 +7,12 @@ public class BomConfigurationMaterialTypeManager : BomConfigurationManagerBase
         configuration = BomConfigurationFactory.Create(reqType);
     }
 }
+*/
+public class BomConfigurationMaterialTypeManager : BomConfigurationManagerBase
+{
+    public BomConfigurationMaterialTypeManager() => configuration = BomConfigurationFactory.Create(ReqType.MaterialBom1);
+}
+
 
 public class BomConfigurationMaterialType1 : BomConfigurationBase
 {

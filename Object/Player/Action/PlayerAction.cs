@@ -28,6 +28,7 @@ public abstract class BasePlayerActionStrategy : IPlayerActionStrategy
         Vector3 direction = bomControl.transform.forward;
         bomControl.RequestDropBom(position, direction);
     }
+
 }
 
 

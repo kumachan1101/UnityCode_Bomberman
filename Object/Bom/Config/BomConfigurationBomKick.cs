@@ -1,3 +1,4 @@
+/*
 public class BomConfigurationBomKickManager : BomConfigurationManagerBase
 {
     public BomConfigurationBomKickManager() => configuration = new BomConfigurationBomKick();
@@ -5,6 +6,12 @@ public class BomConfigurationBomKickManager : BomConfigurationManagerBase
     public override void Request(ReqType reqType){
         configuration.Request();
     }
+}
+*/
+
+public class BomConfigurationBomKickManager : BomConfigurationManagerBase
+{
+    public BomConfigurationBomKickManager() => configuration = BomConfigurationFactory.Create(ReqType.BomKick);
 }
 public class BomConfigurationBomKick : BomConfigurationBase
 {

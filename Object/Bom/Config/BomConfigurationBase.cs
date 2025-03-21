@@ -2,7 +2,14 @@
 public abstract class BomConfigurationManagerBase
 {
     protected BomConfigurationBase configuration;
-    public virtual void Request(ReqType reqType){}
+    //public virtual void Request(ReqType reqType){}
+    public virtual void Request() {
+        configuration.Request();
+    }
+    public virtual void Set(ReqType reqType) {
+        configuration = BomConfigurationFactory.Create(reqType);
+        configuration.Request();
+    }
     public object Get() => configuration.Get();
 }
 public static class BomConfigurationFactory

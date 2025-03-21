@@ -130,6 +130,36 @@ public class PlayerPowerManager_CpuMode: PlayerPowerManager
 
 public class PlayerSpawnManager_CpuMode : PlayerSpawnManager {
 
+    protected override void InitEvent (){
+        eventDispatcher = GameObject.Find("EventDispatcher").GetComponent<EventDispatcher>();
+        eventDispatcher.RegisterListener<CompleteBlockCreateEvent>(OnCompleteBlockCreateEvent);
+    }
+
+    void OnDestroy()
+    {
+        eventDispatcher.UnregisterListener<CompleteBlockCreateEvent>(OnCompleteBlockCreateEvent);
+    }
+
+
+    private void OnCompleteBlockCreateEvent(CompleteBlockCreateEvent eEvent){
+        RequestPlayerSpawn();
+    } 
+
+    public virtual void RequestPlayerSpawn(){
+
+        cPlayerPositionManager.SetPlayerPositions();
+        SpawnPlayer(1);
+        cPlayerNameManager.SetPlayerName("Player1");
+        int iPlayerCnt = cPlayerPositionManager.GetPlayerCount();
+        
+        for(int i = 2; i <= iPlayerCnt; i++) {
+            cPlayerCountManager.SetPlayerCount(i);
+            int iPlayerNo = Random.Range(2, 4);
+            SpawnPlayer(iPlayerNo);    
+        }
+        //cPlayerCountManager.SetPlayerCount(iPlayerCnt);
+    }
+
 	protected override bool PreSpawnDummyPlayer(){
 		cPlayerCountManager.AddPlayerCount();
 		return true;
@@ -137,8 +167,7 @@ public class PlayerSpawnManager_CpuMode : PlayerSpawnManager {
     protected override void PlayerAddConponent (){
         cPlayerPositionManager = gameObject.AddComponent<PlayerPositionManager_CpuMode>();
         gameObject.AddComponent<PlayerPowerManager_CpuMode>();
-    
-        
+            
     }
 
     public override void SpawnDummyPlayer(int playerNo, Vector3 position)

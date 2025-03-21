@@ -1,7 +1,18 @@
+using UnityEditor.SceneManagement;
 using UnityEngine;
-using System.Collections.Generic;
+using UnityEngine.Events;
 
 public class BlockCreateManager_CpuMode : BlockCreateManager {
+
+
+    void Start()
+    {
+        CreateFixedBlock();
+        CreateBrokenBlock();
+        //SetupStage();
+        CompleteBlockCreate();
+    }
+
 
     protected override void CreateAndInitializeBrokenBlockManager()
     {
@@ -25,6 +36,7 @@ public class BlockCreateManager_CpuMode : BlockCreateManager {
 
         return manager;
     }
+
 
 }
 

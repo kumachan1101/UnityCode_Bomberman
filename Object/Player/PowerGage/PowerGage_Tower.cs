@@ -5,7 +5,8 @@ public class PowerGage_Tower : PowerGage
 {
 
 	void Awake() {
-		cSlider = GetComponent<Slider>();
+		//cSlider = GetComponent<Slider>();
+		cSlider = transform.Find("Slider").GetComponent<Slider>();
 		int iPower = GameObject.Find("Field").GetComponent<TowerSpawnManager>().GetPower();
 		cSlider.maxValue = iPower;
 		cSlider.value = iPower;

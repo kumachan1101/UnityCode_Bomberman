@@ -1,3 +1,4 @@
+/*
 public class BomConfigurationFireUpManager : BomConfigurationManagerBase
 {
     public BomConfigurationFireUpManager() => configuration = new BomConfigurationFireUp();
@@ -7,6 +8,12 @@ public class BomConfigurationFireUpManager : BomConfigurationManagerBase
     }
 
 }
+*/
+public class BomConfigurationFireUpManager : BomConfigurationManagerBase
+{
+    public BomConfigurationFireUpManager() => configuration = BomConfigurationFactory.Create(ReqType.FireUp);
+}
+
 
 public class BomConfigurationFireUp : BomConfigurationBase
 {

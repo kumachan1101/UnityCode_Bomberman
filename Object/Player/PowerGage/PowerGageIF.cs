@@ -18,8 +18,10 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 		if(cPowerGage == null){
 			gCanvas = Library_Base.FindGameObjectByInstanceID(iCanvasInsID);
 			if(gCanvas != null){
-				GameObject sliderObject = gCanvas.transform.Find("Slider").gameObject;
-				cPowerGage = CreatePowerGage(sliderObject);
+				//GameObject sliderObject = gCanvas.transform.Find("Slider").gameObject;
+				//cPowerGage = CreatePowerGage(sliderObject);
+				cPowerGage = CreatePowerGage(gCanvas);
+
 				onPowerGageAdded.Invoke(gCanvas);  // 自分が追加されたことを通知
 			}
 		}
@@ -62,7 +64,7 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 		if (cPowerGage == null)
 		{
 			Debug.Log("cPowerGage is null");
-			StartCoroutine(RetrySyncSetDamage(iDamage));
+			//StartCoroutine(RetrySyncSetDamage(iDamage));
 			return;
 		}
 		cPowerGage.SetDamage(iDamage);

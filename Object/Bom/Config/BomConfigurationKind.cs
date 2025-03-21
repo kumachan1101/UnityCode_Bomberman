@@ -1,3 +1,4 @@
+/*
 public class BomConfigurationKindManager : BomConfigurationManagerBase
 {
     public BomConfigurationKindManager() => configuration = new BomConfigurationKindDefalut();
@@ -6,6 +7,12 @@ public class BomConfigurationKindManager : BomConfigurationManagerBase
         configuration = BomConfigurationFactory.Create(reqType);
     }
 }
+*/
+public class BomConfigurationKindManager : BomConfigurationManagerBase
+{
+    public BomConfigurationKindManager() => configuration = BomConfigurationFactory.Create(ReqType.ExplodeBom);
+}
+
 
 public class BomConfigurationKindDefalut : BomConfigurationBase
 {

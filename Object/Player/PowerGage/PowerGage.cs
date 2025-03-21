@@ -6,7 +6,8 @@ public class PowerGage : MonoBehaviour
 	protected Slider cSlider;
 
 	void Awake() {
-		cSlider = GetComponent<Slider>();
+		cSlider = transform.Find("Slider").GetComponent<Slider>();
+		//cSlider = GetComponent<Slider>();
 		int iPower = GameObject.Find("Field").GetComponent<PlayerPowerManager>().GetPower();
 		cSlider.maxValue = iPower;
 		cSlider.value = iPower;

@@ -12,32 +12,23 @@ public class PlayerSpawnManager : MonoBehaviourPunCallbacks
     protected PlayerCountManager cPlayerCountManager;
 
     protected PlayerPositionManager cPlayerPositionManager;
-
+    protected EventDispatcher eventDispatcher;
     private void Awake()
     {
         cPlayerNameManager = gameObject.AddComponent<PlayerNameManager>();
         cPlayerCountManager = gameObject.AddComponent<PlayerCountManager>();
         PlayerAddConponent();
-    }
-
-    public virtual void RequestPlayerSpawn(){
-
-        cPlayerPositionManager.SetPlayerPositions();
-        SpawnPlayer(1);
-        cPlayerNameManager.SetPlayerName("Player1");
-        int iPlayerCnt = cPlayerPositionManager.GetPlayerCount();
+        InitEvent();
         
-        for(int i = 2; i <= iPlayerCnt; i++) {
-            cPlayerCountManager.SetPlayerCount(i);
-            int iPlayerNo = Random.Range(2, 4);
-            SpawnPlayer(iPlayerNo);    
-        }
     }
 
+    
     public virtual void SpawnDummyPlayer(int iPlayerNo, Vector3 v3){}
     public virtual void SpawnPlayer(int iPlayerNo){}
 
+    protected virtual void InitEvent (){}
     protected virtual void PlayerAddConponent (){}
+
 
 	protected virtual bool PreSpawnDummyPlayer(){return false;}
 

@@ -1,3 +1,4 @@
+/*
 public class BomConfigurationBomAttackManager : BomConfigurationManagerBase
 {
     public BomConfigurationBomAttackManager() => configuration = new BomConfigurationBomAttack();
@@ -6,6 +7,12 @@ public class BomConfigurationBomAttackManager : BomConfigurationManagerBase
         configuration.Request();
     }
 }
+*/
+public class BomConfigurationBomAttackManager : BomConfigurationManagerBase
+{
+    public BomConfigurationBomAttackManager() => configuration = BomConfigurationFactory.Create(ReqType.BomAttack);
+}
+
 
 public class BomConfigurationBomAttack : BomConfigurationBase
 {

@@ -4,16 +4,16 @@ public class PlayerBomToBomControl : MonoBehaviour
     BomControl cBomControl;
     PlayerBom cPlayerBom;
 
-    BlockCreateManager cField_Block;
+    GameManager cGameManager;
 
     public void Awake(){
         cBomControl = GameObject.Find("BomControl").GetComponent<BomControl>();
         cPlayerBom = this.gameObject.AddComponent<PlayerBom>();
-        cField_Block = GameObject.Find("Field").GetComponent<BlockCreateManager>();
+        cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     public void RequestDropBom(Vector3 position, Vector3 direction){
-        if(false == cField_Block.GetSetUp()){
+        if(false == cGameManager.GetSetUp()){
             return;
         }
 		if(Library_Base.IsPositionOutOfBounds(position)){

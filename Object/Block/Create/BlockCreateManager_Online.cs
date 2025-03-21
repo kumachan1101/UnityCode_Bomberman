@@ -6,7 +6,6 @@ public class BlockCreateManager_Online : BlockCreateManager {
 
     void Start()
     {
-        cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
 		CreateFixedBlock();
     }
 
