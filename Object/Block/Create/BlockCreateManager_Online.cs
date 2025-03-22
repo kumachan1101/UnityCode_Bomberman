@@ -1,6 +1,5 @@
 using UnityEngine;
 using Photon.Pun;
-using System.Collections.Generic;
 
 public class BlockCreateManager_Online : BlockCreateManager {
 
@@ -26,7 +25,7 @@ public class BlockCreateManager_Online : BlockCreateManager {
         photonView.RPC(nameof(InsObjMove), RpcTarget.All, x, y, z, randomDirection);
     }
 
-    protected override ExplosionManager CreateExplosionManager()
+    protected override void CreateExplosionManager()
     {
         GameObject gExplosionManager = GameObject.Find("ExplosionManager");
         var manager = gExplosionManager.AddComponent<ExplosionManager_Online>();
@@ -34,7 +33,7 @@ public class BlockCreateManager_Online : BlockCreateManager {
         PoolerType type = (GetComponent<TowerSpawnManager>() != null) ? PoolerType.Tower : PoolerType.Local;
         manager.Initialize(type);
 
-        return manager;
+        return;
     }
 
 }

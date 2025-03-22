@@ -230,6 +230,30 @@ public class Library_Base : MonoBehaviour{
         return matchingObjects;
     }
 
+    public static List<GameObject> FindGameObjectsIgnoringNumbers(string partialName)
+    {
+        List<GameObject> matchingObjects = new List<GameObject>();
+
+        // 数字を除去
+        string sanitizedPartialName = Regex.Replace(partialName, @"\d", "");
+
+        // シーン内のすべてのGameObjectを取得
+        GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
+
+        foreach (GameObject obj in allObjects)
+        {
+            // 数字を除去した名前で比較
+            string sanitizedObjectName = Regex.Replace(obj.name, @"\d", "");
+
+            if (sanitizedObjectName.Contains(sanitizedPartialName))
+            {
+                matchingObjects.Add(obj);
+            }
+        }
+
+        return matchingObjects;
+    }
+
     /// <summary>
     /// 指定した座標と名称が一致するGameObjectを1つ返却します。
     /// </summary>
@@ -305,12 +329,6 @@ public class Library_Base : MonoBehaviour{
         return false;
     }
 
-    public static PlayerBom GetPlayerBomFromObject(string objname)
-    {
-        GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
-        PlayerBom cPlayerBom = gPlayer.GetComponent<PlayerBom>();
-        return cPlayerBom;
-    }
 
     public static PlayerAction GetcPlayerActionFromObject(string objname)
     {
@@ -319,18 +337,6 @@ public class Library_Base : MonoBehaviour{
         return cPlayerAction;
     }
 
-    public static Player_Base GetcPlayerFromObject(string objname)
-    {
-        GameObject gPlayer = GameObject.Find(objname); // ゲームオブジェクトを検索
-        Player_Base cPlayer = null;
-        if (gPlayer == null)
-        {
-            Debug.LogError("Object with the name not found.");
-            return cPlayer;
-        }
-        cPlayer = gPlayer.GetComponent<Player_Base>();
-		return cPlayer;
-    }
 
     public static int ExtractNumberFromString(string input)
     {
@@ -350,11 +356,6 @@ public class Library_Base : MonoBehaviour{
             // マッチしなかった場合は0を返すが、適切なエラーハンドリングが必要であれば適宜修正してください
             return 0;
         }
-    }
-
-    public static GameObject FindPlayerObject(string name)
-    {
-        return GameObject.Find(name);
     }
 
     public enum Direction

@@ -20,7 +20,7 @@ public class Bom_Base_MaterialHandler:  MonoBehaviour
         if (renderer != null)
         {
             cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-            Material newMaterial = cMaterialMng.GetMaterialOfType(sMaterialKind);
+            Material newMaterial = cMaterialMng.GetMaterial(sMaterialKind);
             renderer.material = newMaterial;
         }
         else
@@ -33,7 +33,7 @@ public class Bom_Base_MaterialHandler:  MonoBehaviour
     }
 
     public string GetExplotionString(){
-        return cMaterialMng.GetMaterialOfExplosion(sMaterialKind);
+        return MaterialMapper.GetExplosionType(sMaterialKind);
     }
 
 }

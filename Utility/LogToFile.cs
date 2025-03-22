@@ -27,7 +27,7 @@ public class LogToFile : MonoBehaviour
     /// </summary>
     private void InitializeLogFile()
     {
-        Debug.Log($"Log file path: {Application.persistentDataPath}/Logs/");
+        //Debug.Log($"Log file path: {Application.persistentDataPath}/Logs/");
 
         string folderPath = Path.Combine(Application.persistentDataPath, "Logs");
         if (!Directory.Exists(folderPath))

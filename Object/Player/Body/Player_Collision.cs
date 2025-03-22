@@ -5,7 +5,7 @@ public class Player_Collision : MonoBehaviour
     private string MaterialType;
     private float lastDamageTime = 0f;
     private float damageCooldown = 1f; // ダメージを受ける間隔（秒）
-    private MaterialManager materialManager;
+    //private MaterialManager materialManager;
     void Start()
     {
         InitializeMaterialType();
@@ -13,8 +13,8 @@ public class Player_Collision : MonoBehaviour
 
 	private void InitializeMaterialType()
 	{
-		materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-		MaterialType = materialManager.GetBomMaterialByPlayerName(this.gameObject.name);
+		//materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+		MaterialType = MaterialResolver.GetBomMaterialByPlayerName(this.gameObject.name);
 	}
 
 

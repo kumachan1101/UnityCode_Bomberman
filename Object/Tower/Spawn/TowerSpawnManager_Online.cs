@@ -2,17 +2,6 @@ using UnityEngine;
 using Photon.Pun;
 public class TowerSpawnManager_Online : TowerSpawnManager
 {
-    void Start()
-    {
-        InitComponent();
-    }
-/*
-    protected override void SetupTowerCanvasIntegration(GameObject tower, GameObject canvas, int index)
-    {
-        PowerGageIF cPowerGageIF = tower.AddComponent<PowerGageIF_TowerOnline>();
-        cPowerGageIF.SetCanvasInsID(canvas.GetInstanceID());
-    }
-*/
     public override void SpawnTowerObjects(int index)
     {
         if (!IsValidTowerIndex(index))

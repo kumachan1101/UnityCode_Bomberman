@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using System.Collections;
-using UnityEngine.Events;
-
-using System;
 
 public static class BlockManagerFactory
 {
@@ -17,15 +14,11 @@ public static class BlockManagerFactory
 
 public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
 {
-    private bool bSetUp;
-    protected ExplosionManager explosionManager;
     protected GroundBlockManager groundBlockManager;
     protected FixedWallBlockManager fixedWallBlockManager;
     protected BrokenBlockManager brokenBlockManager;
     protected ObjMoveBlockManager objMoveBlockManager;
     protected virtual void InsObjMove_RPC(int x, int y, int z, Library_Base.Direction randomDirection) { }
-
-    //public virtual void Rainbow_RPC(string sMaterialType) { }
 
     protected EventDispatcher eventDispatcher;
     protected void InitEvent(){
@@ -35,12 +28,8 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
     void Awake()
     {
         InitEvent();
-        explosionManager = CreateExplosionManager();
-
+        CreateExplosionManager();
         CreateBlockManagers();
-        InitializeBlockManagers();
-
-        bSetUp = false;
     }
 
     public void CompleteBlockCreate(){
@@ -49,7 +38,7 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
     }
 
     // `ExplosionManager` を生成し、適切な `PoolerType` で初期化
-    protected abstract ExplosionManager CreateExplosionManager();
+    protected abstract void CreateExplosionManager();
 
     protected virtual void CreateBlockManagers()
     {
@@ -57,14 +46,6 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
         CreateAndInitializeFixedWallBlockManager();
         CreateAndInitializeBrokenBlockManager();
         CreateAndInitializeObjMoveBlockManager();
-    }
-
-    protected virtual void InitializeBlockManagers()
-    {
-        groundBlockManager?.Initialize();
-        fixedWallBlockManager?.Initialize();
-        brokenBlockManager?.Initialize();
-        objMoveBlockManager?.Initialize();
     }
 
     protected virtual void CreateAndInitializeGroundBlockManager()
@@ -101,17 +82,7 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
     {
         brokenBlockManager.AddBrokenBlock(randomRangeMax);
     }
-/*
-    public void SetupStage()
-    {
-        bSetUp = true;
-    }
 
-    public bool GetSetUp()
-    {
-        return bSetUp;
-    }
-*/
     [PunRPC]
     public void ClearBrokenList()
     {
@@ -132,8 +103,6 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
     protected void CreateFixedBlock()
     {
         SetFieldRange();
-        //GetComponent<PlayerPositionManager>().SetPlayerPositions();
-
         fixedWallBlockManager.CreateFixedWall();
         groundBlockManager.CreateGroundBlock();
     }
@@ -147,7 +116,6 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
     {
         return objMoveBlockManager.IsMatchObjMove(targetPosition);
     }
-    //public abstract void UpdateGroundExplosion(GameObject gObj);
 
 }
 
@@ -323,14 +291,3 @@ public class ObjMoveBlockManager : MonoBehaviour
         return false;
     }
 }
-
-/*
-public class BlockCreateEventDispatcher : MonoBehaviour
-{
-    // イベント発行関数
-    public void DispatchBlockCreateEvent()
-    {
-        GetComponent<PlayerSpawnManager_CpuMode>().RequestPlayerSpawn();
-    }
-}
-*/

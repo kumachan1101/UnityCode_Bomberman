@@ -28,18 +28,12 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 	}
     void OnDestroy()
     {
-        onPowerGageRemoved.Invoke(gCanvas);  // 自分が削除されたことを通知
     }
 
     protected virtual PowerGage CreatePowerGage(GameObject sliderObject)
     {
         return sliderObject.AddComponent<PowerGage>();
     }
-
-
-	public void SetPowerGage(PowerGage cObj){
-		cPowerGage = cObj;
-	}
 
 	public void SetCanvasInsID(int iID){
 		//Debug.Log(iID);
@@ -78,6 +72,7 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 
 	protected void DestroySync(){
 		//Debug.Log(gCanvas);
+		onPowerGageRemoved.Invoke(gCanvas);  // 自分が削除されたことを通知
 		Destroy(gCanvas);
 	}
 	protected IEnumerator RetrySyncSetDamage(int iDamage){

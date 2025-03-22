@@ -55,7 +55,7 @@ public class Tower : MonoBehaviour
         if (renderer != null)
         {
             MaterialManager cMaterialMng = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-            Material newMaterial = cMaterialMng.GetMaterialOfType(MaterialType);
+            Material newMaterial = cMaterialMng.GetMaterial(MaterialType);
             renderer.material = newMaterial;
         }
         else

@@ -31,7 +31,7 @@ public class PlayerSpawnManager : MonoBehaviourPunCallbacks
 
 
 	protected virtual bool PreSpawnDummyPlayer(){return false;}
-
+/*
     /// <summary>
     /// CanvasPowerGageを上詰めで再配置する (SetPlayerCntを利用)
     /// </summary>
@@ -66,7 +66,7 @@ public class PlayerSpawnManager : MonoBehaviourPunCallbacks
             }
         }
     }
-
+*/
 
 }
 

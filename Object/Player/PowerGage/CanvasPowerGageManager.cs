@@ -41,7 +41,7 @@ public class CanvasPowerGageManager
     public void RearrangeAddCanvases(GameObject obj)
     {
         // "CanvasPowerGage" 名称を持つオブジェクトをすべて取得
-        List<GameObject> canvasPowerGages = Library_Base.FindGameObjectsByPartialName("CanvasPowerGage(Clone)");
+        List<GameObject> canvasPowerGages = Library_Base.FindGameObjectsIgnoringNumbers(obj.name);
         //canvasPowerGages.Add(obj); // 新たに追加されたオブジェクトをリストに追加
         RearrangeCanvases(canvasPowerGages);
     }
@@ -51,8 +51,9 @@ public class CanvasPowerGageManager
     /// </summary>
     public void RearrangeRemoveCanvases(GameObject obj)
     {
+        //Debug.Log("RearrangeRemoveCanvases:"+obj);
         // "CanvasPowerGage" 名称を持つオブジェクトをすべて取得
-        List<GameObject> canvasPowerGages = Library_Base.FindGameObjectsByPartialName("CanvasPowerGage(Clone)");
+        List<GameObject> canvasPowerGages = Library_Base.FindGameObjectsIgnoringNumbers(obj.name);
 
         // リストから削除対象のオブジェクトを削除
         if (canvasPowerGages.Contains(obj))
@@ -61,7 +62,7 @@ public class CanvasPowerGageManager
         }
         else
         {
-            Debug.LogWarning("リストに削除対象のオブジェクトが見つかりません。");
+            Debug.LogWarning(obj + "リストに削除対象のオブジェクトが見つかりません。");
         }
         RearrangeCanvases(canvasPowerGages);
     }

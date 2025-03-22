@@ -27,14 +27,13 @@ public class PlayerObjectGenerator
     }
 }
 
-
-// プレイヤー生成用のインターフェース
 public interface IPlayerFactory
 {
     GameObject CreatePlayer(string playerName, Vector3 position);
 }
 
-public class DummyPlayerFactory : IPlayerFactory
+// --- Base Factory (共通処理をまとめる) ---
+public abstract class BasePlayerFactory : IPlayerFactory
 {
     public GameObject CreatePlayer(string playerName, Vector3 position)
     {
@@ -43,36 +42,42 @@ public class DummyPlayerFactory : IPlayerFactory
         player.name = playerName;
         if (player != null)
         {
-            player.AddComponent<Player_CpuMode>(); // ダミープレイヤー用のコンポーネントを追加
+            AddPlayerComponent(player);
         }
         return player;
     }
+
+    // 各派生クラスで追加するコンポーネントを定義
+    protected abstract void AddPlayerComponent(GameObject player);
 }
 
-public class StandardPlayerFactory : IPlayerFactory
+// --- 通常プレイヤー用のファクトリ ---
+public class StandardPlayerFactory : BasePlayerFactory
 {
-
-    public GameObject CreatePlayer(string playerName, Vector3 position)
+    protected override void AddPlayerComponent(GameObject player)
     {
-        PlayerObjectGenerator generator = new PlayerObjectGenerator();
-        GameObject player = generator.InstantiatePlayer("Player", position);
-        player.name = playerName;
-        if (player != null)
-        {
-            char lastChar = playerName[playerName.Length - 1];
-            int playerNo = int.Parse(lastChar.ToString());
-            if (playerNo == 1)
-            {
-                player.AddComponent<Player>(); // 通常プレイヤー用のコンポーネントを追加
-            }
-            else
-            {
-                player.AddComponent<Player_CpuMode>(); // CPUモードプレイヤー用のコンポーネントを追加
-            }
-        }
-        return player;
+        player.AddComponent<Player>(); // 通常プレイヤー用のコンポーネント
     }
 }
+
+// --- CPU プレイヤー用のファクトリ ---
+public class CpuPlayerFactory : BasePlayerFactory
+{
+    protected override void AddPlayerComponent(GameObject player)
+    {
+        player.AddComponent<Player_CpuMode>(); // CPUモードプレイヤー用のコンポーネント
+    }
+}
+
+// --- プレイヤーの種類に応じて適切なファクトリを取得 ---
+public class PlayerFactorySelector
+{
+    public static IPlayerFactory GetFactory(int playerNo)
+    {
+        return playerNo == 1 ? new StandardPlayerFactory() : new CpuPlayerFactory();
+    }
+}
+
 
 public class PlayerPositionManager_CpuMode : PlayerPositionManager {
 
@@ -142,23 +147,41 @@ public class PlayerSpawnManager_CpuMode : PlayerSpawnManager {
 
 
     private void OnCompleteBlockCreateEvent(CompleteBlockCreateEvent eEvent){
+        //Debug.Log("OnCompleteBlockCreateLog");
         RequestPlayerSpawn();
     } 
 
-    public virtual void RequestPlayerSpawn(){
-
-        cPlayerPositionManager.SetPlayerPositions();
-        SpawnPlayer(1);
-        cPlayerNameManager.SetPlayerName("Player1");
-        int iPlayerCnt = cPlayerPositionManager.GetPlayerCount();
-        
-        for(int i = 2; i <= iPlayerCnt; i++) {
-            cPlayerCountManager.SetPlayerCount(i);
-            int iPlayerNo = Random.Range(2, 4);
-            SpawnPlayer(iPlayerNo);    
-        }
-        //cPlayerCountManager.SetPlayerCount(iPlayerCnt);
+    public virtual void RequestPlayerSpawn() {
+        int iPlayerCnt = InitializePlayerPositionsAndGetCount();
+        UpdatePlayerCount(iPlayerCnt);
+        SetInitialPlayerName();
+        SpawnPlayers(iPlayerCnt);
     }
+
+    private int InitializePlayerPositionsAndGetCount() {
+        cPlayerPositionManager.SetPlayerPositions();
+        return cPlayerPositionManager.GetPlayerCount();
+    }
+
+    private void UpdatePlayerCount(int iPlayerCnt) {
+        cPlayerCountManager.SetPlayerCount(iPlayerCnt);
+    }
+
+    private void SetInitialPlayerName() {
+        cPlayerNameManager.SetPlayerName("Player1");
+    }
+
+    private void SpawnPlayers(int iPlayerCnt) {
+        for (int i = 1; i <= iPlayerCnt; i++) {
+            int playerNo = DeterminePlayerNumber(i);
+            SpawnPlayer(playerNo);
+        }
+    }
+
+    protected virtual int DeterminePlayerNumber(int index) {
+        return (index == 1) ? 1 : Random.Range(2, 4);
+    }
+
 
 	protected override bool PreSpawnDummyPlayer(){
 		cPlayerCountManager.AddPlayerCount();
@@ -172,15 +195,15 @@ public class PlayerSpawnManager_CpuMode : PlayerSpawnManager {
 
     public override void SpawnDummyPlayer(int playerNo, Vector3 position)
     {
-        var dummyFactory = new DummyPlayerFactory();
-        CreateAndSetupPlayer(playerNo, position, dummyFactory);
+        var cpuFactory = new CpuPlayerFactory(); // BaseFactory を使う
+        CreateAndSetupPlayer(playerNo, position, cpuFactory);
     }
 
     public override void SpawnPlayer(int playerNo)
     {
         Vector3 position = cPlayerPositionManager.GetPlayerPosition(playerNo - 1); // プレイヤー位置を取得
-        var standardFactory = new StandardPlayerFactory();
-        CreateAndSetupPlayer(playerNo, position, standardFactory);
+        var factory = PlayerFactorySelector.GetFactory(playerNo);
+        CreateAndSetupPlayer(playerNo, position, factory);
     }
     // プレイヤーとキャンバスを設定するメソッド
     private void CreateAndSetupPlayer(int playerNo, Vector3 position, IPlayerFactory playerFactory)

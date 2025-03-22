@@ -47,7 +47,7 @@ public class EventDispatcher : MonoBehaviour
 
         // リスナーを直接リストに登録
         eventListeners[eventType].Add(listener);
-        Debug.Log($"[RegisterListener] {eventType} が登録されました。登録数: {eventListeners[eventType].Count}");
+        //Debug.Log($"[RegisterListener] {eventType} が登録されました。登録数: {eventListeners[eventType].Count}");
     }
 
     public void UnregisterListener<T>(Action<T> listener) where T : IEvent
@@ -63,25 +63,25 @@ public class EventDispatcher : MonoBehaviour
                 eventListeners.Remove(eventType);
             }
 
-            Debug.Log($"[UnregisterListener] {eventType} の登録を解除しました。現在の登録数: {eventListeners.GetValueOrDefault(eventType)?.Count ?? 0}");
+            //Debug.Log($"[UnregisterListener] {eventType} の登録を解除しました。現在の登録数: {eventListeners.GetValueOrDefault(eventType)?.Count ?? 0}");
         }
     }
 
     public void DispatchEvent(IEvent eventToDispatch)
     {
         var eventType = eventToDispatch.GetType();
-        Debug.Log($"[DispatchEvent] Event Type: {eventType}");
+        //Debug.Log($"[DispatchEvent] Event Type: {eventType}");
 
         if (eventListeners.ContainsKey(eventType))
         {
             foreach (var listener in eventListeners[eventType])
             {
-                Debug.Log($"[DispatchEvent] Listener Type: {listener.GetType()}");
+                //Debug.Log($"[DispatchEvent] Listener Type: {listener.GetType()}");
 
                 // Action<T> 型のリスナーを処理するため、リスナーが IEvent 型に変換される場合
                 if (listener is Action<IEvent> action)
                 {
-                    Debug.Log("action " + eventToDispatch);
+                    //Debug.Log("action " + eventToDispatch);
                     action(eventToDispatch);
                 }
                 // Action<T> 型のリスナー（ジェネリック）を処理
@@ -91,7 +91,7 @@ public class EventDispatcher : MonoBehaviour
                     if (eventTypeArgument.IsAssignableFrom(eventType))
                     {
                         // Action<T> 型のリスナーを IEvent 型にキャストして呼び出す
-                        Debug.Log("invoke " + eventToDispatch);
+                        //Debug.Log("invoke " + eventToDispatch);
                         typedAction.DynamicInvoke(eventToDispatch);
                     }
                 }

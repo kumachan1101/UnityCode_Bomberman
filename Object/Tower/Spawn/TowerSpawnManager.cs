@@ -6,21 +6,16 @@ public class TowerSpawnManager : MonoBehaviourPunCallbacks
     // GameManager.xmax と GameManager.zmax を使用して初期化
     protected Vector3[] v3TowerPos;
     public GameObject towerPrefab; // タワーのPrefab（Inspectorで設定）
-    protected MaterialManager materialManager;
+    //protected MaterialManager materialManager;
 
     void Start()
     {
-        InitComponent();
         SetPositions();
         for (int i = 0; i < playercnt; i++)
         {
             SpawnTowerObjects(i);
         }
         CreateButtonCanvas();
-    }
-
-    protected void InitComponent(){
-        materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
     }
 
     public void SetPositions()
@@ -104,7 +99,7 @@ public class TowerSpawnManager : MonoBehaviourPunCallbacks
 
     protected void ConfigureTowerMaterial(GameObject tower)
     {
-        string materialType = materialManager.GetBomMaterialByPlayerName(tower.name);
+        string materialType = MaterialResolver.GetBomMaterialByPlayerName(tower.name);
         Tower cTower = tower.GetComponent<Tower>();
         cTower.SetMaterialType(materialType);
     }

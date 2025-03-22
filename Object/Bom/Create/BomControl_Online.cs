@@ -27,7 +27,7 @@ public class BomControl_Online : BomControl
 	public void MakeBom(BomParameters bomParams)
 	{
 		MaterialManager materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-		Material newMaterial = materialManager.GetMaterialOfType(bomParams.materialType);
+		Material newMaterial = materialManager.GetMaterial(bomParams.materialType);
 
 		PhotonView targetView = PhotonView.Find(bomParams.viewID);
 		if (targetView != null)

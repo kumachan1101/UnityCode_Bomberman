@@ -49,6 +49,7 @@ public class GameManager : MonoBehaviour
     }
 
     private void OnCompleteBlockCreateEvent(CompleteBlockCreateEvent eEvent){
+        //Debug.Log("OnCompleteBlockCreateLog");
         bSetUp = true;  
     } 
     public bool GetSetUp()

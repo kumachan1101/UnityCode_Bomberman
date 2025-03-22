@@ -9,7 +9,6 @@ public class BlockCreateManager_CpuMode : BlockCreateManager {
     {
         CreateFixedBlock();
         CreateBrokenBlock();
-        //SetupStage();
         CompleteBlockCreate();
     }
 
@@ -24,20 +23,16 @@ public class BlockCreateManager_CpuMode : BlockCreateManager {
         InsObjMove(x, y, z, randomDirection);
     }
 
-    protected override ExplosionManager CreateExplosionManager()
+    protected override void CreateExplosionManager()
     {
-        //var obj = new GameObject("ExplosionManager");
-        
         GameObject gExplosionManager = GameObject.Find("ExplosionManager");
         var manager = gExplosionManager.AddComponent<ExplosionManager_CpuMode>();
 
         PoolerType type = (GetComponent<TowerSpawnManager>() != null) ? PoolerType.Tower : PoolerType.Local;
         manager.Initialize(type);
 
-        return manager;
+        return;
     }
-
-
 }
 
 public class BrokenBlockManager_CpuMode : BrokenBlockManager
@@ -45,9 +40,4 @@ public class BrokenBlockManager_CpuMode : BrokenBlockManager
     protected override void InsBrokenBlock_RPC(int x, int y, int z){
         InsBrokenBlock(x, y, z);
     }
-
-
-
-
-
 }

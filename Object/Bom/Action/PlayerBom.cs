@@ -35,9 +35,9 @@ public class PlayerBom : MonoBehaviour
     {
         cBomConfigManager = new BomConfigurationManager();
         cBomListManager = new BomListManager();
-        materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
-		string MaterialType = materialManager.GetBomMaterialByPlayerName(this.gameObject.name);
-        Request(materialManager.GetReqtypeOfMaterial(MaterialType));
+        //materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
+		string MaterialType = MaterialResolver.GetBomMaterialByPlayerName(this.gameObject.name);
+        Request(MaterialMapper.GetReqtypeOfMaterial(MaterialType));
 
     }
 
