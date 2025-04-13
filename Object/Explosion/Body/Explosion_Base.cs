@@ -8,7 +8,6 @@ public class Explosion_Base : MonoBehaviour
     private SoundManager soundManager;
 
     void Awake(){
-        soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
     }
 
     // Start is called before the first frame update
@@ -20,13 +19,15 @@ public class Explosion_Base : MonoBehaviour
             return;
         }
         */
-		cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
-        cField = GameObject.Find("Field").GetComponent<BlockCreateManager>();
+		//cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
+        //cField = GameObject.Find("Field").GetComponent<BlockCreateManager>();
         //Invoke(nameof(hide), 1f);
+        /*
         soundManager.PlaySoundEffect("EXPLOISON");
         if (Library_Base.IsPositionOutOfBounds(transform.position)){
             DestroySync(this.gameObject);
         }
+        */
 
     }
 
@@ -37,18 +38,34 @@ public class Explosion_Base : MonoBehaviour
 
     }
 
+    private bool Setup(){
+        soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
+		cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
+        cField = GameObject.Find("Field").GetComponent<BlockCreateManager>();
+        soundManager.PlaySoundEffect("EXPLOISON");
+        if (Library_Base.IsPositionOutOfBounds(transform.position)){
+            DestroySync(this.gameObject);
+            return false;
+        }
+        return true;
+    }
 
-	public void ReqHide(){
+	public void ReqActive(){
+        if(false == Setup()){
+            return;
+        }
 		Invoke(nameof(hide), 1f);
 	}
 
     protected virtual void hide(){
+        /*
 		if(null == cExplosionManager){
 			cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
 		}
         if(null == cField){
             cField = GameObject.Find("Field").GetComponent<BlockCreateManager>();
         }
+        */
         SetPosition(new Vector3(transform.position.x, transform.position.y-1, transform.position.z));
         bool bRet = cField.IsMatchObjMove(transform.position);
         if(bRet){

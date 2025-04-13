@@ -9,7 +9,7 @@ public class BomBigBan_Common : MonoBehaviour
     public void SetInstanceManager(InstanceManager_Base cManager){
         cInsManager = cManager;
     }
-
+/*
     public void BomBiBomBigBan_Explosion(Vector3 basePosition)
     {
         processedCoordinates.Clear();
@@ -47,6 +47,34 @@ public class BomBigBan_Common : MonoBehaviour
         // Destroy the bomb object after explosion
         cInsManager.DestroyInstance(this.gameObject);
     }
+*/
+
+    public void BomBiBomBigBan_Explosion(Vector3 basePosition)
+    {
+        processedCoordinates.Clear();
+        int iExplosionNum = 2;
+
+        // x, z にそれぞれ ±1 の組み合わせを渡す
+        int[] directions = { 1, -1 };
+
+        foreach (int xSign in directions)
+        {
+            foreach (int zSign in directions)
+            {
+                for (int i = 0; i <= iExplosionNum; i++)
+                {
+                    for (int j = 0; j <= iExplosionNum; j++)
+                    {
+                        XZ_Explosion(basePosition, i * xSign, j * zSign);
+                    }
+                }
+            }
+        }
+
+        // Destroy the bomb object after explosion
+        cInsManager.DestroyInstance(this.gameObject);
+    }
+
     private bool XZ_Explosion(Vector3 basePosition, int x, int z)
     {
 

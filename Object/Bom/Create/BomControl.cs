@@ -14,7 +14,7 @@ public class BomControl : MonoBehaviourPunCallbacks
 {
     public GameObject BomPrefab;
     protected GameObject tempBom;
-    protected ItemControl cItemControl;
+    //protected ItemControl cItemControl;
     private SoundManager soundManager;
     public List<GameObject> instanceList = new List<GameObject>();
 
@@ -47,7 +47,7 @@ public class BomControl : MonoBehaviourPunCallbacks
     protected virtual void InitFactory(){}
     public virtual void Awake(){
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
-		cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
+		//cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
 
 		ReadBomResource();
 		CustomTypes.Register();
@@ -69,6 +69,7 @@ public class BomControl : MonoBehaviourPunCallbacks
    
  
     public GameObject DropBom(BomParameters bomParams){
+/*
         if(null == cItemControl){
 			return null;
 		}
@@ -78,6 +79,7 @@ public class BomControl : MonoBehaviourPunCallbacks
         if(null != Library_Base.GetGameObjectAtExactPositionWithName(bomParams.position, "Explosion")){
 			return null;
 		}
+*/
 		MakeBom_RPC(bomParams);
         soundManager.PlaySoundEffect("DROPBOMB");
         return tempBom;

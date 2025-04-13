@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Bom_Base : MonoBehaviour
@@ -8,13 +9,11 @@ public class Bom_Base : MonoBehaviour
 
     private BrokenBlockManager cBrokenBlockManager;
 
-    protected Library_Base cLibrary;
-
     public int iExplosionNum;
     protected InstanceManager_Base cInsManager;
     protected Bom_Base_MoveManager moveManager;
     protected Bom_Base_MaterialHandler materialHandler;
-    protected Bom_Base_CollisionManager collisionManager;
+    //protected Bom_Base_CollisionManager collisionManager;
 
     public bool bDel;
 
@@ -26,9 +25,8 @@ public class Bom_Base : MonoBehaviour
         GameObject gField = GameObject.Find("Field");
         cBrokenBlockManager = gField.GetComponent<BrokenBlockManager>();
         cField = gField.GetComponent<BlockCreateManager>();
-        cLibrary = GameObject.Find("Library").GetComponent<Library_Base>();
         moveManager = gameObject.AddComponent<Bom_Base_MoveManager>();
-        collisionManager = gameObject.AddComponent<Bom_Base_CollisionManager>();
+        Bom_Base_CollisionManager collisionManager = gameObject.AddComponent<Bom_Base_CollisionManager>();
         materialHandler = gameObject.AddComponent<Bom_Base_MaterialHandler>();
         moveManager.SetCollisionManager(collisionManager);
     }
@@ -48,7 +46,7 @@ public class Bom_Base : MonoBehaviour
     }
     public void SetMoveDirection(Vector3 direction)
     {
-        moveManager.SetMoveDirection(direction);
+        moveManager.ReqBomKick(direction);
     }
     
     public void SetMaterialKind(string sParamMaterial){
@@ -94,6 +92,52 @@ public class Bom_Base : MonoBehaviour
         CancelInvoke();
     }
 
+
+    protected virtual void HandleExplosion(Vector3 initialPosition)
+    {
+        if (cInsManager == null)
+            return;
+
+        moveManager.StopMoving();
+        transform.position = initialPosition;
+
+        if (DestroyExistingExplosion(initialPosition))
+        {
+            cInsManager.InstantiateInstancePool(initialPosition);
+        }
+
+        // 各方向に爆風を生成
+        ExplodeInAllDirections(transform.position);
+
+        // 自身を削除
+        cInsManager.DestroyInstance(this.gameObject);
+    }
+
+    private void ExplodeInAllDirections(Vector3 origin)
+    {
+        // 各方向ごとの移動ベクトル（X負, X正, Z負, Z正）
+        List<Vector3> directions = new List<Vector3>
+        {
+            new Vector3(-1, 0, 0), // X負方向
+            new Vector3(1, 0, 0),  // X正方向
+            new Vector3(0, 0, -1), // Z負方向
+            new Vector3(0, 0, 1)   // Z正方向
+        };
+
+        foreach (Vector3 dir in directions)
+        {
+            for (int i = 1; i <= iExplosionNum; i++)
+            {
+                Vector3 targetPos = origin + dir * i;
+                if (CreateExplosionAndCheckContinuation(targetPos) == ExplosionResult.Stop)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+/*
     protected virtual void HandleExplosion(Vector3 initialPosition)
     {
         if (cInsManager == null)
@@ -138,6 +182,8 @@ public class Bom_Base : MonoBehaviour
         // このオブジェクトの破棄
         cInsManager.DestroyInstance(this.gameObject);
     }
+*/
+
 
     public enum ExplosionResult
     {

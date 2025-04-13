@@ -8,7 +8,7 @@ public abstract class BomConfigurationManagerBase
     }
     public virtual void Set(ReqType reqType) {
         configuration = BomConfigurationFactory.Create(reqType);
-        configuration.Request();
+        //configuration.Request();
     }
     public object Get() => configuration.Get();
 }

@@ -3,6 +3,9 @@ using System.Reflection;
 using Photon.Pun;
 using System.Collections.Generic;
 using UnityEngine.PlayerLoop;
+using UnityEngine.UI;
+using System.Collections;
+using System.Text.RegularExpressions;
 
 
 public class PlayerSpawnManager : MonoBehaviourPunCallbacks
@@ -119,4 +122,9 @@ public class PlayerNameManager : MonoBehaviour
         playerName = "Player" + iPlayerNo;
     }
 
+    public string GetPlayerNoString()
+    {
+        Match match = Regex.Match(playerName, @"\d+$");
+        return match.Success ? match.Value : "";
+    }
 }

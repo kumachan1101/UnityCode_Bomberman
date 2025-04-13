@@ -146,7 +146,8 @@ public class PlayerSpawnManager_CpuMode : PlayerSpawnManager {
     }
 
 
-    private void OnCompleteBlockCreateEvent(CompleteBlockCreateEvent eEvent){
+    //private void OnCompleteBlockCreateEvent(CompleteBlockCreateEvent eEvent){
+    private void OnCompleteBlockCreateEvent(IEvent eEvent){
         //Debug.Log("OnCompleteBlockCreateLog");
         RequestPlayerSpawn();
     } 

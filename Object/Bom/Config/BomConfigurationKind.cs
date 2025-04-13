@@ -10,9 +10,15 @@ public class BomConfigurationKindManager : BomConfigurationManagerBase
 */
 public class BomConfigurationKindManager : BomConfigurationManagerBase
 {
-    public BomConfigurationKindManager() => configuration = BomConfigurationFactory.Create(ReqType.ExplodeBom);
+    public BomConfigurationKindManager() => configuration = new BomConfigurationKindDefalut();
 }
 
+/*
+public class BomConfigurationKindManager : BomConfigurationManagerBase
+{
+    public BomConfigurationKindManager() => configuration = BomConfigurationFactory.Create(ReqType.ExplodeBom);
+}
+*/
 
 public class BomConfigurationKindDefalut : BomConfigurationBase
 {

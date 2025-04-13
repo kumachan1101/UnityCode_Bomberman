@@ -27,7 +27,7 @@ public class Bom_Base_CollisionManager : MonoBehaviour
         }
         return bCollistion;
     }
-
+/*
     void OnTriggerEnter(Collider other)
     {
         switch (other.transform.name)
@@ -42,7 +42,7 @@ public class Bom_Base_CollisionManager : MonoBehaviour
                 return;
         }
     }
-
+*/
 
     void OnTriggerExit(Collider other)
     {

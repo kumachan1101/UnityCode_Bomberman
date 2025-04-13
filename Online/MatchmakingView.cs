@@ -5,6 +5,149 @@ using UnityEngine;
 
 public class MatchmakingView : MonoBehaviourPunCallbacks
 {
+    //private List<RoomButton> roomButtonList = new List<RoomButton>();
+    private RoomListUI cRoomListUI;
+    protected GameObject gField;
+
+    private LobbyManager cLobbyManager;
+
+	void Awake() {
+		cRoomListUI = this.gameObject.AddComponent<RoomListUI>();
+        cLobbyManager = this.gameObject.AddComponent<LobbyManager>();
+        gField = GameObject.Find("Field");
+	}
+
+	void Start() {
+		gField.GetComponent<PlayerPositionManager>().SetPlayerPositions();
+	}
+
+	// 自分がルームに入室した
+	public override void OnJoinedRoom()
+    {
+        UpdateRoom();
+    }
+
+    private void HandleRoomButtonUpdates(/*bool checkMaxPlayers*/)
+    {
+        int playerCount = PhotonNetwork.PlayerList.Length; // ルームにいる人数を確認
+        string roomName = PhotonNetwork.CurrentRoom.Name;
+        //GameObject gField = GameObject.Find("Field");
+        //List<RoomButton> roomButtonList = cRoomListUI.GetRoomButtonList();
+        RoomButton roomButton = cRoomListUI.GetMatchRoomButton(roomName);
+        if(null != roomButton){
+            UpdatePlayerCount(roomButton, playerCount);
+            CheckAndHandleMaxPlayers(roomButton, playerCount);
+        }
+        /*
+        foreach (var roomButton in roomButtonList)
+        {
+            if (roomButton.RoomName == roomName)
+            {
+                // プレイヤー数の更新
+                UpdatePlayerCount(roomButton, playerCount);
+                CheckAndHandleMaxPlayers(roomButton, playerCount);
+                // 最大プレイヤー数のチェック処理が必要な場合のみ呼び出し
+                if (checkMaxPlayers)
+                {
+                    CheckAndHandleMaxPlayers(roomButton, playerCount);
+                }
+            }
+        }
+        */
+    }
+
+    //自分が入室しているルームに、別のプレイヤーが入室した
+    public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
+    {
+        HandleRoomButtonUpdates(/*true*/);
+    }
+
+    // 自分がルームから退出した
+    public override void OnLeftRoom()
+    {
+        HandleRoomButtonUpdates(/*false*/);
+    }
+
+    // 他のプレイヤーがルームから退出した
+    public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
+    {
+        HandleRoomButtonUpdates(/*false*/);
+    }
+
+    private void UpdateRoom() {
+        int playerCount = PhotonNetwork.PlayerList.Length; // ルームにいる人数を確認
+        string roomName = PhotonNetwork.CurrentRoom.Name;
+        //gField.GetComponent<PlayerPositionManager>().SetPlayerPositions();
+        //List<RoomButton> roomButtonList = cRoomListUI.GetRoomButtonList();
+        RoomButton roomButton = cRoomListUI.GetMatchRoomButton(roomName);
+        if(null != roomButton){
+            HandleRoomButtonUpdate(roomButton, playerCount);
+        }
+        cRoomListUI.HideOtherRoomButtons(roomName);
+        /*
+        foreach (var roomButton in roomButtonList) {
+            if (roomButton.RoomName == roomName) {
+                HandleRoomButtonUpdate(roomButton, playerCount);
+            }
+            else {
+                roomButton.gameObject.SetActive(false);
+            }
+        }
+        */
+    }
+
+    // ルームボタンの更新処理を行う
+    private void HandleRoomButtonUpdate(RoomButton roomButton, int playerCount) {
+        UpdatePlayerCount(roomButton, playerCount);
+        HandlePlayerObjects(playerCount);
+        CheckAndHandleMaxPlayers(roomButton, playerCount);
+    }
+    protected virtual void HandleTowerObjects(int playerCount) {
+    }
+
+    // プレイヤー数を更新
+    private void UpdatePlayerCount(RoomButton roomButton, int playerCount) {
+        roomButton.SetPlayerCount(playerCount);
+        PlayerCountManager cFieldPlayer = gField.GetComponent<PlayerCountManager>();
+        cFieldPlayer.SetPlayerCount(playerCount);
+    }
+
+    // プレイヤーオブジェクトの処理
+    private void HandlePlayerObjects(int playerCount) {
+        PlayerSpawnManager cFieldPlayer = gField.GetComponent<PlayerSpawnManager>();
+        cFieldPlayer.SpawnPlayer(playerCount);
+    }
+
+    // 最大プレイヤー数に達したかどうかを確認して、処理を行う
+    protected void CheckAndHandleMaxPlayers(RoomButton roomButton, int playerCount) {
+        if (roomButton.GetIsMax(playerCount)) {
+            HandleMaxPlayers();
+            HandleTowerObjects(playerCount);
+        }
+    }
+
+    // 最大プレイヤー数に達した際の処理
+    private void HandleMaxPlayers() {
+        BlockCreateManager cField = gField.GetComponent<BlockCreateManager>();
+        GameObject gGameEndCanvasLocal = GameObject.Find("GameEndCanvas_Local(Clone)");
+        Destroy(gGameEndCanvasLocal);
+
+        if (PhotonNetwork.IsMasterClient) {
+            cField.CreateBrokenBlock();
+            GameObject gGameEndCanvas = PhotonNetwork.Instantiate("GameEndCanvas_Online", Vector3.zero, Quaternion.identity);
+        }
+
+        //cField.SetupStage();
+        cField.CompleteBlockCreate();
+        gameObject.SetActive(false);
+    }
+
+
+}
+
+
+public class RoomListUI : MonoBehaviourPunCallbacks
+{
     private RoomList roomList = new RoomList();
     private List<RoomButton> roomButtonList = new List<RoomButton>();
     private CanvasGroup canvasGroup;
@@ -19,12 +162,13 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
         int roomId = 1;
         foreach (Transform child in transform) {
             if (child.TryGetComponent<RoomButton>(out var roomButton)) {
-                roomButton.Init(this, roomId++);
+                roomButton.Init(roomId++);
                 roomButton.SetPlayerCount(0);
                 roomButtonList.Add(roomButton);
             }
         }
     }
+
 
     public override void OnJoinedLobby() {
         //Debug.Log("MatchmakingView:OnJoinedLobby");
@@ -47,120 +191,40 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
     // 自分がルームに入室した
     public override void OnJoinedRoom()
     {
-        UpdateRoom();
+        canvasGroup.interactable = false;
+    }
+/*
+    public List<RoomButton> GetRoomButtonList(){
+        return roomButtonList;
     }
 
     public void OnJoiningRoom() {
         // ルーム参加処理中は、全てのルーム参加ボタンを押せないようにする
         canvasGroup.interactable = false;
     }
-
+*/
     public override void OnJoinRoomFailed(short returnCode, string message) {
         // ルームへの参加が失敗したら、再びルーム参加ボタンを押せるようにする
         canvasGroup.interactable = true;
     }
 
-    private void HandleRoomButtonUpdates(bool checkMaxPlayers)
-    {
-        int playerCount = PhotonNetwork.PlayerList.Length; // ルームにいる人数を確認
-        string roomName = PhotonNetwork.CurrentRoom.Name;
-        GameObject gField = GameObject.Find("Field");
-
+    public RoomButton GetMatchRoomButton(string roomName){
         foreach (var roomButton in roomButtonList)
         {
             if (roomButton.RoomName == roomName)
             {
-                // プレイヤー数の更新
-                UpdatePlayerCount(roomButton, playerCount, gField);
-                
-                // 最大プレイヤー数のチェック処理が必要な場合のみ呼び出し
-                if (checkMaxPlayers)
-                {
-                    CheckAndHandleMaxPlayers(playerCount, gField, roomButton);
-                }
+                return roomButton;
             }
         }
+        return null;
     }
 
-    //自分が入室しているルームに、別のプレイヤーが入室した
-    public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
-    {
-        HandleRoomButtonUpdates(true);
-    }
 
-    // 自分がルームから退出した
-    public override void OnLeftRoom()
-    {
-        HandleRoomButtonUpdates(false);
-    }
-
-    // 他のプレイヤーがルームから退出した
-    public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
-    {
-        HandleRoomButtonUpdates(false);
-    }
-
-    private void UpdateRoom() {
-        int playerCount = PhotonNetwork.PlayerList.Length; // ルームにいる人数を確認
-        string roomName = PhotonNetwork.CurrentRoom.Name;
-        GameObject gField = GameObject.Find("Field");
-        gField.GetComponent<PlayerPositionManager>().SetPlayerPositions();
-
-        foreach (var roomButton in roomButtonList) {
-            if (roomButton.RoomName == roomName) {
-                HandleRoomButtonUpdate(roomButton, playerCount, gField);
-            }
-            else {
+    public void HideOtherRoomButtons(string targetRoomName){
+        foreach (var roomButton in roomButtonList){
+            if (roomButton.RoomName != targetRoomName){
                 roomButton.gameObject.SetActive(false);
             }
         }
     }
-
-    // ルームボタンの更新処理を行う
-    private void HandleRoomButtonUpdate(RoomButton roomButton, int playerCount, GameObject gField) {
-        UpdatePlayerCount(roomButton, playerCount, gField);
-        HandlePlayerObjects(playerCount, gField);
-        CheckAndHandleMaxPlayers(playerCount, gField, roomButton);
-    }
-    protected virtual void HandleTowerObjects(int playerCount, GameObject gField) {
-    }
-
-    // プレイヤー数を更新
-    private void UpdatePlayerCount(RoomButton roomButton, int playerCount, GameObject gField) {
-        roomButton.SetPlayerCount(playerCount);
-        PlayerCountManager cFieldPlayer = gField.GetComponent<PlayerCountManager>();
-        cFieldPlayer.SetPlayerCount(playerCount);
-    }
-
-    // プレイヤーオブジェクトの処理
-    private void HandlePlayerObjects(int playerCount, GameObject gField) {
-        PlayerSpawnManager cFieldPlayer = gField.GetComponent<PlayerSpawnManager>();
-        cFieldPlayer.SpawnPlayer(playerCount);
-    }
-
-    // 最大プレイヤー数に達したかどうかを確認して、処理を行う
-    protected void CheckAndHandleMaxPlayers(int playerCount, GameObject gField, RoomButton roomButton) {
-        if (roomButton.GetIsMax(playerCount)) {
-            HandleMaxPlayers(gField);
-            HandleTowerObjects(playerCount, gField);
-        }
-    }
-
-    // 最大プレイヤー数に達した際の処理
-    private void HandleMaxPlayers(GameObject gField) {
-        BlockCreateManager cField = gField.GetComponent<BlockCreateManager>();
-        GameObject gGameEndCanvasLocal = GameObject.Find("GameEndCanvas_Local(Clone)");
-        Destroy(gGameEndCanvasLocal);
-
-        if (PhotonNetwork.IsMasterClient) {
-            cField.CreateBrokenBlock();
-            GameObject gGameEndCanvas = PhotonNetwork.Instantiate("GameEndCanvas_Online", Vector3.zero, Quaternion.identity);
-        }
-
-        //cField.SetupStage();
-        cField.CompleteBlockCreate();
-        gameObject.SetActive(false);
-    }
-
-
 }

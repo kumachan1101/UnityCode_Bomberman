@@ -49,7 +49,7 @@ abstract public class InstanceManager_Base : MonoBehaviour
 			Explosion_Base cExplosion = explosion.GetComponent<Explosion_Base>();
 			cExplosion.SetPosition(position);
 
-			explosion.GetComponent<Explosion_Base>().ReqHide();
+			explosion.GetComponent<Explosion_Base>().ReqActive();
 		}
 		else
 		{

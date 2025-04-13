@@ -226,7 +226,7 @@ public class ExplosionManager_Online : ExplosionManager
     [PunRPC]
     public void UpdateGroundExplosion_RPC(string matname, Vector3 v3)
     {
-        Debug.Log("UpdateGroundExplosion");
+        //Debug.Log("UpdateGroundExplosion");
         UpdateGroundExplosion(matname, v3);
     }   
 }

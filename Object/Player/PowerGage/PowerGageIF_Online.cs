@@ -39,9 +39,10 @@ public class PowerGageIF_Online : PowerGageIF
 				return;
 			}
 
-			GameObject sliderObject = gCanvas.transform.Find("Slider").gameObject;
-			cPowerGage = CreatePowerGage(sliderObject);
+			//GameObject sliderObject = gCanvas.transform.Find("Slider").gameObject;
+			//cPowerGage = CreatePowerGage(sliderObject);
 			//cPowerGage = sliderObject.AddComponent<PowerGage_Online>();
+			cPowerGage = CreatePowerGage(gCanvas);
 		}
 	}
 

@@ -12,13 +12,11 @@ public class RoomButton : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI label = default;
 
-    private MatchmakingView matchmakingView;
     private Button button;
 
     public string RoomName { get; private set; }
 
-    public void Init(MatchmakingView parentView, int roomId) {
-        matchmakingView = parentView;
+    public void Init(int roomId) {
         MaxPlayers = roomId+1;
         RoomName = $"Room{MaxPlayers}P";
 
@@ -30,7 +28,7 @@ public class RoomButton : MonoBehaviour
 
     private void OnButtonClick() {
         // ルーム参加処理中は、全ての参加ボタンを押せないようにする
-        matchmakingView.OnJoiningRoom();
+        //matchmakingView.OnJoiningRoom();
 
         // ボタンに対応したルーム名のルームに参加する（ルームが存在しなければ作成してから参加する）
         var roomOptions = new RoomOptions();

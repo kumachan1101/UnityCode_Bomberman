@@ -1,8 +1,9 @@
 using UnityEngine;
 using Photon.Pun;
+using Photon.Pun.Demo.Cockpit;
 public class TowerSpawnManager : MonoBehaviourPunCallbacks
 {
-    private int playercnt = 4;
+    //private int playercnt = 4;
     // GameManager.xmax と GameManager.zmax を使用して初期化
     protected Vector3[] v3TowerPos;
     public GameObject towerPrefab; // タワーのPrefab（Inspectorで設定）
@@ -10,6 +11,10 @@ public class TowerSpawnManager : MonoBehaviourPunCallbacks
 
     void Start()
     {
+        init(4);
+    }
+
+    public void init(int playercnt){
         SetPositions();
         for (int i = 0; i < playercnt; i++)
         {

@@ -4,14 +4,11 @@ using UnityEngine;
 
 public class Player_Online_Setting : MonoBehaviour, IPunInstantiateMagicCallback
 {
-	private int iCanvasInsID;
-	private int iPlayerNo;
-
 	public void OnPhotonInstantiate(PhotonMessageInfo info)
 	{
 		object[] data = info.photonView.InstantiationData;
-		iCanvasInsID = (int)data[0];
-		iPlayerNo = (int)data[1];
+		int iCanvasInsID = (int)data[0];
+		int iPlayerNo = (int)data[1];
 		string scriptName = (string)data[2];
 		Player_Base cPlayer = null;
 		if (!string.IsNullOrEmpty(scriptName))
@@ -36,10 +33,5 @@ public class Player_Online_Setting : MonoBehaviour, IPunInstantiateMagicCallback
 		cPowerGageIF.SetCanvasInsID(iCanvasInsID);
 
 		cPlayer.AddPlayerComponent();
-	}
-
-	void Start()
-	{
-		
 	}
 }

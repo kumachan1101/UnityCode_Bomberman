@@ -1,7 +1,7 @@
 ﻿
 using UnityEngine;
 using System.Collections.Generic;
-
+using System;
 public class CpuPlayerActionStrategy : BasePlayerActionStrategy
 {
     private float timer;
@@ -11,7 +11,19 @@ public class CpuPlayerActionStrategy : BasePlayerActionStrategy
     private float bombTimer = 0f;
     private int randomDirection;
 
+/*
     public CpuPlayerActionStrategy(PlayerBomToBomControl bomControl) : base(bomControl)
+    {
+        randomMovementBindings = new Dictionary<int, Vector3>
+        {
+            { 0, Vector3.forward },
+            { 1, Vector3.back },
+            { 2, Vector3.left },
+            { 3, Vector3.right }
+        };
+    }
+*/
+    public CpuPlayerActionStrategy(Action requestDropBomAction) : base(requestDropBomAction)
     {
         randomMovementBindings = new Dictionary<int, Vector3>
         {
@@ -81,6 +93,6 @@ public class PlayerAction_CpuMode : PlayerAction
 {
     protected override void CreatePlayerStrategy()
     {
-        playerStrategy = new CpuPlayerActionStrategy(cPlayerBomToBomControl);
+        playerStrategy = new CpuPlayerActionStrategy(cPlayerBomToBomControl.RequestDropBom);
     }
 }

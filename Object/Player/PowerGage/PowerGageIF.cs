@@ -15,7 +15,7 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
     public static GameObjectEvent onPowerGageRemoved = new GameObjectEvent();
 
 	void Start(){
-		if(cPowerGage == null){
+		//if(cPowerGage == null){
 			gCanvas = Library_Base.FindGameObjectByInstanceID(iCanvasInsID);
 			if(gCanvas != null){
 				//GameObject sliderObject = gCanvas.transform.Find("Slider").gameObject;
@@ -24,7 +24,7 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 
 				onPowerGageAdded.Invoke(gCanvas);  // 自分が追加されたことを通知
 			}
-		}
+		//}
 	}
     void OnDestroy()
     {

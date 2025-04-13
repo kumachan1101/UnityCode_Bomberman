@@ -48,7 +48,8 @@ public class GameManager : MonoBehaviour
         eventDispatcher.RegisterListener<CompleteBlockCreateEvent>(OnCompleteBlockCreateEvent);
     }
 
-    private void OnCompleteBlockCreateEvent(CompleteBlockCreateEvent eEvent){
+    //private void OnCompleteBlockCreateEvent(CompleteBlockCreateEvent eEvent){
+    private void OnCompleteBlockCreateEvent(IEvent eEvent){
         //Debug.Log("OnCompleteBlockCreateLog");
         bSetUp = true;  
     } 

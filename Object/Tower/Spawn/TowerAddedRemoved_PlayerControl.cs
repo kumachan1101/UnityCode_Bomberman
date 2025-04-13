@@ -22,8 +22,7 @@ public class TowerAddedRemoved_PlayerControl :Field_Event
         //cPlayerPositionManager = gFeild.AddComponent<PlayerPositionManager_CpuMode>();
         cPlayerCountManager = gFeild.GetComponent<PlayerCountManager>();
         cPlayerNameManager = gFeild.GetComponent<PlayerNameManager>();
-        string PlayerName = GetPlayerName();
-        string sPlayerNo = ExtractTrailingNumber(PlayerName);
+        string sPlayerNo = cPlayerNameManager.GetPlayerNoString();
         int.TryParse(sPlayerNo, out iPlayerNo);
         PlayerTowerName = MakeTowerName(sPlayerNo);
         
@@ -80,10 +79,11 @@ public class TowerAddedRemoved_PlayerControl :Field_Event
         Match match = Regex.Match(input, @"\d+$");
         return match.Success ? match.Value : "";
     }
-
+/*
     private string GetPlayerName(){
         return cPlayerNameManager.GetPlayerName();
     }
+*/
     private string MakeTowerName(string number)
     {
         return "Tower" + number;
@@ -110,9 +110,6 @@ public class TowerAddedRemoved_PlayerControl :Field_Event
         //Debug.Log(obj);
         if(JudgeMyPlayer(obj)){
             SetToneDown();
-        }
-        else{
-
         }
     }
 
