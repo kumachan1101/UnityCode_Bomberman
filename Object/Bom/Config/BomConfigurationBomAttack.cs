@@ -10,17 +10,24 @@ public class BomConfigurationBomAttackManager : BomConfigurationManagerBase
 */
 public class BomConfigurationBomAttackManager : BomConfigurationManagerBase
 {
-    public BomConfigurationBomAttackManager() => configuration = BomConfigurationFactory.Create(ReqType.BomAttack);
+    public BomConfigurationBomAttackManager() => configuration = new BomConfigurationBomAttackDefault();
 }
 
-
+public class BomConfigurationBomAttackDefault : BomConfigurationBase
+{
+    public BomConfigurationBomAttackDefault(){
+        value = BOM_ATTACK.BOM_ATTACK_NOTHING;
+    }
+}
 public class BomConfigurationBomAttack : BomConfigurationBase
 {
     public BomConfigurationBomAttack(){
-        value = false;
+        value = BOM_ATTACK.BOM_ATTACK_THROW;
     }
-    public override void Request()
-    {
-        value = true;
+}
+public class BomConfigurationBomMulti : BomConfigurationBase
+{
+    public BomConfigurationBomMulti(){
+        value = BOM_ATTACK.BOM_ATTACK_MULTI;
     }
 }

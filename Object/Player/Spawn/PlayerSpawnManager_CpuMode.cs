@@ -87,7 +87,7 @@ public class PlayerPositionManager_CpuMode : PlayerPositionManager {
         int zmax = GameManager.zmax;
 
         // プレイヤー数を4以上のランダムな値に設定（例: 4〜10人）
-        int playerCount = Random.Range(4, 4);
+        int playerCount = Random.Range(4, 10);
 
         // プレイヤー位置のリストを初期化
         playerPositions = new Vector3[playerCount];

@@ -8,8 +8,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private int iStage;
 
-    public static int xmax;
-    public static int zmax;
+    public static int xmax = 20;
+    public static int zmax = 20;
 
     [SerializeField] private int maxStage;
 

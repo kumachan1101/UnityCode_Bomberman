@@ -59,8 +59,7 @@ public class BomControl_Online : BomControl
 					bomBase.iExplosionNum = bomParams.explosionNum;
 
 					Bom_Base_MoveManager cMoveManager = obj.GetComponent<Bom_Base_MoveManager>();
-					cMoveManager.AbailableBomKick(bomParams);
-					cMoveManager.AbailableBomAttack(bomParams);
+					cMoveManager.BomAttack(bomParams);
 				}
 				else
 				{

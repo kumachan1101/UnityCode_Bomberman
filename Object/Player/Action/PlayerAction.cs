@@ -8,30 +8,6 @@ public interface IPlayerActionStrategy
     void DropBom();
 }
 
-/*
-public abstract class BasePlayerActionStrategy : IPlayerActionStrategy
-{
-    private PlayerBomToBomControl bomControl;
-    protected PlayerInput playerInput;
-
-    protected BasePlayerActionStrategy(PlayerBomToBomControl bomControl)
-    {
-        this.bomControl = bomControl;
-        playerInput = new PlayerInput();
-    }
-
-    public abstract void UpdateStrategy(PlayerMovement playerMovement);
-    
-    public void DropBom()
-    {
-        //Vector3 position = Library_Base.GetPos(bomControl.transform.position);
-        //Vector3 direction = bomControl.transform.forward;
-        bomControl.RequestDropBom();
-    }
-}
-*/
-
-
 public abstract class BasePlayerActionStrategy : IPlayerActionStrategy
 {
     private readonly Action requestDropBomAction;
@@ -57,18 +33,6 @@ public class PlayerActionStrategy : BasePlayerActionStrategy
 {
     private Dictionary<InputAction, Vector3> movementBindings;
 
-/*
-    public PlayerActionStrategy(PlayerBomToBomControl bomControl) : base(bomControl)
-    {
-        movementBindings = new Dictionary<InputAction, Vector3>
-        {
-            { InputAction.Up, Vector3.forward },
-            { InputAction.Down, Vector3.back },
-            { InputAction.Left, Vector3.left },
-            { InputAction.Right, Vector3.right }
-        };
-    }
-*/
     // Action を受け取るように変更
     public PlayerActionStrategy(Action requestDropBomAction) : base(requestDropBomAction)
     {
@@ -138,7 +102,6 @@ public class PlayerAction : MonoBehaviour
 
     protected virtual void CreatePlayerStrategy()
     {
-        //playerStrategy = new PlayerActionStrategy(cPlayerBomToBomControl);
         playerStrategy = new PlayerActionStrategy(cPlayerBomToBomControl.RequestDropBom);
     }
 

@@ -12,7 +12,7 @@ public class BomBigBan_Online : Bom_Online
     protected override void HandleExplosion(Vector3 initialPosition)
     {
         cBomBiBomBigBan.SetInstanceManager(cInsManager);
-        moveManager.StopMoving();
+        moveManager.Explosion();
         transform.position = initialPosition;
         cBomBiBomBigBan.BomBiBomBigBan_Explosion(transform.position);
     }

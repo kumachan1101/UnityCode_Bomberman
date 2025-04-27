@@ -26,6 +26,7 @@ public static class BomConfigurationFactory
             ReqType.ExplodeBom => new BomConfigurationKindExplode(),
             ReqType.BigBanBom => new BomConfigurationKindBigBan(),
             ReqType.BomAttack => new BomConfigurationBomAttack(),
+            ReqType.BomMulti => new BomConfigurationBomMulti(),
             ReqType.BomKick => new BomConfigurationBomKick(),
             ReqType.BomUp => new BomConfigurationBomUp(),
             _ => null

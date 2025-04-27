@@ -12,7 +12,7 @@ public class BomBigBan_CpuMode : Bom_CpuMode
     protected override void HandleExplosion(Vector3 initialPosition)
     {
         cBomBiBomBigBan.SetInstanceManager(cInsManager);
-        moveManager.StopMoving();
+        moveManager.Explosion();
         transform.position = initialPosition;
         cBomBiBomBigBan.BomBiBomBigBan_Explosion(transform.position);
     }

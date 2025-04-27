@@ -2,12 +2,13 @@ using UnityEngine;
 
 public class Bom_Base_CollisionManager : MonoBehaviour
 {
-    public bool CheckForCollision(Vector3 position, Vector3 moveDirection)
+    public bool CheckForCollision()
     {
+
         bool bCollistion = false;
         // 移動方向にレイを飛ばして衝突を検知
         RaycastHit hit;
-        if (Physics.Raycast(position, moveDirection, out hit, 1f))
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 1f))
         {
             // 衝突したオブジェクトの名前によって処理を分岐する
             switch (hit.transform.name)

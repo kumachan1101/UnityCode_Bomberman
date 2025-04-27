@@ -101,7 +101,8 @@ public class BomConfigurationManager
                 cBomkindManager.Set(reqType);
                 break;
             case ReqType.BomAttack:
-                cBomAttackManager.Request();
+            case ReqType.BomMulti:
+                cBomAttackManager.Set(reqType);
                 break;
             case ReqType.BomKick:
                 cBomKickManager.Request();

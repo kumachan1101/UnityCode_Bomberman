@@ -27,7 +27,11 @@ public class BomControl_CpuMode : BomControl
         cBom.iExplosionNum = bomParams.explosionNum;
 
         Bom_Base_MoveManager cMoveManager = g.GetComponent<Bom_Base_MoveManager>();
-        cMoveManager.ReqSetting(bomParams);
+        //cMoveManager.SetBomStatus(status);
+        cMoveManager.BomAttack(bomParams);
+        //cMoveManager.AbailableBomKick(bomParams);
+        //cMoveManager.AbailableBomAttack(bomParams);
+        
 
         tempBom = g;
     }

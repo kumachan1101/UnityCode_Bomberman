@@ -20,7 +20,7 @@ public class ObjectPooler_Base : MonoBehaviour
     protected GameObject CreateObject(GameObject prefab)
     {
         // ローカルでオブジェクトをインスタンス化
-        GameObject gobj = Instantiate(prefab, new Vector3(0, -2, 0), Quaternion.identity);
+        GameObject gobj = Instantiate(prefab, new Vector3(0, -100, 0), Quaternion.identity);
         AddExplostionComponent(gobj);
         return gobj;
     }
@@ -34,6 +34,8 @@ public class ObjectPooler_Base : MonoBehaviour
     public void SetObjectActive_RPC(GameObject gObj, bool isActive)
     {
         gObj.SetActive(isActive);
+        // 常にアクティブにしようとすると、ゲーム開始時に固まってしまう。
+        //gObj.SetActive(true);
     }
 
     public void InitializePool()
@@ -82,7 +84,7 @@ public class ObjectPooler_Base : MonoBehaviour
     {
         if (obj != null)
         {
-            obj.transform.position = new Vector3(0, -2, 0); // オブジェクトの位置を変更
+            obj.transform.position = new Vector3(0, -100, 0); // オブジェクトの位置を変更
             SetObjectActive_RPC(obj, false);
             objectPoolByTag[tag].Enqueue(obj); // タグごとのキューにエンキュー
         }

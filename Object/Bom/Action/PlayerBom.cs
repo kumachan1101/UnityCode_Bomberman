@@ -6,6 +6,7 @@ public enum ReqType
     FireUp,
     BomKick,
     BomAttack,
+    BomMulti,
     BomUp,
     MaterialBom1,
     MaterialBom2,
@@ -29,7 +30,6 @@ public class PlayerBom : MonoBehaviour
 {
     private BomConfigurationManager cBomConfigManager;
     private BomListManager cBomListManager;
-    private MaterialManager materialManager;
 
     public void Awake()
     {
@@ -73,9 +73,13 @@ public class PlayerBom : MonoBehaviour
             explosionNum = Get<int>(GetKind.FireNum),
             bomKick = Get<bool>(GetKind.BomKick),
             materialType = Get<string>(GetKind.MaterialType),
-            bomAttack = Get<bool>(GetKind.BomAttack),
+            bomAttack = Get<BOM_ATTACK>(GetKind.BomAttack),
             direction = direction
         };
         return cBomParameters;
+    }
+
+    public BOM_ATTACK GetBomAttack(){
+        return Get<BOM_ATTACK>(GetKind.BomAttack);
     }
 }

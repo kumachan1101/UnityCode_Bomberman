@@ -7,30 +7,6 @@ public class Explosion_Base : MonoBehaviour
     protected bool bField = false;
     private SoundManager soundManager;
 
-    void Awake(){
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        /*
-        if(bField){
-            //cField.AddExplosion(this.gameObject);
-            return;
-        }
-        */
-		//cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
-        //cField = GameObject.Find("Field").GetComponent<BlockCreateManager>();
-        //Invoke(nameof(hide), 1f);
-        /*
-        soundManager.PlaySoundEffect("EXPLOISON");
-        if (Library_Base.IsPositionOutOfBounds(transform.position)){
-            DestroySync(this.gameObject);
-        }
-        */
-
-    }
-
     void update(){
         if (Library_Base.IsPositionOutOfBounds(transform.position)){
             DestroySync(this.gameObject);
@@ -57,6 +33,10 @@ public class Explosion_Base : MonoBehaviour
 		Invoke(nameof(hide), 1f);
 	}
 
+    public void ReqCancel () {
+        CancelInvoke(nameof(hide));
+    }
+
     protected virtual void hide(){
         /*
 		if(null == cExplosionManager){
@@ -72,9 +52,19 @@ public class Explosion_Base : MonoBehaviour
             DestroySync(this.gameObject);
         }
         else{
-			if (gameObject.activeInHierarchy){
+            /*
+                爆風の重なりで同一色と判断された場合など、Hideがコールされる前に、エンキューされてしまう事がある。
+                エンキューする際に、Hideのキャンセルを実行しているが、非同期で動作することもあり、Hideが発動された後に
+                エンキュー処理が動き、Hideのキャンセルをしてももう間に合わず、その場合は、アクティブかどうか判定することで、
+                非アクティブになってしまった後でも、処理しないで済む。                
+            */
+
+            if (gameObject.activeSelf){
 				cExplosionManager.UpdateGroundExplosion(this.gameObject);
 			}
+            else{
+                Debug.Log("activeSelf false");
+            }
         }
     }
 

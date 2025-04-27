@@ -109,7 +109,8 @@ public static class CustomTypes
             System.Buffer.BlockCopy(stringBytes, 0, bytes, index, stringBytes.Length);
             index += stringBytes.Length;
 
-            bytes[index++] = (byte)(bomParams.bomAttack ? 1 : 0);
+            //bytes[index++] = (byte)(bomParams.bomAttack ? 1 : 0);
+            Protocol.Serialize((int)bomParams.bomAttack, bytes, ref index);
 
             Protocol.Serialize(bomParams.direction.x, bytes, ref index);
             Protocol.Serialize(bomParams.direction.y, bytes, ref index);
@@ -150,7 +151,10 @@ public static class CustomTypes
             bomParams.materialType = System.Text.Encoding.UTF8.GetString(stringBytes);
             index += stringLength;
 
-            bomParams.bomAttack = bytes[index++] == 1;
+            //bomParams.bomAttack = bytes[index++] == 1;
+            int bomAttack = 0;
+            Protocol.Deserialize(out bomAttack, bytes, ref index);
+            bomParams.bomAttack = (BOM_ATTACK)bomAttack;
 
             Protocol.Deserialize(out x, bytes, ref index);
             Protocol.Deserialize(out y, bytes, ref index);

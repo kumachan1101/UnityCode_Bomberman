@@ -5,6 +5,10 @@ using UnityEngine;
 
 public class MatchmakingView_Tower : MatchmakingView
 {
+	void Awake() {
+		cRoomListUI = this.gameObject.AddComponent<RoomListUI_Tower>();
+        gField = GameObject.Find("Field");
+	}
 
     protected override void HandleTowerObjects(int playerCount) {
         TowerSpawnManager cBlockCreateManager = gField.GetComponent<TowerSpawnManager_Online>();
@@ -17,5 +21,15 @@ public class MatchmakingView_Tower : MatchmakingView
         cBlockCreateManager.CreateButtonCanvas();
 */
     }
+}
+
+
+
+public class RoomListUI_Tower : RoomListUI
+{
+    protected override string GetRoomName(){
+        return "Tower";
+    }
+
 
 }

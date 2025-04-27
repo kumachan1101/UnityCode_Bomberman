@@ -14,10 +14,7 @@ public class BomControl : MonoBehaviourPunCallbacks
 {
     public GameObject BomPrefab;
     protected GameObject tempBom;
-    //protected ItemControl cItemControl;
     private SoundManager soundManager;
-    public List<GameObject> instanceList = new List<GameObject>();
-
     protected IBomFactory bomFactory;
 
     protected void SetFactory(IBomFactory factory)
@@ -47,8 +44,6 @@ public class BomControl : MonoBehaviourPunCallbacks
     protected virtual void InitFactory(){}
     public virtual void Awake(){
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
-		//cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
-
 		ReadBomResource();
 		CustomTypes.Register();
         InitFactory();
@@ -58,32 +53,10 @@ public class BomControl : MonoBehaviourPunCallbacks
 		BomPrefab = Resources.Load<GameObject>("Bom");
 	}
 
-	protected void DeleteComponent_Bom(GameObject gBom){
-		Bom_Base cBom = gBom.AddComponent<Bom_Base>();
-		Destroy(cBom);
-	}
-
-    void Update()
-    {
-    }
-   
- 
     public GameObject DropBom(BomParameters bomParams){
-/*
-        if(null == cItemControl){
-			return null;
-		}
-		if(cItemControl.IsItem(bomParams.position)){
-			return null;
-		}
-        if(null != Library_Base.GetGameObjectAtExactPositionWithName(bomParams.position, "Explosion")){
-			return null;
-		}
-*/
 		MakeBom_RPC(bomParams);
         soundManager.PlaySoundEffect("DROPBOMB");
         return tempBom;
-
     }
 
 	protected virtual void MakeBom_RPC(BomParameters bomParams){}
@@ -92,7 +65,6 @@ public class BomControl : MonoBehaviourPunCallbacks
         if(null != tempBom){
             tempBom.GetComponent<Bom_Base>().CancelInvokeAndCallExplosion();
         }
-        
     }
 
 }

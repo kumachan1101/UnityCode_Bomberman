@@ -42,30 +42,27 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
 
     protected virtual void CreateBlockManagers()
     {
-        CreateAndInitializeGroundBlockManager();
-        CreateAndInitializeFixedWallBlockManager();
-        CreateAndInitializeBrokenBlockManager();
-        CreateAndInitializeObjMoveBlockManager();
+        CreateGroundBlockManager();
+        CreateFixedWallBlockManager();
+        CreateBrokenBlockManager();
+        CreateObjMoveBlockManager();
     }
 
-    protected virtual void CreateAndInitializeGroundBlockManager()
+    protected virtual void CreateGroundBlockManager()
     {
         groundBlockManager = CreateBlockManager<GroundBlockManager>();
-        groundBlockManager?.Initialize();
     }
 
-    protected virtual void CreateAndInitializeFixedWallBlockManager()
+    protected virtual void CreateFixedWallBlockManager()
     {
         fixedWallBlockManager = CreateBlockManager<FixedWallBlockManager>();
-        fixedWallBlockManager?.Initialize();
     }
 
-    protected abstract void CreateAndInitializeBrokenBlockManager(); // 派生クラスで実装
+    protected abstract void CreateBrokenBlockManager(); // 派生クラスで実装
 
-    protected virtual void CreateAndInitializeObjMoveBlockManager()
+    protected virtual void CreateObjMoveBlockManager()
     {
         objMoveBlockManager = CreateBlockManager<ObjMoveBlockManager>();
-        objMoveBlockManager?.Initialize();
     }
 
     protected T CreateBlockManager<T>() where T : Component
@@ -124,7 +121,11 @@ public class GroundBlockManager : MonoBehaviour
     public GameObject GroundPrefab;
     public List<GameObject> GroundList;
 
-    public void Initialize()
+	public void Awake() {
+		Initialize();
+	}
+
+	public void Initialize()
     {
         this.GroundPrefab = Resources.Load<GameObject>("Ground");
         this.GroundList = new List<GameObject>();
@@ -151,7 +152,10 @@ public class FixedWallBlockManager : MonoBehaviour
     private List<GameObject> FixedWallList;
     private List<GameObject> WallList;
 
-    public void Initialize()
+	void Awake() {
+		Initialize();
+	}
+	private void Initialize()
     {
         this.FixedWallPrefab = Resources.Load<GameObject>("FixedWall");
         this.WallList = new List<GameObject>();
@@ -192,7 +196,11 @@ public class BrokenBlockManager : MonoBehaviourPunCallbacks
     public GameObject BrokenPrefab;
     public List<GameObject> BrokenList;
 
-    public void Initialize()
+	void Awake() {
+		Initialize();
+	}
+
+	private void Initialize()
     {
         this.BrokenPrefab = Resources.Load<GameObject>("Broken");
         this.BrokenList = new List<GameObject>();
@@ -265,7 +273,11 @@ public class ObjMoveBlockManager : MonoBehaviour
     public GameObject ObjMovePrefab;
     public List<GameObject> ObjMoveList;
 
-    public void Initialize()
+	void Awake() {
+		Initialize();
+	}
+
+	private void Initialize()
     {
         this.ObjMovePrefab = Resources.Load<GameObject>("ObjMove");
         this.ObjMoveList = new List<GameObject>();

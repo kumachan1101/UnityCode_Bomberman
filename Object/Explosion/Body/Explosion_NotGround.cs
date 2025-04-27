@@ -10,7 +10,14 @@ public class Explosion_NotGround : Explosion_Base
 			cExplosionManager = GameObject.Find("ExplosionManager").GetComponent<ExplosionManager>();
 		}
         */
-        cExplosionManager.EnqueueObject(this.gameObject);
+        // アクティブ判定しないと、爆風を暫く表示し続けると、FALSEの爆風が生成され始めて、表示されなくなる。調査必要
+    	//if (gameObject.activeInHierarchy){
+        if (gameObject.activeSelf){
+            cExplosionManager.EnqueueObject(this.gameObject);
+        }
+        else{
+            Debug.Log("activeSelf false");
+        }
     }
 
 }

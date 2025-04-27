@@ -1,8 +1,9 @@
+using System;
 using UnityEngine;
 public class PlayerBomToBomControl : MonoBehaviour
 {
-    BomControl cBomControl;
-    PlayerBom cPlayerBom;
+    protected BomControl cBomControl;
+    protected PlayerBom cPlayerBom;
 
     GameManager cGameManager;
 
@@ -15,7 +16,23 @@ public class PlayerBomToBomControl : MonoBehaviour
         cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
     }
 
-    public void RequestDropBom(){
+
+    protected Action GetAction(){
+        Action cAction = null;
+        switch (cPlayerBom.GetBomAttack())
+        {
+            case BOM_ATTACK.BOM_ATTACK_MULTI:
+                cAction = RequestDropBomMulti;
+                break;
+            case BOM_ATTACK.BOM_ATTACK_THROW:
+            default:
+                cAction = RequestDropBomNormal;
+                break;
+        }
+        return cAction;
+    }
+
+    private void RequestDropBomNormal(){
         Vector3 position = Library_Base.GetPos(transform.position);
         if(false == CanDropBom(position)){
             return;
@@ -24,8 +41,39 @@ public class PlayerBomToBomControl : MonoBehaviour
         GameObject cBom = cBomControl.DropBom(bomParams);
         cPlayerBom.Add(cBom);
     }
+    private void RequestDropBomMulti(){
+        Vector3 currentPos = transform.position;
+        Vector3 direction = transform.forward;
 
-    bool CanDropBom(Vector3 position){
+        while (true)
+        {
+            // 方向に1マス進める
+            currentPos += direction;
+            Vector3 dropPos = Library_Base.GetPos(currentPos);
+
+            if (false == CanDropBom(dropPos))
+            {
+                break;
+            }
+            // 通常の爆弾投下と以下処理は共通化出来る。
+            BomParameters bomParams = cPlayerBom.CreateBomParameters(dropPos, direction);
+            GameObject cBom = cBomControl.DropBom(bomParams);
+            cPlayerBom.Add(cBom);
+        }
+    }
+
+    private void RequestExplodeThrow(){
+        /*
+         ExplodeAttackManagerを作成して依頼する
+         爆風の数を渡すようにして、爆風の数分アタックできる仕様とする。
+        */
+    }
+
+    public void RequestDropBom(){
+        GetAction().Invoke();
+    }
+
+    protected bool CanDropBom(Vector3 position){
         if(false == cGameManager.GetSetUp()){
             return false;
         }
@@ -46,5 +94,4 @@ public class PlayerBomToBomControl : MonoBehaviour
 		}
         return true;
     }
-
 }

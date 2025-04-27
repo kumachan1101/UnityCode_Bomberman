@@ -9,6 +9,24 @@ public class BomParameters
     public int explosionNum;
     public bool bomKick;
     public string materialType;
-    public bool bomAttack;
+    public BOM_ATTACK bomAttack;
     public Vector3 direction;
+}
+
+public class BomStatusData
+{
+    public bool bomKick;
+    public BOM_ATTACK bomAttack;
+
+    public BomStatusData()
+    {
+        this.bomKick = false;
+        this.bomAttack = BOM_ATTACK.BOM_ATTACK_NOTHING;
+    }
+
+    public BomStatusData(BomParameters parameters)
+    {
+        this.bomKick = parameters.bomKick;
+        this.bomAttack = parameters.bomAttack;
+    }
 }

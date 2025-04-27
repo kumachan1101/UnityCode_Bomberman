@@ -8,10 +8,9 @@ public class BlockCreateManager_Online : BlockCreateManager {
 		CreateFixedBlock();
     }
 
-    protected override void CreateAndInitializeBrokenBlockManager()
+    protected override void CreateBrokenBlockManager()
     {
         brokenBlockManager = CreateBlockManager<BrokenBlockManager_Online>();
-        brokenBlockManager?.Initialize();
     }
 
 	protected override void SetFieldRange(){

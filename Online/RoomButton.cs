@@ -14,8 +14,23 @@ public class RoomButton : MonoBehaviour
 
     private Button button;
 
+
     public string RoomName { get; private set; }
 
+    private string lobbyName = "Default"; // ← 追加：ロビー名
+
+    public void Init(int roomId, string lobbyName)
+    {
+        this.lobbyName = lobbyName;
+        MaxPlayers = roomId + 1;
+
+        RoomName = $"{lobbyName}_Room{MaxPlayers}P"; // ← ロビーごとにルーム名が変わる
+
+        button = GetComponent<Button>();
+        button.interactable = false;
+        button.onClick.AddListener(OnButtonClick);
+    }
+/*
     public void Init(int roomId) {
         MaxPlayers = roomId+1;
         RoomName = $"Room{MaxPlayers}P";
@@ -25,7 +40,7 @@ public class RoomButton : MonoBehaviour
         button.onClick.AddListener(OnButtonClick);
 
     }
-
+*/
     private void OnButtonClick() {
         // ルーム参加処理中は、全ての参加ボタンを押せないようにする
         //matchmakingView.OnJoiningRoom();

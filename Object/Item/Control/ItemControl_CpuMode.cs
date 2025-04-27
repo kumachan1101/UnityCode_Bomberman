@@ -10,8 +10,10 @@ public class ItemPathProvider_CpuMode : IItemPathProvider
         { "Item_BomExplode", "item_explode" },
         { "Item_BomBigBan", "item_bigban" },
         { "Item_SpeedUp", "item_speedup" },
+        { "Item_BomSpeedUp", "item_bomspeedup" },
         { "Item_BomKick", "item_bomkick" },
         { "Item_BomAttack", "item_bomattack" },
+        { "Item_BomMulti", "item_bommulti" },
         { "Item_Rainbow", "item_rainbow" },
         { "Item_Heart", "item_heart" },
         { "Item_AddBlock", "item_addblock" }

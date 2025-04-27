@@ -6,3 +6,11 @@ public enum BOM_KIND {
 
 	BOM_KIND_MAX
 }
+
+
+public enum BOM_ATTACK {
+	BOM_ATTACK_NOTHING,//能力なし
+	BOM_ATTACK_THROW,
+	BOM_ATTACK_MULTI,
+	BOM_KIND_MAX
+}

@@ -6,14 +6,14 @@ using UnityEngine;
 public class MatchmakingView : MonoBehaviourPunCallbacks
 {
     //private List<RoomButton> roomButtonList = new List<RoomButton>();
-    private RoomListUI cRoomListUI;
+    protected RoomListUI cRoomListUI;
     protected GameObject gField;
 
     private LobbyManager cLobbyManager;
 
 	void Awake() {
 		cRoomListUI = this.gameObject.AddComponent<RoomListUI>();
-        cLobbyManager = this.gameObject.AddComponent<LobbyManager>();
+        //cLobbyManager = this.gameObject.AddComponent<LobbyManager>();
         gField = GameObject.Find("Field");
 	}
 
@@ -162,11 +162,15 @@ public class RoomListUI : MonoBehaviourPunCallbacks
         int roomId = 1;
         foreach (Transform child in transform) {
             if (child.TryGetComponent<RoomButton>(out var roomButton)) {
-                roomButton.Init(roomId++);
+                roomButton.Init(roomId++,GetRoomName());
                 roomButton.SetPlayerCount(0);
                 roomButtonList.Add(roomButton);
             }
         }
+    }
+
+    protected virtual string GetRoomName(){
+        return "Normal";
     }
 
 

@@ -31,7 +31,7 @@ abstract public class InstanceManager_Base : MonoBehaviour
         // オンライン生成した場合も、PhotonNetwork.Destroyではなく、以下Destroyで削除してしまっている。
         if(null != instance){
             var bomComponent = instance.GetComponent<Bom_Base>(); // BomComponentはカスタムコンポーネント
-            bomComponent.bDel = true;
+            //bomComponent.bDel = true;
             Destroy(instance); // ローカルのみで削除
         }
     }
@@ -65,6 +65,7 @@ abstract public class InstanceManager_Base : MonoBehaviour
         while (instanceQueue.Count > 0)
         {
             GameObject gtemp = instanceQueue.Dequeue(); // キューから取り出し
+            gtemp.GetComponent<Explosion_Base>().ReqCancel();
 
             // キューに取り出したオブジェクトをエンキューする
             cExplosionManager.EnqueueObject(gtemp);

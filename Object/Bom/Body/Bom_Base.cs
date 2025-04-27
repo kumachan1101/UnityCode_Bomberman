@@ -26,9 +26,9 @@ public class Bom_Base : MonoBehaviour
         cBrokenBlockManager = gField.GetComponent<BrokenBlockManager>();
         cField = gField.GetComponent<BlockCreateManager>();
         moveManager = gameObject.AddComponent<Bom_Base_MoveManager>();
-        Bom_Base_CollisionManager collisionManager = gameObject.AddComponent<Bom_Base_CollisionManager>();
+        //Bom_Base_CollisionManager collisionManager = gameObject.AddComponent<Bom_Base_CollisionManager>();
         materialHandler = gameObject.AddComponent<Bom_Base_MaterialHandler>();
-        moveManager.SetCollisionManager(collisionManager);
+        //moveManager.SetCollisionManager(collisionManager);
     }
 
     void Start()
@@ -46,7 +46,7 @@ public class Bom_Base : MonoBehaviour
     }
     public void SetMoveDirection(Vector3 direction)
     {
-        moveManager.ReqBomKick(direction);
+        moveManager.BomKick(direction);
     }
     
     public void SetMaterialKind(string sParamMaterial){
@@ -64,10 +64,6 @@ public class Bom_Base : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        moveManager.Move(transform);
-    }
 
     protected virtual bool IsWall(Vector3 v3Temp){
         bool bRet = cField.IsAllWall(v3Temp);
@@ -98,7 +94,7 @@ public class Bom_Base : MonoBehaviour
         if (cInsManager == null)
             return;
 
-        moveManager.StopMoving();
+        moveManager.Explosion();
         transform.position = initialPosition;
 
         if (DestroyExistingExplosion(initialPosition))

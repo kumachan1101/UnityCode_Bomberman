@@ -1,19 +1,12 @@
 using UnityEngine;
-using System.Reflection;
 using Photon.Pun;
-using System.Collections.Generic;
-using UnityEngine.PlayerLoop;
-using UnityEngine.UI;
-using System.Collections;
 using System.Text.RegularExpressions;
-
 
 public class PlayerSpawnManager : MonoBehaviourPunCallbacks
 {
 
     protected PlayerNameManager cPlayerNameManager;
     protected PlayerCountManager cPlayerCountManager;
-
     protected PlayerPositionManager cPlayerPositionManager;
     protected EventDispatcher eventDispatcher;
     private void Awake()
@@ -22,9 +15,7 @@ public class PlayerSpawnManager : MonoBehaviourPunCallbacks
         cPlayerCountManager = gameObject.AddComponent<PlayerCountManager>();
         PlayerAddConponent();
         InitEvent();
-        
     }
-
     
     public virtual void SpawnDummyPlayer(int iPlayerNo, Vector3 v3){}
     public virtual void SpawnPlayer(int iPlayerNo){}
@@ -32,52 +23,12 @@ public class PlayerSpawnManager : MonoBehaviourPunCallbacks
     protected virtual void InitEvent (){}
     protected virtual void PlayerAddConponent (){}
 
-
 	protected virtual bool PreSpawnDummyPlayer(){return false;}
-/*
-    /// <summary>
-    /// CanvasPowerGageを上詰めで再配置する (SetPlayerCntを利用)
-    /// </summary>
-    public void RearrangeCanvases()
-    {
-        // "CanvasPowerGage" 名称を持つオブジェクトをすべて取得
-        List<GameObject> canvasPowerGages = Library_Base.FindGameObjectsByPartialName("CanvasPowerGage(Clone)");
-        if (canvasPowerGages.Count == 0)
-        {
-            Debug.LogWarning("CanvasPowerGage が見つかりませんでした。");
-            return;
-        }
-
-        // ソート: Canvas をプレイヤー番号順に並べ替え
-        canvasPowerGages.Sort((a, b) =>
-        {
-            int noA = a.GetComponent<PowerGage_Slider>().GetPlayerNo();
-            int noB = b.GetComponent<PowerGage_Slider>().GetPlayerNo();
-            return noA.CompareTo(noB);
-        });
-
-        // 再配置処理
-        int newPlayerCnt = 1; // 新しいプレイヤーのカウント
-        foreach (GameObject canvas in canvasPowerGages)
-        {
-            PowerGage_Slider powerGageSlider = canvas.GetComponent<PowerGage_Slider>();
-            if (powerGageSlider != null)
-            {
-                //Debug.Log(newPlayerCnt);
-                powerGageSlider.SetPlayerCnt(newPlayerCnt); // 新しい位置を設定
-                newPlayerCnt++; // 次の位置のためにカウントを増やす
-            }
-        }
-    }
-*/
-
 }
-
 
 public abstract class PlayerPowerManager: MonoBehaviour
 {
     public abstract int GetPower();
-    
 }
 
 public class PlayerPositionManager: MonoBehaviour

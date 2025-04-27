@@ -11,10 +11,9 @@ public class BlockCreateManager_CpuMode : BlockCreateManager {
     }
 
 
-    protected override void CreateAndInitializeBrokenBlockManager()
+    protected override void CreateBrokenBlockManager()
     {
         brokenBlockManager = CreateBlockManager<BrokenBlockManager_CpuMode>();
-        brokenBlockManager?.Initialize();
     }
 
     protected override void InsObjMove_RPC(int x, int y, int z, Library_Base.Direction randomDirection){
