@@ -1,22 +1,20 @@
 ﻿using UnityEngine;
 public class Player_Collision : MonoBehaviour
 {
-
     private string MaterialType;
     private float lastDamageTime = 0f;
     private float damageCooldown = 1f; // ダメージを受ける間隔（秒）
-    //private MaterialManager materialManager;
+    private PlayerBom cPlayerBom;
     void Start()
     {
-        InitializeMaterialType();
+        Initialize();
 	}
 
-	private void InitializeMaterialType()
+	private void Initialize()
 	{
-		//materialManager = GameObject.Find("MaterialManager").GetComponent<MaterialManager>();
 		MaterialType = MaterialResolver.GetBomMaterialByPlayerName(this.gameObject.name);
+        //cPlayerBom = this.gameObject.GetComponent<PlayerBom>();
 	}
-
 
     public void OnTriggerEnter (Collider other)
     {
@@ -36,6 +34,11 @@ public class Player_Collision : MonoBehaviour
     }
 
     private void OnCollisionEnter(Collision collision){
+        cPlayerBom = this.gameObject.GetComponent<PlayerBom>();
+        if(cPlayerBom == null){
+            Debug.Log(cPlayerBom);
+            return;
+        }
         switch (collision.transform.name){
             case "Bom(Clone)":
             case "Bombigban(Clone)":
@@ -70,7 +73,7 @@ public class Player_Collision : MonoBehaviour
             collisionDirection.z = collisionDirectionTemp.z;
         }
         // Bomオブジェクトに方向を伝える
-        collision.transform.GetComponent<Bom_Base>().SetMoveDirection(collisionDirection * 1.5F);
+        collision.transform.GetComponent<Bom_Base>().SetMoveDirection(collisionDirection * 1.5F, cPlayerBom.GetBomSpeed());
     }
 
 

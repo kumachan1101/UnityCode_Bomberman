@@ -2,13 +2,11 @@
 public abstract class BomConfigurationManagerBase
 {
     protected BomConfigurationBase configuration;
-    //public virtual void Request(ReqType reqType){}
     public virtual void Request() {
         configuration.Request();
     }
     public virtual void Set(ReqType reqType) {
         configuration = BomConfigurationFactory.Create(reqType);
-        //configuration.Request();
     }
     public object Get() => configuration.Get();
 }
@@ -29,6 +27,7 @@ public static class BomConfigurationFactory
             ReqType.BomMulti => new BomConfigurationBomMulti(),
             ReqType.BomKick => new BomConfigurationBomKick(),
             ReqType.BomUp => new BomConfigurationBomUp(),
+            ReqType.BomSpeedUp => new BomConfigurationBomSpeedUp(),
             _ => null
         };
     }

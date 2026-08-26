@@ -116,6 +116,8 @@ public static class CustomTypes
             Protocol.Serialize(bomParams.direction.y, bytes, ref index);
             Protocol.Serialize(bomParams.direction.z, bytes, ref index);
 
+            Protocol.Serialize(bomParams.iSpeed, bytes, ref index);
+
             outStream.Write(bytes, 0, index);
         }
         return (short)memBomParameters.Length;
@@ -160,6 +162,8 @@ public static class CustomTypes
             Protocol.Deserialize(out y, bytes, ref index);
             Protocol.Deserialize(out z, bytes, ref index);
             bomParams.direction = new Vector3(x, y, z);
+
+            Protocol.Deserialize(out bomParams.iSpeed, bytes, ref index);
         }
         return bomParams;
     }

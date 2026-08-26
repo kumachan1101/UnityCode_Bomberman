@@ -11,8 +11,10 @@ public class ItemPathProvider_Online : IItemPathProvider
         { "Item_BomExplode", "item_explode" },
         { "Item_BomBigBan", "item_bigban" },
         { "Item_SpeedUp", "item_speedup" },
+        { "Item_BomSpeedUp", "item_bomspeedup" },
         { "Item_BomKick", "item_bomkick" },
         { "Item_BomAttack", "item_bomattack" },
+        { "Item_BomMulti", "item_bommulti" },
         { "Item_Rainbow", "item_rainbow" },
         { "Item_Heart", "item_heart" },
         { "Item_AddBlock", "item_addblock" },
@@ -41,7 +43,7 @@ public class ItemControl_Online: ItemControl
     protected override bool IsCreateItem()
     {
         // アイテム生成の確率
-        if (Random.value <= 0.2f)  
+        if (Random.value <= 1f)  
         {
             return true;
         }

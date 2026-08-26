@@ -1,19 +1,8 @@
-/*
-public class BomConfigurationBomUpManager : BomConfigurationManagerBase
-{
-    public BomConfigurationBomUpManager() => configuration = new BomConfigurationBomUp();
 
-    public override void Request(ReqType reqType){
-        configuration.Request();
-    }
-}
-*/
 public class BomConfigurationBomUpManager : BomConfigurationManagerBase
 {
     public BomConfigurationBomUpManager() => configuration = BomConfigurationFactory.Create(ReqType.BomUp);
 }
-
-
 
 public class BomConfigurationBomUp : BomConfigurationBase
 {

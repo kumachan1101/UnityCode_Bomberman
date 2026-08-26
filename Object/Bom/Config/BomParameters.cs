@@ -11,6 +11,7 @@ public class BomParameters
     public string materialType;
     public BOM_ATTACK bomAttack;
     public Vector3 direction;
+    public int iSpeed;
 }
 
 public class BomStatusData

@@ -8,6 +8,7 @@ public enum ReqType
     BomAttack,
     BomMulti,
     BomUp,
+    BomSpeedUp,
     MaterialBom1,
     MaterialBom2,
     MaterialBom3,
@@ -21,6 +22,7 @@ public enum GetKind
     BomKick,
     BomAttack,
     BomNum,
+    BomSpeed,
     MaterialType
 }
 
@@ -74,12 +76,17 @@ public class PlayerBom : MonoBehaviour
             bomKick = Get<bool>(GetKind.BomKick),
             materialType = Get<string>(GetKind.MaterialType),
             bomAttack = Get<BOM_ATTACK>(GetKind.BomAttack),
-            direction = direction
+            direction = direction,
+            iSpeed = Get<int>(GetKind.BomSpeed)
         };
         return cBomParameters;
     }
 
     public BOM_ATTACK GetBomAttack(){
         return Get<BOM_ATTACK>(GetKind.BomAttack);
+    }
+
+    public int GetBomSpeed(){
+        return Get<int>(GetKind.BomSpeed);
     }
 }

@@ -13,7 +13,9 @@ public class PlayerSpawnManager_CpuMode_Tower : PlayerSpawnManager_CpuMode {
         cPlayerPositionManager = gameObject.AddComponent<PlayerPositionManager_CpuMode>();
         gameObject.AddComponent<PlayerPowerManager_Tower>();
     }
+    /*
     protected override int DeterminePlayerNumber(int index) {
         return index;
     }
+    */
 }

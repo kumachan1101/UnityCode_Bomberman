@@ -6,15 +6,11 @@ public class Bom_Base : MonoBehaviour
 {
     public GameObject ExplosionPrefab;
     protected BlockCreateManager cField;
-
     private BrokenBlockManager cBrokenBlockManager;
-
     public int iExplosionNum;
     protected InstanceManager_Base cInsManager;
     protected Bom_Base_MoveManager moveManager;
     protected Bom_Base_MaterialHandler materialHandler;
-    //protected Bom_Base_CollisionManager collisionManager;
-
     public bool bDel;
 
     void Awake(){
@@ -26,9 +22,7 @@ public class Bom_Base : MonoBehaviour
         cBrokenBlockManager = gField.GetComponent<BrokenBlockManager>();
         cField = gField.GetComponent<BlockCreateManager>();
         moveManager = gameObject.AddComponent<Bom_Base_MoveManager>();
-        //Bom_Base_CollisionManager collisionManager = gameObject.AddComponent<Bom_Base_CollisionManager>();
         materialHandler = gameObject.AddComponent<Bom_Base_MaterialHandler>();
-        //moveManager.SetCollisionManager(collisionManager);
     }
 
     void Start()
@@ -44,9 +38,9 @@ public class Bom_Base : MonoBehaviour
         cInsManager.SetPrefab(ExplosionPrefab);	
 
     }
-    public void SetMoveDirection(Vector3 direction)
+    public void SetMoveDirection(Vector3 direction, int iSpeed)
     {
-        moveManager.BomKick(direction);
+        moveManager.BomKick(direction, iSpeed);
     }
     
     public void SetMaterialKind(string sParamMaterial){
@@ -133,54 +127,6 @@ public class Bom_Base : MonoBehaviour
         }
     }
 
-/*
-    protected virtual void HandleExplosion(Vector3 initialPosition)
-    {
-        if (cInsManager == null)
-        {
-            return;
-        }
-
-        moveManager.StopMoving();
-
-        // 初期位置に移動
-        transform.position = initialPosition;
-        // 爆風のインスタンスを生成
-        if(DestroyExistingExplosion(initialPosition)){
-            cInsManager.InstantiateInstancePool(initialPosition);
-        }
-        // X方向の爆風を生成
-        for (int i = 1; i <= iExplosionNum; i++)
-        {
-            Vector3 xNegativeDirection = new Vector3(transform.position.x - i, transform.position.y, transform.position.z); // X方向の負の方向
-            if (ExplosionResult.Stop == CreateExplosionAndCheckContinuation(xNegativeDirection)) break; // X方向の負の方向
-        }
-
-        for (int i = 1; i <= iExplosionNum; i++)
-        {
-            Vector3 xPositiveDirection = new Vector3(transform.position.x + i, transform.position.y, transform.position.z); // X方向の正の方向
-            if (ExplosionResult.Stop == CreateExplosionAndCheckContinuation(xPositiveDirection)) break; // X方向の正の方向
-        }
-
-        // Z方向の爆風を生成
-        for (int i = 1; i <= iExplosionNum; i++)
-        {
-            Vector3 zNegativeDirection = new Vector3(transform.position.x, transform.position.y, transform.position.z - i); // Z方向の負の方向
-            if (ExplosionResult.Stop == CreateExplosionAndCheckContinuation(zNegativeDirection)) break; // Z方向の負の方向
-        }
-
-        for (int i = 1; i <= iExplosionNum; i++)
-        {
-            Vector3 zPositiveDirection = new Vector3(transform.position.x, transform.position.y, transform.position.z + i); // Z方向の正の方向
-            if (ExplosionResult.Stop == CreateExplosionAndCheckContinuation(zPositiveDirection)) break; // Z方向の正の方向
-        }
-
-        // このオブジェクトの破棄
-        cInsManager.DestroyInstance(this.gameObject);
-    }
-*/
-
-
     public enum ExplosionResult
     {
         Continue,
@@ -251,15 +197,4 @@ public class Bom_Base : MonoBehaviour
         }
         return true;
     }
-/*
-    public void AbailableBomKick()
-    {
-        moveManager.AbailableBomKick();
-    }
-
-    public void AbailableBomAttack(Vector3 direction)
-    {
-        moveManager.AbailableBomAttack(direction);
-    }
-*/
 }
