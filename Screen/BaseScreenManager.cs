@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 public abstract class BaseScreenManager:MonoBehaviour
 {
     protected GameObject currentCanvas;
@@ -11,17 +10,25 @@ public abstract class BaseScreenManager:MonoBehaviour
         if (currentCanvas == null)
         {
             currentCanvas = Instantiate(Resources.Load("Canvas") as GameObject);
-            GameObject mainCamera = GameObject.Find("Main Camera");
 
-            JoystickCameraController joystickController = mainCamera.GetComponent<JoystickCameraController>();
-            Transform joystickCameraTransform = currentCanvas.transform.Find("JoystickCamera");
-            joystickController.joystick = joystickCameraTransform.GetComponent<Joystick>();
+            // This legacy component is also attached to the Canvas prefab.
+            CameraControlWithButtons cameraButtons = currentCanvas.GetComponent<CameraControlWithButtons>();
+            if (cameraButtons != null) cameraButtons.enabled = false;
+            HideCameraControl("JoystickCamera");
+            HideCameraControl("up");
+            HideCameraControl("down");
 
-            CameraControlWithButtons cameraController = mainCamera.GetComponent<CameraControlWithButtons>();
-            Transform upTransform = currentCanvas.transform.Find("up");
-            cameraController.upButton = upTransform.GetComponent<Button>();
-            Transform downTransform = currentCanvas.transform.Find("down");
-            cameraController.downButton = downTransform.GetComponent<Button>();
+            ResponsiveGameUiController responsiveUi =
+                currentCanvas.GetComponent<ResponsiveGameUiController>();
+            if (responsiveUi == null)
+                responsiveUi = currentCanvas.AddComponent<ResponsiveGameUiController>();
+            responsiveUi.RefreshLayout();
         }
+    }
+
+    private void HideCameraControl(string controlName)
+    {
+        Transform control = currentCanvas.transform.Find(controlName);
+        if (control != null) control.gameObject.SetActive(false);
     }
 }

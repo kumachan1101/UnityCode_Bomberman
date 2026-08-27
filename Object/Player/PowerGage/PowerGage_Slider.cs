@@ -25,6 +25,9 @@ public class PowerGage_Slider : MonoBehaviourPunCallbacks, IPunInstantiateMagicC
 	public int GetPlayerNo(){
 		return iPlayerNo;
 	}
+	public int GetPlayerPosition(){
+		return iPlayerCnt;
+	}
 
 
 	void Awake(){
@@ -49,18 +52,8 @@ public class PowerGage_Slider : MonoBehaviourPunCallbacks, IPunInstantiateMagicC
 	}
 
 	public virtual void SetSliderPos(int iPlayerPos){
-		RectTransform sliderRectTransform = cSlider.GetComponent<RectTransform>(); // SliderのRectTransformを取得します。
-		Vector3 newPosition = sliderRectTransform.anchoredPosition; // ローカル座標
-		// 横の位置を計算 (X個ごとにX座標をずらす)
-		int column = (iPlayerPos - 1) % 30; // X個ごとに新しい列を作成
-		int row = (iPlayerPos - 1) / 30; // 1列にX個が並んだら、次の行に移動
-
-		// Y座標: 同じ行の中で、X個目ごとにY座標を変えず、X座標を変更
-		newPosition.y = 200 - column * 12; // X個まで縦に並べる
-		// X座標: 5個ごとにずらす
-		newPosition.x = row * 55 - 400; // 1行に並ぶ間隔、必要に応じて調整
-
-		sliderRectTransform.anchoredPosition = newPosition; // 新しい座標を設定します。
+		iPlayerCnt = iPlayerPos;
+		ResponsiveGameUiController.LayoutPowerGauge(this);
 	}
 
 	private void SetSliderColor(Color sliderColor){
@@ -97,5 +90,4 @@ public class PowerGage_Slider : MonoBehaviourPunCallbacks, IPunInstantiateMagicC
 	}
 
 }
-
 

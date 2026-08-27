@@ -1,29 +1,70 @@
+using ExitGames.Client.Photon;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
-public class ButtonClickScript_Online : ButtonClickScript
+
+public class ButtonClickScript_Online : ButtonClickScript, IOnEventCallback
 {
-    // 他のクライアントがシーン遷移をリクエストする
-    [PunRPC]
-    public void LoadGameScene_RPC()
+    public const byte ReturnTitleEventCode = 199;
+    private bool loadRequested;
+
+    private void OnEnable()
     {
+        PhotonNetwork.AddCallbackTarget(this);
+    }
+
+    private void OnDisable()
+    {
+        PhotonNetwork.RemoveCallbackTarget(this);
+    }
+
+    public void OnEvent(EventData photonEvent)
+    {
+        if (photonEvent.Code == ReturnTitleEventCode && PhotonNetwork.IsMasterClient)
+            LoadTitleAsMaster();
+    }
+
+    override public void LoadGameScene()
+    {
+        if (!PhotonNetwork.IsConnected || !PhotonNetwork.InRoom)
+        {
+            Debug.LogError("Cannot return to title: client is not connected to a room.");
+            return;
+        }
+
         if (PhotonNetwork.IsMasterClient)
         {
-            if (PhotonNetwork.IsConnected && PhotonNetwork.InRoom)
-            {
-                PhotonNetwork.LoadLevel("GameTitle");
-            }
-            else
-            {
-                Debug.LogError("Cannot load level. Client is not connected or not in a room.");
-            }
+            LoadTitleAsMaster();
+            return;
+        }
+
+        if (PhotonNetwork.MasterClient == null)
+        {
+            Debug.LogError("Cannot return to title: master client is unavailable.");
+            return;
+        }
+
+        RaiseEventOptions options = new RaiseEventOptions
+        {
+            TargetActors = new[] { PhotonNetwork.MasterClient.ActorNumber }
+        };
+        if (!PhotonNetwork.RaiseEvent(
+            ReturnTitleEventCode, null, options, SendOptions.SendReliable))
+        {
+            Debug.LogError("Failed to request returning to the title.");
         }
     }
 
-    // シーン遷移リクエストを送信する
-    override public void LoadGameScene()
+    private void LoadTitleAsMaster()
     {
-        //Debug.Log("Sending scene change request to MasterClient...");
-        PhotonView photonView = GetComponent<PhotonView>();
-        photonView.RPC(nameof(LoadGameScene_RPC), RpcTarget.MasterClient);
+        if (loadRequested) return;
+        if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected || !PhotonNetwork.InRoom)
+        {
+            Debug.LogError("Cannot load title: master client is not connected to a room.");
+            return;
+        }
+
+        loadRequested = true;
+        PhotonNetwork.LoadLevel("GameTitle");
     }
 }
