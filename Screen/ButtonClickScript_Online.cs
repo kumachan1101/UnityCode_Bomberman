@@ -1,7 +1,9 @@
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ButtonClickScript_Online : ButtonClickScript, IOnEventCallback
 {
@@ -28,7 +30,7 @@ public class ButtonClickScript_Online : ButtonClickScript, IOnEventCallback
     {
         if (!PhotonNetwork.IsConnected || !PhotonNetwork.InRoom)
         {
-            Debug.LogError("Cannot return to title: client is not connected to a room.");
+            LoadTitleLocally();
             return;
         }
 
@@ -40,7 +42,7 @@ public class ButtonClickScript_Online : ButtonClickScript, IOnEventCallback
 
         if (PhotonNetwork.MasterClient == null)
         {
-            Debug.LogError("Cannot return to title: master client is unavailable.");
+            LoadTitleLocally();
             return;
         }
 
@@ -51,8 +53,11 @@ public class ButtonClickScript_Online : ButtonClickScript, IOnEventCallback
         if (!PhotonNetwork.RaiseEvent(
             ReturnTitleEventCode, null, options, SendOptions.SendReliable))
         {
-            Debug.LogError("Failed to request returning to the title.");
+            LoadTitleLocally();
+            return;
         }
+
+        StartCoroutine(ReturnToTitleIfMasterDoesNotRespond());
     }
 
     private void LoadTitleAsMaster()
@@ -65,6 +70,22 @@ public class ButtonClickScript_Online : ButtonClickScript, IOnEventCallback
         }
 
         loadRequested = true;
+        StartCoroutine(ReturnToTitleIfMasterDoesNotRespond());
         PhotonNetwork.LoadLevel("GameTitle");
+    }
+
+    private IEnumerator ReturnToTitleIfMasterDoesNotRespond()
+    {
+        yield return new WaitForSecondsRealtime(3f);
+        if (SceneManager.GetActiveScene().name != "GameTitle")
+            LoadTitleLocally();
+    }
+
+    private void LoadTitleLocally()
+    {
+        StopAllCoroutines();
+        if (PhotonNetwork.InRoom)
+            PhotonNetwork.LeaveRoom(false);
+        SceneManager.LoadScene("GameTitle");
     }
 }

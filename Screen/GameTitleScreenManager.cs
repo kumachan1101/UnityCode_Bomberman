@@ -1,4 +1,5 @@
 using Photon.Pun;
+using UnityEngine;
 
 public class GameTitleScreenManager : BaseScreenManager
 {
@@ -9,12 +10,19 @@ public class GameTitleScreenManager : BaseScreenManager
 
     protected override void InitializeCanvas()
     {
-        // タイトル画面にはCanvasを表示しないので何もしない
         if (currentCanvas != null)
         {
             Destroy(currentCanvas);
             currentCanvas = null;
         }
+
+        GameObject titleCanvas = GameObject.Find("GameStartCanvas");
+        if (titleCanvas == null) return;
+        ResponsiveTitleUiController responsive =
+            titleCanvas.GetComponent<ResponsiveTitleUiController>();
+        if (responsive == null)
+            responsive = titleCanvas.AddComponent<ResponsiveTitleUiController>();
+        responsive.RefreshLayout();
     }
 
     void Start(){

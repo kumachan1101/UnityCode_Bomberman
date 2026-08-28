@@ -7,10 +7,11 @@ public sealed class ResponsiveGameUiController : MonoBehaviour
     public static readonly Vector2 ReferenceResolution = new Vector2(1280f, 720f);
     public static readonly Vector2 BombButtonSize = new Vector2(176f, 176f);
     public static readonly Vector2 MovementJoystickSize = new Vector2(192f, 192f);
-    public static readonly Vector2 ReturnButtonSize = new Vector2(200f, 64f);
+    public static readonly Vector2 ReturnButtonSize = new Vector2(240f, 76f);
     public static readonly Vector2 PowerGaugeSize = new Vector2(260f, 32f);
 
     private const float Margin = 28f;
+    private const float BottomControlMargin = 44f;
     private const float GaugeGap = 8f;
     private const float CompactLayoutWidth = 900f;
     private const float RefreshInterval = 0.25f;
@@ -121,26 +122,45 @@ public sealed class ResponsiveGameUiController : MonoBehaviour
         if (canvas == null || canvasRect == null) return;
 
         Vector4 safe = GetSafeInsets(canvasRect);
+        Vector2 canvasSize = GetCanvasSize(canvasRect);
         LayoutBottomCorner(transform.Find("JoystickPlayer") as RectTransform,
-            MovementJoystickSize, safe.x, safe.w, false);
+            canvasSize, MovementJoystickSize, safe, false);
         LayoutBottomCorner(transform.Find("bom") as RectTransform,
-            BombButtonSize, safe.y, safe.w, true);
+            canvasSize, BombButtonSize, safe, true);
 
         Transform bomb = transform.Find("bom");
         if (bomb != null)
             ConfigureLabel(bomb.GetComponentInChildren<Text>(true), 24, 56);
     }
 
-    private static void LayoutBottomCorner(RectTransform rect, Vector2 size,
-        float sideInset, float bottomInset, bool right)
+    private static void LayoutBottomCorner(RectTransform rect, Vector2 canvasSize,
+        Vector2 size, Vector4 safeInsets, bool right)
     {
         if (rect == null) return;
         rect.anchorMin = rect.anchorMax = right ? Vector2.right : Vector2.zero;
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.sizeDelta = size;
-        float x = sideInset + Margin + size.x * 0.5f;
-        rect.anchoredPosition = new Vector2(right ? -x : x,
-            bottomInset + Margin + size.y * 0.5f);
+        rect.anchoredPosition = CalculateBottomCornerPosition(
+            canvasSize, size, safeInsets, right);
+    }
+
+    // Safe-area clamping also protects controls when the WebGL canvas changes size
+    // while a phone is rotating or while the browser toolbar is expanding.
+    public static Vector2 CalculateBottomCornerPosition(Vector2 canvasSize,
+        Vector2 size, Vector4 safeInsets, bool right)
+    {
+        float halfWidth = size.x * 0.5f;
+        float halfHeight = size.y * 0.5f;
+        float left = safeInsets.x + BottomControlMargin + halfWidth;
+        float rightEdge = canvasSize.x - safeInsets.y - BottomControlMargin - halfWidth;
+        float bottom = safeInsets.w + BottomControlMargin + halfHeight;
+        float top = canvasSize.y - safeInsets.z - BottomControlMargin - halfHeight;
+
+        float x = right ? Mathf.Max(left, rightEdge) : Mathf.Min(left, rightEdge);
+        float y = Mathf.Min(bottom, top);
+        x = Mathf.Clamp(x, halfWidth, Mathf.Max(halfWidth, canvasSize.x - halfWidth));
+        y = Mathf.Clamp(y, halfHeight, Mathf.Max(halfHeight, canvasSize.y - halfHeight));
+        return new Vector2(right ? x - canvasSize.x : x, y);
     }
 
     private static void LayoutReturnButton(Canvas canvas)
@@ -205,12 +225,20 @@ public sealed class ResponsiveGameUiController : MonoBehaviour
         Vector2 size = GetCanvasSize(canvasRect);
         float screenWidth = Mathf.Max(1f, Screen.width);
         float screenHeight = Mathf.Max(1f, Screen.height);
-        Rect safeArea = Screen.safeArea;
+        return CalculateSafeInsets(size, new Vector2(screenWidth, screenHeight),
+            Screen.safeArea);
+    }
+
+    public static Vector4 CalculateSafeInsets(Vector2 canvasSize,
+        Vector2 screenSize, Rect safeArea)
+    {
+        float screenWidth = Mathf.Max(1f, screenSize.x);
+        float screenHeight = Mathf.Max(1f, screenSize.y);
         return new Vector4(
-            safeArea.xMin / screenWidth * size.x,
-            (screenWidth - safeArea.xMax) / screenWidth * size.x,
-            (screenHeight - safeArea.yMax) / screenHeight * size.y,
-            safeArea.yMin / screenHeight * size.y);
+            Mathf.Max(0f, safeArea.xMin) / screenWidth * canvasSize.x,
+            Mathf.Max(0f, screenWidth - safeArea.xMax) / screenWidth * canvasSize.x,
+            Mathf.Max(0f, screenHeight - safeArea.yMax) / screenHeight * canvasSize.y,
+            Mathf.Max(0f, safeArea.yMin) / screenHeight * canvasSize.y);
     }
 
     private static Vector2 GetCanvasSize(RectTransform canvasRect)
