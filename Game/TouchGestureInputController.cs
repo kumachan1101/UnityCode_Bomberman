@@ -26,6 +26,7 @@ public sealed class TouchGestureRecognizer
 
     private readonly Dictionary<int, GestureState> gestures =
         new Dictionary<int, GestureState>();
+    private readonly List<int> missingPointers = new List<int>();
     private long nextSequence;
     private int movementPointer = NoPointer;
 
@@ -42,6 +43,11 @@ public sealed class TouchGestureRecognizer
 
     public void PointerDown(int pointerId, Vector2 position, float time)
     {
+        // WebGL can reuse a finger id immediately after a fast flick. If the
+        // preceding end event was skipped, never inherit its movement state.
+        if (gestures.ContainsKey(pointerId))
+            CancelPointer(pointerId);
+
         gestures[pointerId] = new GestureState
         {
             startPosition = position,
@@ -106,6 +112,20 @@ public sealed class TouchGestureRecognizer
         Movement = Vector2.zero;
     }
 
+    public void CancelPointersExcept(ICollection<int> activePointerIds)
+    {
+        missingPointers.Clear();
+        foreach (int pointerId in gestures.Keys)
+        {
+            if (!activePointerIds.Contains(pointerId))
+                missingPointers.Add(pointerId);
+        }
+
+        foreach (int pointerId in missingPointers)
+            CancelPointer(pointerId);
+        missingPointers.Clear();
+    }
+
     private Vector2 CalculateMovement(Vector2 delta)
     {
         float responseRadius = Mathf.Max(DragThreshold * 3f, 1f);
@@ -141,6 +161,7 @@ public sealed class TouchGestureInputController : MonoBehaviour
     private const float RelativeDragThreshold = 0.04f;
 
     private readonly HashSet<int> ignoredPointers = new HashSet<int>();
+    private readonly HashSet<int> observedPointers = new HashSet<int>();
     private readonly List<RaycastResult> raycastResults = new List<RaycastResult>();
 
     private TouchGestureRecognizer recognizer;
@@ -169,8 +190,21 @@ public sealed class TouchGestureInputController : MonoBehaviour
         if (!gestureModeEnabled) return;
 
         recognizer.DragThreshold = CalculateDragThreshold();
+        observedPointers.Clear();
         for (int index = 0; index < Input.touchCount; index++)
-            ProcessTouch(Input.GetTouch(index));
+        {
+            Touch touch = Input.GetTouch(index);
+            observedPointers.Add(touch.fingerId);
+            ProcessTouch(touch);
+        }
+
+        // Do not rely solely on Ended/Canceled. Under a rapid WebGL flick the
+        // browser can drop that one-frame event, while the next frame already
+        // reports no finger. Reconcile against the actual active touch list.
+        recognizer.CancelPointersExcept(observedPointers);
+        ignoredPointers.RemoveWhere(pointerId => !observedPointers.Contains(pointerId));
+        if (observedPointers.Count == 0)
+            recognizer.Reset();
 
         ApplyMovement();
     }
@@ -183,6 +217,11 @@ public sealed class TouchGestureInputController : MonoBehaviour
     private void OnApplicationFocus(bool hasFocus)
     {
         if (!hasFocus) ResetInput();
+    }
+
+    private void OnApplicationPause(bool isPaused)
+    {
+        if (isPaused) ResetInput();
     }
 
     public void SetGestureMode(bool enabled)
@@ -267,6 +306,7 @@ public sealed class TouchGestureInputController : MonoBehaviour
     private void ResetInput()
     {
         ignoredPointers.Clear();
+        observedPointers.Clear();
         if (recognizer != null) recognizer.Reset();
         if (joystickController != null)
             joystickController.SetGestureMoveVector(Vector2.zero);

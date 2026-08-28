@@ -86,6 +86,54 @@ public sealed class TouchGestureInputControllerTests
         Assert.That(recognizer.Movement.y, Is.GreaterThan(0f));
     }
 
+    [Test]
+    public void MissingEndEventCannotLeaveMovementActive()
+    {
+        TouchGestureRecognizer recognizer = CreateRecognizer();
+        recognizer.PointerDown(40, Vector2.zero, 0f);
+        recognizer.PointerMove(40, Vector2.right * 80f);
+        Assert.That(recognizer.IsMoving, Is.True);
+
+        recognizer.CancelPointersExcept(new int[0]);
+
+        Assert.That(recognizer.IsMoving, Is.False);
+        Assert.That(recognizer.Movement, Is.EqualTo(Vector2.zero));
+    }
+
+    [Test]
+    public void RepeatedFlicksAlwaysStopWithoutReceivingPointerUp()
+    {
+        TouchGestureRecognizer recognizer = CreateRecognizer();
+        for (int index = 0; index < 100; index++)
+        {
+            int pointerId = index % 3;
+            Vector2 start = new Vector2(index, index * 2f);
+            recognizer.PointerDown(pointerId, start, index);
+            recognizer.PointerMove(pointerId, start + Vector2.right * 80f);
+            Assert.That(recognizer.IsMoving, Is.True, "flick " + index);
+
+            recognizer.CancelPointersExcept(new int[0]);
+            Assert.That(recognizer.IsMoving, Is.False, "release " + index);
+            Assert.That(recognizer.Movement, Is.EqualTo(Vector2.zero),
+                "release vector " + index);
+        }
+    }
+
+    [Test]
+    public void ReusedFingerIdDoesNotInheritStaleMovement()
+    {
+        TouchGestureRecognizer recognizer = CreateRecognizer();
+        recognizer.PointerDown(50, Vector2.zero, 0f);
+        recognizer.PointerMove(50, Vector2.right * 80f);
+
+        recognizer.PointerDown(50, new Vector2(300f, 200f), 0.1f);
+
+        Assert.That(recognizer.IsMoving, Is.False);
+        Assert.That(recognizer.Movement, Is.EqualTo(Vector2.zero));
+        Assert.That(recognizer.PointerUp(50, new Vector2(302f, 201f), 0.2f),
+            Is.EqualTo(TouchGestureResult.BombTap));
+    }
+
     private static TouchGestureRecognizer CreateRecognizer()
     {
         return new TouchGestureRecognizer(20f, 0.3f);
