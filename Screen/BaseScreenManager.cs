@@ -23,6 +23,11 @@ public abstract class BaseScreenManager:MonoBehaviour
             if (responsiveUi == null)
                 responsiveUi = currentCanvas.AddComponent<ResponsiveGameUiController>();
             responsiveUi.RefreshLayout();
+
+            TouchGestureInputController gestureInput =
+                currentCanvas.GetComponent<TouchGestureInputController>();
+            if (gestureInput == null)
+                currentCanvas.AddComponent<TouchGestureInputController>();
         }
     }
 

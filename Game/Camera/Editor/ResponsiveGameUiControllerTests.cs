@@ -53,6 +53,9 @@ public class ResponsiveGameUiControllerTests
 
             Assert.That(canvas.GetComponent<ResponsiveGameUiController>(), Is.Not.Null,
                 screenType.Name);
+            TouchGestureInputController gestureInput =
+                canvas.GetComponent<TouchGestureInputController>();
+            Assert.That(gestureInput, Is.Not.Null, screenType.Name);
             AssertScaler(canvas.GetComponent<CanvasScaler>(), screenType.Name);
 
             RectTransform joystick = canvas.transform.Find("JoystickPlayer") as RectTransform;
@@ -65,6 +68,17 @@ public class ResponsiveGameUiControllerTests
                 Is.EqualTo(ResponsiveGameUiController.BombButtonSize), screenType.Name);
             Assert.That(joystick.anchoredPosition.x, Is.GreaterThan(0f), screenType.Name);
             Assert.That(bomb.anchoredPosition.x, Is.LessThan(0f), screenType.Name);
+
+            gestureInput.SetGestureMode(true);
+            Assert.That(joystick.GetComponent<CanvasGroup>().alpha, Is.Zero,
+                screenType.Name + " gesture joystick");
+            Assert.That(bomb.GetComponent<CanvasGroup>().alpha, Is.Zero,
+                screenType.Name + " gesture bomb");
+            Assert.That(joystick.gameObject.activeSelf, Is.True,
+                screenType.Name + " movement input remains connected");
+            gestureInput.SetGestureMode(false);
+            Assert.That(joystick.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f),
+                screenType.Name + " legacy joystick");
 
             Object.Destroy(canvas);
             Object.Destroy(screenObject);
