@@ -238,13 +238,20 @@ public sealed class GameStatusAndAudioTests
         Assert.That(sound.IsAudioReady, Is.True);
         Assert.That(sound.IsSoundEnabled, Is.True);
         Assert.That(hud.AudioButtonText, Is.EqualTo("SOUND ON"));
-        Assert.That(sound.GetComponent<AudioSource>(), Is.Not.Null);
-        Assert.That(sound.sDropBomb.length, Is.GreaterThan(0f));
-        Assert.That(sound.sGetItem.length, Is.GreaterThan(0f));
-        Assert.That(sound.sExploison.length, Is.GreaterThan(0f));
+        AudioSource source = sound.GetComponent<AudioSource>();
+        Assert.That(source, Is.Not.Null);
+        Assert.That(source.volume, Is.EqualTo(SoundManager.MasterOutputVolume).Within(0.001f));
+        Assert.That(SoundManager.DropBombVolumeScale, Is.LessThanOrEqualTo(0.5f));
+        Assert.That(SoundManager.GetItemVolumeScale, Is.LessThanOrEqualTo(0.4f));
+        Assert.That(SoundManager.ExplosionVolumeScale, Is.LessThanOrEqualTo(0.55f));
+        AssertComfortableClip(sound.sDropBomb, "bomb_place_soft", 0.12f, 0.22f);
+        AssertComfortableClip(sound.sGetItem, "item_collect_soft", 0.25f, 0.40f);
+        AssertComfortableClip(sound.sExploison, "explosion_soft", 0.45f, 0.65f);
 
         int before = sound.PlayedEffectCount;
         Assert.That(sound.PlaySoundEffect("DROPBOMB"), Is.True);
+        Assert.That(sound.PlaySoundEffect("DROPBOMB"), Is.False,
+            "Rapid bomb placement sounds should not stack into a sharp peak.");
         Assert.That(sound.PlayedEffectCount, Is.EqualTo(before + 1));
 
         Button soundButton = canvasObject.transform
@@ -262,6 +269,11 @@ public sealed class GameStatusAndAudioTests
         Assert.That(sound.GetComponent<AudioSource>().mute, Is.False);
         Assert.That(hud.AudioButtonText, Is.EqualTo("SOUND ON"));
         Assert.That(PlayerPrefs.GetInt(SoundManager.SoundEnabledPreference), Is.EqualTo(1));
+        int beforeItem = sound.PlayedEffectCount;
+        Assert.That(sound.PlaySoundEffect("GETITEM"), Is.True);
+        Assert.That(sound.PlaySoundEffect("GETITEM"), Is.False,
+            "Rapid item chimes should not stack into a piercing peak.");
+        Assert.That(sound.PlayedEffectCount, Is.EqualTo(beforeItem + 1));
         Assert.That(sound.PlaySoundEffect("EXPLOISON"), Is.True);
         Assert.That(sound.PlaySoundEffect("EXPLOISON"), Is.False,
             "Simultaneous explosion tiles should share one sound burst.");
@@ -270,6 +282,37 @@ public sealed class GameStatusAndAudioTests
         Object.Destroy(canvasObject);
         Object.Destroy(soundObject);
         yield return null;
+    }
+
+    private static void AssertComfortableClip(AudioClip clip, string expectedName,
+        float minimumLength, float maximumLength)
+    {
+        Assert.That(clip, Is.Not.Null);
+        Assert.That(clip.name, Is.EqualTo(expectedName));
+        Assert.That(clip.channels, Is.EqualTo(1));
+        Assert.That(clip.length, Is.InRange(minimumLength, maximumLength));
+
+        float[] samples = new float[clip.samples * clip.channels];
+        Assert.That(clip.GetData(samples, 0), Is.True);
+
+        float peak = 0f;
+        double squareSum = 0d;
+        double sampleSum = 0d;
+        for (int i = 0; i < samples.Length; i++)
+        {
+            float absolute = Mathf.Abs(samples[i]);
+            if (absolute > peak) peak = absolute;
+            squareSum += samples[i] * samples[i];
+            sampleSum += samples[i];
+        }
+
+        float rms = Mathf.Sqrt((float)(squareSum / samples.Length));
+        float dcOffset = Mathf.Abs((float)(sampleSum / samples.Length));
+        Assert.That(peak, Is.InRange(0.08f, 0.76f), "Clip must retain safe headroom.");
+        Assert.That(rms, Is.InRange(0.01f, 0.30f), "Clip loudness is outside the safe test range.");
+        Assert.That(dcOffset, Is.LessThan(0.02f), "Clip has an audible DC offset.");
+        Assert.That(Mathf.Abs(samples[0]), Is.LessThan(0.01f));
+        Assert.That(Mathf.Abs(samples[samples.Length - 1]), Is.LessThan(0.01f));
     }
 
     private static void SetPrivateField(object target, string name, object value)
