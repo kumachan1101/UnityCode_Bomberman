@@ -218,7 +218,7 @@ public sealed class GameStatusHudController : MonoBehaviour
             new Color(1f, 0.72f, 0.28f, 1f));
         CreateStatusCell("BombType", "BOMB TYPE (ONE)", HudIcon.TypeNormal, font);
         CreateStatusCell("DropMode", "DROP MODE (ONE)", HudIcon.ModeNormal, font);
-        CreateStatusCell("ThrowSpeed", "THROW SPD (THROW)", HudIcon.BombSpeed, font);
+        CreateStatusCell("ThrowSpeed", "THROW SPEED", HudIcon.BombSpeed, font);
 
         LayoutHud();
     }
@@ -397,13 +397,12 @@ public sealed class GameStatusHudController : MonoBehaviour
         cells["BombType"].SetIcon(GetBombTypeIcon(kind));
 
         BOM_ATTACK attack = bomb.Get<BOM_ATTACK>(GetKind.BomAttack);
-        cells["DropMode"].Set(GetDropModeStatus(attack), true);
+        int throwSpeed = bomb.Get<int>(GetKind.BomSpeed);
+        cells["DropMode"].Set(FormatDropModeStatus(attack, throwSpeed), true);
         cells["DropMode"].SetIcon(GetDropModeIcon(attack));
 
         bool throwing = attack == BOM_ATTACK.BOM_ATTACK_THROW;
-        cells["ThrowSpeed"].Set(throwing
-            ? bomb.Get<int>(GetKind.BomSpeed).ToString()
-            : "OFF", throwing);
+        cells["ThrowSpeed"].Set(FormatThrowSpeedStatus(attack, throwSpeed), throwing);
     }
 
     public static string GetBombTypeStatus(BOM_KIND kind)
@@ -418,6 +417,24 @@ public sealed class GameStatusHudController : MonoBehaviour
         if (attack == BOM_ATTACK.BOM_ATTACK_MULTI) return "MULTI";
         if (attack == BOM_ATTACK.BOM_ATTACK_THROW) return "THROW";
         return "NORMAL";
+    }
+
+    public static string FormatDropModeStatus(BOM_ATTACK attack, int throwSpeed)
+    {
+        if (attack == BOM_ATTACK.BOM_ATTACK_THROW)
+        {
+            return string.Format(CultureInfo.InvariantCulture,
+                "THROW  SPD {0}", Mathf.Max(1, throwSpeed));
+        }
+
+        return GetDropModeStatus(attack);
+    }
+
+    public static string FormatThrowSpeedStatus(BOM_ATTACK attack, int throwSpeed)
+    {
+        if (attack != BOM_ATTACK.BOM_ATTACK_THROW) return "INACTIVE";
+        return string.Format(CultureInfo.InvariantCulture,
+            "SPEED {0}", Mathf.Max(1, throwSpeed));
     }
 
     private static HudIcon GetBombTypeIcon(BOM_KIND kind)

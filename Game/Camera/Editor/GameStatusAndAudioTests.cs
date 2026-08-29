@@ -56,6 +56,43 @@ public sealed class GameStatusAndAudioTests
     }
 
     [UnityTest]
+    public IEnumerator PlayerRemovalDuringWinningTransitionCannotResetNextStage()
+    {
+        GameObject dispatcherObject = new GameObject("EventDispatcher");
+        dispatcherObject.AddComponent<EventDispatcher>();
+        GameObject managerObject = new GameObject("GameManager");
+        GameManager manager = managerObject.AddComponent<GameManager>();
+        yield return null;
+
+        SetPrivateField(manager, "iStage", 1);
+        SetPrivateField(manager, "maxStage", 5);
+        manager.GameWin();
+        Assert.That(manager.IsStageTransitionPending(), Is.True);
+
+        manager.NextStage();
+        manager.GameOver();
+
+        Assert.That(manager.GetCurrentStage(), Is.EqualTo(2),
+            "Old-scene player destruction must not reset the stage during a win transition.");
+
+        manager.CancelInvoke();
+        Object.Destroy(managerObject);
+        Object.Destroy(dispatcherObject);
+        yield return null;
+    }
+
+    [Test]
+    public void ThrowModeMakesItsSpeedExplicitAndOtherModesStayInactive()
+    {
+        Assert.That(GameStatusHudController.FormatDropModeStatus(
+            BOM_ATTACK.BOM_ATTACK_THROW, 3), Is.EqualTo("THROW  SPD 3"));
+        Assert.That(GameStatusHudController.FormatThrowSpeedStatus(
+            BOM_ATTACK.BOM_ATTACK_THROW, 3), Is.EqualTo("SPEED 3"));
+        Assert.That(GameStatusHudController.FormatThrowSpeedStatus(
+            BOM_ATTACK.BOM_ATTACK_MULTI, 3), Is.EqualTo("INACTIVE"));
+    }
+
+    [UnityTest]
     public IEnumerator StageHudRefreshesWhenGameManagerAdvances()
     {
         GameObject dispatcherObject = new GameObject("EventDispatcher");
@@ -140,7 +177,7 @@ public sealed class GameStatusAndAudioTests
         Assert.That(hud.GetCellValue("Kick"), Is.EqualTo("OFF"));
         Assert.That(hud.GetCellValue("BombType"), Is.EqualTo("NORMAL"));
         Assert.That(hud.GetCellValue("DropMode"), Is.EqualTo("NORMAL"));
-        Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("OFF"));
+        Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("INACTIVE"));
         Assert.That(hud.GetCellActive("ThrowSpeed"), Is.False);
 
         bomb.Request(ReqType.FireUp);
@@ -157,8 +194,8 @@ public sealed class GameStatusAndAudioTests
         Assert.That(hud.GetCellValue("Move"), Is.EqualTo("4"));
         Assert.That(hud.GetCellValue("Kick"), Is.EqualTo("ON"));
         Assert.That(hud.GetCellValue("BombType"), Is.EqualTo("EXPLODE"));
-        Assert.That(hud.GetCellValue("DropMode"), Is.EqualTo("THROW"));
-        Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("2"));
+        Assert.That(hud.GetCellValue("DropMode"), Is.EqualTo("THROW  SPD 2"));
+        Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("SPEED 2"));
         Assert.That(hud.GetCellActive("ThrowSpeed"), Is.True);
         Assert.That(hud.GetCellIconName("BombType"), Does.EndWith("TypeExplode"));
         Assert.That(hud.GetCellIconName("DropMode"), Does.EndWith("ModeThrow"));
@@ -169,7 +206,7 @@ public sealed class GameStatusAndAudioTests
         hud.RefreshNow();
         Assert.That(hud.GetCellValue("BombType"), Is.EqualTo("EXPLODE"));
         Assert.That(hud.GetCellValue("DropMode"), Is.EqualTo("MULTI"));
-        Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("OFF"));
+        Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("INACTIVE"));
         Assert.That(hud.GetCellActive("ThrowSpeed"), Is.False);
 
         bomb.Request(ReqType.BigBanBom);

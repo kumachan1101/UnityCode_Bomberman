@@ -50,6 +50,12 @@ public class PlayerAddedRemovedHandler
     // ゲーム進行のチェック
     private void GameTransision()
     {
+        // シーン切替時のPlayer破棄は勝敗判定の対象外。
+        if (cGameManager == null || cGameManager.IsStageTransitionPending())
+        {
+            return;
+        }
+
         bool hasPlayer1 = false;
         bool hasPlayerDummy1 = false;
 

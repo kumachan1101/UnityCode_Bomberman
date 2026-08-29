@@ -111,29 +111,27 @@ public class GameManager : MonoBehaviour
 
     public void GameTowerWin()
     {
-        if (stageTransitionPending) return;
-        stageTransitionPending = true;
+        if (!TryBeginStageTransition()) return;
         if (iStage < maxStage)
         {
             Invoke("SwitchTowerScene", 5f);
         }
         else
         {
-            GameOver();
+            ScheduleGameOver();
         }
     }
     
     public void GameWin()
     {
-        if (stageTransitionPending) return;
-        stageTransitionPending = true;
+        if (!TryBeginStageTransition()) return;
         if (iStage < maxStage)
         {
             Invoke("SwitchGameScene", 5f);
         }
         else
         {
-            GameOver();
+            ScheduleGameOver();
         }
     }
     
@@ -144,6 +142,26 @@ public class GameManager : MonoBehaviour
     }
 
     public void GameOver()
+    {
+        // 勝利後のシーン破棄ではPlayer削除イベントも発生する。
+        // 進行中の勝利遷移を敗北で上書きしてステージ番号を0へ戻さない。
+        if (!TryBeginStageTransition()) return;
+        ScheduleGameOver();
+    }
+
+    public bool IsStageTransitionPending()
+    {
+        return stageTransitionPending;
+    }
+
+    private bool TryBeginStageTransition()
+    {
+        if (stageTransitionPending) return false;
+        stageTransitionPending = true;
+        return true;
+    }
+
+    private void ScheduleGameOver()
     {
         iStage = 0;
         Invoke("SwitchGameOver", 5f);
