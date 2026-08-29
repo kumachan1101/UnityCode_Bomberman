@@ -1,135 +1,229 @@
-using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
 using System.Text.RegularExpressions;
-public class TowerAddedRemoved_PlayerControl :Field_Event
+using Photon.Pun;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class TowerAddedRemoved_PlayerControl : Field_Event
 {
-    private Button button; // 対象のボタンをInspectorで設定
-    private PlayerSpawnManager cField;
-    private PlayerCountManager cPlayerCountManager;
-    private PlayerNameManager cPlayerNameManager;
-    private static bool listenersRegistered = false;
+    public const int RevivalPowerCost = 2;
+    private const float RefreshInterval = 0.25f;
 
-    Color gold;
-    Color gray;
+    private Button button;
     private Image buttonImage;
-    private int iPlayerNo;
-    private string PlayerTowerName;
+    private PlayerSpawnManager playerSpawnManager;
+    private PlayerCountManager playerCountManager;
+    private PlayerNameManager playerNameManager;
+    private TowerSpawnManager towerSpawnManager;
+    private GameManager gameManager;
+    private bool listenersRegistered;
+    private bool revivalInProgress;
+    private int playerNo;
+    private float nextRefreshTime;
+    private readonly Color enabledColor = new Color(1f, 0.84f, 0f);
+    private readonly Color disabledColor = new Color(0.6627f, 0.6627f, 0.6627f);
 
-    protected override void Init() {
-        GameObject gFeild = GameObject.Find("Field");
-        cField = gFeild.GetComponent<PlayerSpawnManager>();
-        //cPlayerPositionManager = gFeild.AddComponent<PlayerPositionManager_CpuMode>();
-        cPlayerCountManager = gFeild.GetComponent<PlayerCountManager>();
-        cPlayerNameManager = gFeild.GetComponent<PlayerNameManager>();
-        string sPlayerNo = cPlayerNameManager.GetPlayerNoString();
-        int.TryParse(sPlayerNo, out iPlayerNo);
-        PlayerTowerName = MakeTowerName(sPlayerNo);
-        
-        button = GetComponent<Button>();
-        if (button == null){
-            return;
+    public int ControlledPlayerNumber { get { return playerNo; } }
+    public bool IsRevivalAvailable { get { return CanRevivePlayer(); } }
+
+    protected override void Init()
+    {
+        GameObject field = GameObject.Find("Field");
+        if (field != null)
+        {
+            playerSpawnManager = field.GetComponent<PlayerSpawnManager>();
+            playerCountManager = field.GetComponent<PlayerCountManager>();
+            playerNameManager = field.GetComponent<PlayerNameManager>();
+            towerSpawnManager = field.GetComponent<TowerSpawnManager>();
         }
-        button.onClick.RemoveListener(PushButton);
-        button.onClick.AddListener(() => PushButton());
 
-        buttonImage = button.GetComponent<Image>();
-        gold = new Color(1f, 0.84f, 0f);
-        gray = new Color(0.6627f, 0.6627f, 0.6627f);
+        GameObject managerObject = GameObject.Find("GameManager");
+        gameManager = managerObject != null ? managerObject.GetComponent<GameManager>() : null;
+
+        button = GetComponent<Button>();
+        buttonImage = button != null ? button.GetComponent<Image>() : null;
+        if (button != null)
+        {
+            button.onClick.RemoveListener(PushButton);
+            button.onClick.AddListener(PushButton);
+        }
+
+        TryResolvePlayerNumber(null);
         SetToneDown();
+    }
+
+    private void Update()
+    {
+        if (Time.unscaledTime < nextRefreshTime) return;
+        RefreshAvailability();
+        nextRefreshTime = Time.unscaledTime + RefreshInterval;
+    }
+
+    public void RefreshAvailability()
+    {
+        if (CanRevivePlayer()) SetToneUp();
+        else SetToneDown();
     }
 
     public void SetToneUp()
     {
-        if(button == null || buttonImage == null){
-            return;
-        }
+        if (button == null || buttonImage == null) return;
         button.interactable = true;
-        buttonImage.color = gold;
+        buttonImage.color = enabledColor;
     }
+
     public void SetToneDown()
     {
-        if(button == null || buttonImage == null){
-            return;
-        }
+        if (button == null || buttonImage == null) return;
         button.interactable = false;
-        buttonImage.color = gray;
+        buttonImage.color = disabledColor;
     }
-    
+
     protected override void RegisterListeners()
     {
-        if(listenersRegistered){
-            return;
-        }
-        listenersRegistered = true;
+        if (listenersRegistered) return;
         Player_Base.onPlayerAdded.AddListener(Field_Player_Tower_OnAdded);
         Player_Base.onPlayerRemoved.AddListener(Field_Player_Tower_OnRemoved);
+        listenersRegistered = true;
     }
+
     protected override void UnregisterListeners()
     {
-        listenersRegistered = false;
+        if (!listenersRegistered) return;
         Player_Base.onPlayerAdded.RemoveListener(Field_Player_Tower_OnAdded);
         Player_Base.onPlayerRemoved.RemoveListener(Field_Player_Tower_OnRemoved);
+        listenersRegistered = false;
     }
 
-
-
-    private string ExtractTrailingNumber(string input)
+    private bool TryResolvePlayerNumber(Player_Base playerHint)
     {
-        Match match = Regex.Match(input, @"\d+$");
-        return match.Success ? match.Value : "";
-    }
-/*
-    private string GetPlayerName(){
-        return cPlayerNameManager.GetPlayerName();
-    }
-*/
-    private string MakeTowerName(string number)
-    {
-        return "Tower" + number;
-    }
+        if (playerNo > 0) return true;
 
-    private bool JudgeMyPlayer(object obj)
-    {
-        if (obj.GetType() == typeof(Player) || obj.GetType() == typeof(Player_Online))
+        if (playerNameManager != null &&
+            TryGetPlayerNumber(playerNameManager.GetPlayerName(), out playerNo))
         {
-            // objの名称から数字のみを抽出
-            string objName = obj.ToString();
-            string numberStr = Regex.Replace(objName, @"\D", ""); // 数字以外を除去
+            return true;
+        }
 
-            if (int.TryParse(numberStr, out int extractedNumber))
+        if (IsLocallyControlledPlayer(playerHint) &&
+            TryGetPlayerNumber(playerHint.gameObject.name, out playerNo))
+        {
+            return true;
+        }
+
+        foreach (Player_Base player in FindObjectsOfType<Player_Base>())
+        {
+            if (IsLocallyControlledPlayer(player) &&
+                TryGetPlayerNumber(player.gameObject.name, out playerNo))
             {
-                return extractedNumber == iPlayerNo;
+                return true;
             }
         }
+
+        // ローカルタワーモードの操作対象は常にPlayer1。
+        if (playerSpawnManager is PlayerSpawnManager_CpuMode_Tower)
+        {
+            playerNo = 1;
+            return true;
+        }
+
         return false;
     }
 
-    protected void Field_Player_Tower_OnAdded(object obj)
+    private bool CanRevivePlayer()
     {
-        //Debug.Log(obj);
-        if(JudgeMyPlayer(obj)){
-            SetToneDown();
+        if (revivalInProgress || button == null || playerSpawnManager == null ||
+            towerSpawnManager == null || gameManager == null || !gameManager.GetSetUp() ||
+            !TryResolvePlayerNumber(null) || IsControlledPlayerAlive())
+        {
+            return false;
         }
+
+        return towerSpawnManager.CanSpendRevivalPower(playerNo, RevivalPowerCost);
     }
 
-    protected void Field_Player_Tower_OnRemoved(object obj)
+    private bool IsControlledPlayerAlive()
     {
-        //Debug.Log(obj);
-        if(JudgeMyPlayer(obj)){
-            SetToneUp();
+        foreach (Player_Base player in FindObjectsOfType<Player_Base>())
+        {
+            int existingPlayerNo;
+            if (TryGetPlayerNumber(player.gameObject.name, out existingPlayerNo) &&
+                existingPlayerNo == playerNo)
+            {
+                return true;
+            }
         }
-	}
+
+        return false;
+    }
+
+    private bool JudgeMyPlayer(Player_Base player)
+    {
+        if (player == null || !TryResolvePlayerNumber(player)) return false;
+        int eventPlayerNo;
+        return TryGetPlayerNumber(player.gameObject.name, out eventPlayerNo) &&
+               eventPlayerNo == playerNo;
+    }
+
+    private void Field_Player_Tower_OnAdded(Player_Base player)
+    {
+        if (!JudgeMyPlayer(player)) return;
+        revivalInProgress = false;
+        SetToneDown();
+    }
+
+    private void Field_Player_Tower_OnRemoved(Player_Base player)
+    {
+        if (!JudgeMyPlayer(player)) return;
+        revivalInProgress = false;
+        // OnDestroy中は対象Playerが検索に残る場合があるため、次フレームにも再判定する。
+        StartCoroutine(RefreshAfterPlayerChange());
+    }
 
     public void PushButton()
     {
-        SetToneDown();
-        
-        GameObject gObj = GameObject.Find(PlayerTowerName);
-        if(null != gObj){
-            cPlayerCountManager.AddPlayerCount();
-            cField.SpawnPlayer(iPlayerNo);
-            gObj.GetComponent<PowerGageIF>().SetDamage(2);
+        if (!CanRevivePlayer())
+        {
+            RefreshAvailability();
+            return;
         }
+
+        revivalInProgress = true;
+        SetToneDown();
+        if (!towerSpawnManager.TrySpendRevivalPower(playerNo, RevivalPowerCost))
+        {
+            revivalInProgress = false;
+            RefreshAvailability();
+            return;
+        }
+
+        playerCountManager?.AddPlayerCount();
+        playerSpawnManager.SpawnPlayer(playerNo);
+        StartCoroutine(RefreshAfterPlayerChange());
+    }
+
+    private IEnumerator RefreshAfterPlayerChange()
+    {
+        yield return null;
+        revivalInProgress = false;
+        RefreshAvailability();
+    }
+
+    private static bool TryGetPlayerNumber(string value, out int number)
+    {
+        number = 0;
+        if (string.IsNullOrEmpty(value)) return false;
+        Match match = Regex.Match(value, @"Player(\d+)");
+        return match.Success && int.TryParse(match.Groups[1].Value, out number) && number > 0;
+    }
+
+    private static bool IsLocallyControlledPlayer(Player_Base player)
+    {
+        if (player == null || player is Player_Online_Dummy || player is Player_CpuMode)
+            return false;
+        if (player is Player) return true;
+        if (!(player is Player_Online)) return false;
+        PhotonView view = player.GetComponent<PhotonView>();
+        return view != null && view.IsMine;
     }
 }

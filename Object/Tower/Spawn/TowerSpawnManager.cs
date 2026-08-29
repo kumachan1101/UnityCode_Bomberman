@@ -95,6 +95,20 @@ public class TowerSpawnManager : MonoBehaviourPunCallbacks
         gCanvas.transform.position = new Vector3(0, 0, 0);
     }
 
+    public virtual bool CanSpendRevivalPower(int playerNo, int powerCost)
+    {
+        GameObject tower = GameObject.Find("Tower" + playerNo);
+        PowerGageIF power = tower != null ? tower.GetComponent<PowerGageIF>() : null;
+        return power != null && power.CanSpendPower(powerCost);
+    }
+
+    public virtual bool TrySpendRevivalPower(int playerNo, int powerCost)
+    {
+        GameObject tower = GameObject.Find("Tower" + playerNo);
+        PowerGageIF power = tower != null ? tower.GetComponent<PowerGageIF>() : null;
+        return power != null && power.TrySpendPower(powerCost);
+    }
+
 
     protected virtual void SetupTowerCanvasIntegration(GameObject tower, GameObject canvas, int index)
     {

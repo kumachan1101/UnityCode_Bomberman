@@ -16,6 +16,20 @@ public class TowerSpawnManager_Online : TowerSpawnManager
         }
         photonView.RPC(nameof(SetpUpSpawnTowerObjects), RpcTarget.All, index);
     }
+
+    public override bool TrySpendRevivalPower(int playerNo, int powerCost)
+    {
+        if (!CanSpendRevivalPower(playerNo, powerCost)) return false;
+        photonView.RPC(nameof(SpendRevivalPowerForAll), RpcTarget.All,
+            playerNo, powerCost);
+        return true;
+    }
+
+    [PunRPC]
+    private void SpendRevivalPowerForAll(int playerNo, int powerCost)
+    {
+        base.TrySpendRevivalPower(playerNo, powerCost);
+    }
     
     
 

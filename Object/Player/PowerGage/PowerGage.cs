@@ -19,6 +19,11 @@ public class PowerGage : MonoBehaviour
 		cSlider.value -= iDamage;
 	}
 
+    public float GetCurrentPower()
+    {
+        return cSlider != null ? cSlider.value : 0f;
+    }
+
 	public void HeartUp(int iHeart){
 		cSlider.value += iHeart;
 	}
@@ -58,5 +63,4 @@ public class PowerGage : MonoBehaviour
     }
 
 }
-
 

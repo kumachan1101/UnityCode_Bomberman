@@ -48,6 +48,29 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
         SetDamage_RPC(iDamage);
 	}
 
+    public bool IsPowerGageReady()
+    {
+        return cPowerGage != null;
+    }
+
+    public float GetCurrentPower()
+    {
+        return cPowerGage != null ? cPowerGage.GetCurrentPower() : 0f;
+    }
+
+    public bool CanSpendPower(int powerCost)
+    {
+        return powerCost > 0 && cPowerGage != null &&
+               cPowerGage.GetCurrentPower() > powerCost;
+    }
+
+    public bool TrySpendPower(int powerCost)
+    {
+        if (!CanSpendPower(powerCost)) return false;
+        SetDamage_RPC(powerCost);
+        return true;
+    }
+
 	protected virtual void SetDamage_RPC(int iDamage){}
 
 	protected virtual Component GetDestroyTarget() => GetComponent<Player_Base>();
@@ -106,5 +129,4 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 	}
 
 }
-
 
