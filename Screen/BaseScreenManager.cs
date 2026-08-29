@@ -28,7 +28,22 @@ public abstract class BaseScreenManager:MonoBehaviour
                 currentCanvas.GetComponent<TouchGestureInputController>();
             if (gestureInput == null)
                 currentCanvas.AddComponent<TouchGestureInputController>();
+
+            GameStatusHudController statusHud =
+                currentCanvas.GetComponent<GameStatusHudController>();
+            if (statusHud == null)
+                statusHud = currentCanvas.AddComponent<GameStatusHudController>();
+            statusHud.ConfigureMode(GetGameModeDisplayName());
         }
+    }
+
+    private string GetGameModeDisplayName()
+    {
+        if (this is GameTowerOnlineScreenManager) return "ONLINE TOWER";
+        if (this is GameTowerSceneManager) return "TOWER BATTLE";
+        if (this is GameOnlineScreenManager) return "ONLINE BATTLE";
+        if (this is GameSceneScreenManager) return "LOCAL BATTLE";
+        return "BATTLE";
     }
 
     private void HideCameraControl(string controlName)

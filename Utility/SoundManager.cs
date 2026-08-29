@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class SoundManager : MonoBehaviour
 {
     public AudioClip sDropBomb;
@@ -7,6 +8,13 @@ public class SoundManager : MonoBehaviour
     public AudioClip sExploison;
 
     private static SoundManager instance = null;
+    private AudioSource audioSource;
+    private float nextExplosionTime;
+
+    public static SoundManager Instance => instance;
+    public int PlayedEffectCount { get; private set; }
+    public bool IsAudioReady => audioSource != null &&
+        sDropBomb != null && sGetItem != null && sExploison != null;
 
     private void Awake()
     {
@@ -16,6 +24,12 @@ public class SoundManager : MonoBehaviour
             // このインスタンスを保存し、DontDestroyOnLoadで破棄されないようにする
             instance = this;
             DontDestroyOnLoad(gameObject);
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.loop = false;
+            audioSource.spatialBlend = 0f;
+            audioSource.volume = 0.75f;
         }
         else
         {
@@ -25,7 +39,7 @@ public class SoundManager : MonoBehaviour
     }
 
     // 効果音を再生するメソッド
-    public void PlaySoundEffect(string effectName)
+    public bool PlaySoundEffect(string effectName)
     {
         AudioClip clipToPlay = null;
 
@@ -43,14 +57,19 @@ public class SoundManager : MonoBehaviour
                 break;
             default:
                 Debug.LogWarning("指定された効果音がありません: " + effectName);
-                return; // 適切な効果音が見つからない場合は処理を中断
+                return false;
         }
 
-        // 効果音を再生
-        if (clipToPlay != null)
-        {
-            //AudioSource.PlayClipAtPoint(clipToPlay, Camera.main.transform.position);
-			
-        }
+        if (clipToPlay == null || audioSource == null) return false;
+
+        // A single bomb creates several explosion tiles at once. Playing the
+        // same clip for every tile clips badly, so treat that burst as one SFX.
+        if (effectName == "EXPLOISON" && Time.unscaledTime < nextExplosionTime)
+            return false;
+        if (effectName == "EXPLOISON") nextExplosionTime = Time.unscaledTime + 0.08f;
+
+        audioSource.PlayOneShot(clipToPlay);
+        PlayedEffectCount++;
+        return true;
     }
 }

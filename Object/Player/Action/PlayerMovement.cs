@@ -125,4 +125,9 @@ public class PlayerMovement : MonoBehaviour
     {
         return transform.position;
     }
+
+    public float GetMoveSpeed()
+    {
+        return moveSpeed;
+    }
 }

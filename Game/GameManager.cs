@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int maxStage;
 
     private bool bSetUp = false;
+    private bool stageTransitionPending;
 
     public static GameManager Instance
     {
@@ -67,6 +68,7 @@ public class GameManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         bSetUp = false;
+        stageTransitionPending = false;
         CancelInvoke("SwitchGameScene"); 
         CancelInvoke("SwitchTowerScene"); 
         CancelInvoke("SwitchGameOver");
@@ -109,8 +111,9 @@ public class GameManager : MonoBehaviour
 
     public void GameTowerWin()
     {
-        int stage = NextStage();
-        if (stage <= maxStage)
+        if (stageTransitionPending) return;
+        stageTransitionPending = true;
+        if (iStage < maxStage)
         {
             Invoke("SwitchTowerScene", 5f);
         }
@@ -122,8 +125,9 @@ public class GameManager : MonoBehaviour
     
     public void GameWin()
     {
-        int stage = NextStage();
-        if (stage <= maxStage)
+        if (stageTransitionPending) return;
+        stageTransitionPending = true;
+        if (iStage < maxStage)
         {
             Invoke("SwitchGameScene", 5f);
         }
@@ -183,6 +187,16 @@ public class GameManager : MonoBehaviour
     {
         iStage += 1;
         return iStage;
+    }
+
+    public int GetCurrentStage()
+    {
+        return iStage;
+    }
+
+    public int GetStageCount()
+    {
+        return maxStage > 0 ? maxStage : GetMaxStage();
     }
 
     public static void SetFieldRange(int x, int z)

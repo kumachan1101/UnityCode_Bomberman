@@ -42,9 +42,17 @@ public class ResponsiveGameUiControllerTests
             typeof(GameTowerSceneManager),
             typeof(GameTowerOnlineScreenManager)
         };
-
-        foreach (System.Type screenType in screenTypes)
+        string[] modeNames =
         {
+            "LOCAL BATTLE",
+            "ONLINE BATTLE",
+            "TOWER BATTLE",
+            "ONLINE TOWER"
+        };
+
+        for (int screenIndex = 0; screenIndex < screenTypes.Length; screenIndex++)
+        {
+            System.Type screenType = screenTypes[screenIndex];
             GameObject screenObject = new GameObject(screenType.Name);
             BaseScreenManager screen = (BaseScreenManager)screenObject.AddComponent(screenType);
             InvokeInitializeCanvas(screen);
@@ -56,6 +64,13 @@ public class ResponsiveGameUiControllerTests
             TouchGestureInputController gestureInput =
                 canvas.GetComponent<TouchGestureInputController>();
             Assert.That(gestureInput, Is.Not.Null, screenType.Name);
+            GameStatusHudController statusHud =
+                canvas.GetComponent<GameStatusHudController>();
+            Assert.That(statusHud, Is.Not.Null, screenType.Name);
+            Assert.That(statusHud.StageTextValue, Does.Contain(modeNames[screenIndex]),
+                screenType.Name);
+            Assert.That(canvas.transform.Find("StageStatus"), Is.Not.Null, screenType.Name);
+            Assert.That(canvas.transform.Find("ItemStatus"), Is.Not.Null, screenType.Name);
             AssertScaler(canvas.GetComponent<CanvasScaler>(), screenType.Name);
 
             RectTransform joystick = canvas.transform.Find("JoystickPlayer") as RectTransform;
@@ -156,11 +171,19 @@ public class ResponsiveGameUiControllerTests
         float wideTowerBottom = InvokePrivateLayoutMargin("GetTowerActionBottomMargin", 1280f);
         float veryNarrowGaugeWidth = InvokePrivateLayoutMargin("GetPowerGaugeWidth", 500f);
         Assert.That(compactGaugeTop, Is.GreaterThan(ResponsiveGameUiController.ReturnButtonSize.y));
+        Assert.That(compactGaugeTop, Is.GreaterThanOrEqualTo(
+            GameStatusHudController.StagePanelTopMargin +
+            ResponsiveGameUiController.ReturnButtonSize.y +
+            GameStatusHudController.PanelGap + GameStatusHudController.StagePanelHeight));
         Assert.That(compactTowerBottom,
             Is.GreaterThan(ResponsiveGameUiController.MovementJoystickSize.y));
         Assert.That(wideGaugeTop, Is.LessThan(ResponsiveGameUiController.ReturnButtonSize.y));
         Assert.That(wideTowerBottom,
             Is.LessThan(ResponsiveGameUiController.MovementJoystickSize.y));
+        Assert.That(wideTowerBottom, Is.GreaterThanOrEqualTo(
+            GameStatusHudController.StatusPanelBottomMargin +
+            GameStatusHudController.StatusPanelHeight +
+            GameStatusHudController.PanelGap));
         Assert.That(veryNarrowGaugeWidth,
             Is.LessThan(ResponsiveGameUiController.PowerGaugeSize.x));
         Assert.That(veryNarrowGaugeWidth * 2f + 64f, Is.LessThanOrEqualTo(500f));

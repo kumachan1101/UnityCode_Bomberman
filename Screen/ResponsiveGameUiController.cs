@@ -196,7 +196,9 @@ public sealed class ResponsiveGameUiController : MonoBehaviour
     private static float GetPowerGaugeTopMargin(float availableWidth)
     {
         if (availableWidth >= CompactLayoutWidth) return Margin;
-        return Margin + ReturnButtonSize.y + GaugeGap * 2f;
+        return GameStatusHudController.StagePanelTopMargin + ReturnButtonSize.y +
+            GameStatusHudController.PanelGap + GameStatusHudController.StagePanelHeight +
+            GaugeGap;
     }
 
     private static float GetPowerGaugeWidth(float availableWidth)
@@ -207,8 +209,11 @@ public sealed class ResponsiveGameUiController : MonoBehaviour
 
     private static float GetTowerActionBottomMargin(float availableWidth)
     {
-        if (availableWidth >= CompactLayoutWidth) return Margin;
-        return Margin + Mathf.Max(MovementJoystickSize.y, BombButtonSize.y) + GaugeGap * 2f;
+        float statusClearance = GameStatusHudController.StatusPanelBottomMargin +
+            GameStatusHudController.StatusPanelHeight + GameStatusHudController.PanelGap;
+        if (availableWidth >= CompactLayoutWidth) return Mathf.Max(Margin, statusClearance);
+        return Mathf.Max(statusClearance,
+            Margin + Mathf.Max(MovementJoystickSize.y, BombButtonSize.y) + GaugeGap * 2f);
     }
 
     private static void ConfigureLabel(Text text, int minSize, int maxSize)
