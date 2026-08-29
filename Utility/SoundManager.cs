@@ -3,6 +3,8 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class SoundManager : MonoBehaviour
 {
+    public const string SoundEnabledPreference = "Bomberman.SoundEnabled";
+
     public AudioClip sDropBomb;
     public AudioClip sGetItem;
     public AudioClip sExploison;
@@ -13,6 +15,7 @@ public class SoundManager : MonoBehaviour
 
     public static SoundManager Instance => instance;
     public int PlayedEffectCount { get; private set; }
+    public bool IsSoundEnabled { get; private set; }
     public bool IsAudioReady => audioSource != null &&
         sDropBomb != null && sGetItem != null && sExploison != null;
 
@@ -30,6 +33,7 @@ public class SoundManager : MonoBehaviour
             audioSource.loop = false;
             audioSource.spatialBlend = 0f;
             audioSource.volume = 0.75f;
+            ApplySoundEnabled(PlayerPrefs.GetInt(SoundEnabledPreference, 1) != 0);
         }
         else
         {
@@ -60,7 +64,7 @@ public class SoundManager : MonoBehaviour
                 return false;
         }
 
-        if (clipToPlay == null || audioSource == null) return false;
+        if (clipToPlay == null || audioSource == null || !IsSoundEnabled) return false;
 
         // A single bomb creates several explosion tiles at once. Playing the
         // same clip for every tile clips badly, so treat that burst as one SFX.
@@ -71,5 +75,18 @@ public class SoundManager : MonoBehaviour
         audioSource.PlayOneShot(clipToPlay);
         PlayedEffectCount++;
         return true;
+    }
+
+    public void SetSoundEnabled(bool enabled)
+    {
+        ApplySoundEnabled(enabled);
+        PlayerPrefs.SetInt(SoundEnabledPreference, enabled ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    private void ApplySoundEnabled(bool enabled)
+    {
+        IsSoundEnabled = enabled;
+        if (audioSource != null) audioSource.mute = !enabled;
     }
 }

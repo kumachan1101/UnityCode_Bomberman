@@ -9,36 +9,53 @@ public sealed class GameStatusHudController : MonoBehaviour
 {
     private enum HudIcon
     {
-        Fire,
-        Bomb,
-        Move,
-        BombSpeed,
+        FireRange,
+        BombCount,
+        MoveSpeed,
         Kick,
-        Special
+        TypeNormal,
+        TypeExplode,
+        TypeBig,
+        ModeNormal,
+        ModeThrow,
+        ModeMulti,
+        BombSpeed,
     }
 
     private sealed class StatusCell
     {
         public RawImage icon;
         public Text value;
+        public Image background;
+        public bool isActive;
 
         public void Set(string text, bool active)
         {
+            isActive = active;
             value.text = text;
             value.color = active ? Color.white : new Color(0.65f, 0.68f, 0.72f, 1f);
             icon.color = active ? Color.white : new Color(1f, 1f, 1f, 0.28f);
+            background.color = active
+                ? new Color(0.1f, 0.15f, 0.21f, 0.96f)
+                : new Color(0.065f, 0.075f, 0.09f, 0.78f);
+        }
+
+        public void SetIcon(HudIcon type)
+        {
+            icon.texture = GetIconTexture(type);
         }
     }
 
     private const float RefreshInterval = 0.1f;
     private const float LayoutInterval = 0.25f;
     public const float StagePanelHeight = 46f;
-    public const float StatusPanelHeight = 68f;
+    public const float StatusPanelHeight = 156f;
     public const float StagePanelTopMargin = 28f;
     public const float StatusPanelBottomMargin = 20f;
     public const float PanelGap = 8f;
     private const float CellGap = 5f;
-    private const int CellCount = 6;
+    private const int CoreCellCount = 4;
+    private const int AbilityCellCount = 3;
 
     private static readonly Dictionary<HudIcon, Texture2D> iconTextures =
         new Dictionary<HudIcon, Texture2D>();
@@ -50,6 +67,7 @@ public sealed class GameStatusHudController : MonoBehaviour
     private RectTransform statusPanel;
     private Text stageText;
     private Text audioText;
+    private Image audioButtonImage;
     private Player_Base localPlayer;
     private string modeName = "BATTLE";
     private int lastValidStage = 1;
@@ -59,6 +77,7 @@ public sealed class GameStatusHudController : MonoBehaviour
     private int lastHeight = -1;
 
     public string StageTextValue => stageText != null ? stageText.text : string.Empty;
+    public string AudioButtonText => audioText != null ? audioText.text : string.Empty;
 
     private void Awake()
     {
@@ -115,6 +134,27 @@ public sealed class GameStatusHudController : MonoBehaviour
         return cells.TryGetValue(key, out cell) ? cell.value.text : string.Empty;
     }
 
+    public bool GetCellActive(string key)
+    {
+        StatusCell cell;
+        return cells.TryGetValue(key, out cell) && cell.isActive;
+    }
+
+    public string GetCellIconName(string key)
+    {
+        StatusCell cell;
+        return cells.TryGetValue(key, out cell) && cell.icon.texture != null
+            ? cell.icon.texture.name : string.Empty;
+    }
+
+    public void ToggleSound()
+    {
+        SoundManager sound = SoundManager.Instance;
+        if (sound == null || !sound.IsAudioReady) return;
+        sound.SetSoundEnabled(!sound.IsSoundEnabled);
+        RefreshAudioStatus();
+    }
+
     public static string FormatStageTitle(string mode, int stage, int stageCount)
     {
         return string.Format(CultureInfo.InvariantCulture, "STAGE {0}/{1}  •  {2}",
@@ -131,26 +171,54 @@ public sealed class GameStatusHudController : MonoBehaviour
             TextAnchor.MiddleLeft, FontStyle.Bold);
         RectTransform stageTextRect = stageText.rectTransform;
         stageTextRect.anchorMin = new Vector2(0f, 0f);
-        stageTextRect.anchorMax = new Vector2(0.78f, 1f);
+        stageTextRect.anchorMax = new Vector2(0.74f, 1f);
         stageTextRect.offsetMin = new Vector2(14f, 0f);
         stageTextRect.offsetMax = Vector2.zero;
+        stageText.resizeTextForBestFit = true;
+        stageText.resizeTextMinSize = 13;
+        stageText.resizeTextMaxSize = 22;
 
-        audioText = CreateText("AudioStatus", stagePanel, font, 15,
+        GameObject audioButtonObject = new GameObject("SoundToggle",
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        audioButtonObject.transform.SetParent(stagePanel, false);
+        audioButtonImage = audioButtonObject.GetComponent<Image>();
+        audioButtonImage.color = new Color(0.08f, 0.32f, 0.19f, 0.96f);
+        Button audioButton = audioButtonObject.GetComponent<Button>();
+        audioButton.targetGraphic = audioButtonImage;
+        audioButton.navigation = new Navigation { mode = Navigation.Mode.None };
+        audioButton.onClick.AddListener(ToggleSound);
+        RectTransform audioButtonRect = audioButtonObject.GetComponent<RectTransform>();
+        audioButtonRect.anchorMin = new Vector2(0.75f, 0.12f);
+        audioButtonRect.anchorMax = new Vector2(0.985f, 0.88f);
+        audioButtonRect.offsetMin = Vector2.zero;
+        audioButtonRect.offsetMax = Vector2.zero;
+
+        audioText = CreateText("Label", audioButtonRect, font, 14,
             TextAnchor.MiddleCenter, FontStyle.Bold);
         RectTransform audioRect = audioText.rectTransform;
-        audioRect.anchorMin = new Vector2(0.78f, 0f);
+        audioRect.anchorMin = Vector2.zero;
         audioRect.anchorMax = Vector2.one;
         audioRect.offsetMin = Vector2.zero;
-        audioRect.offsetMax = new Vector2(-8f, 0f);
+        audioRect.offsetMax = Vector2.zero;
+        audioText.resizeTextForBestFit = true;
+        audioText.resizeTextMinSize = 9;
+        audioText.resizeTextMaxSize = 14;
 
         statusPanel = CreatePanel("ItemStatus", transform,
             new Color(0.025f, 0.035f, 0.055f, 0.82f));
-        CreateStatusCell("Fire", "FIRE", HudIcon.Fire, font);
-        CreateStatusCell("Bomb", "BOMB", HudIcon.Bomb, font);
-        CreateStatusCell("Move", "MOVE", HudIcon.Move, font);
-        CreateStatusCell("BombSpeed", "B.SPD", HudIcon.BombSpeed, font);
+        CreateGroupLabel("CoreGroup", "COEXISTING / STACKABLE", font,
+            new Color(0.35f, 0.86f, 1f, 1f));
+        CreateStatusCell("Fire", "BLAST RANGE", HudIcon.FireRange, font);
+        CreateStatusCell("Bomb", "BOMB COUNT", HudIcon.BombCount, font);
+        CreateStatusCell("Move", "MOVE SPEED", HudIcon.MoveSpeed, font);
         CreateStatusCell("Kick", "KICK", HudIcon.Kick, font);
-        CreateStatusCell("Special", "TYPE", HudIcon.Special, font);
+
+        CreateGroupLabel("AbilityGroup",
+            "TYPE + DROP COEXIST / ONE PER GROUP", font,
+            new Color(1f, 0.72f, 0.28f, 1f));
+        CreateStatusCell("BombType", "BOMB TYPE (ONE)", HudIcon.TypeNormal, font);
+        CreateStatusCell("DropMode", "DROP MODE (ONE)", HudIcon.ModeNormal, font);
+        CreateStatusCell("ThrowSpeed", "THROW SPD (THROW)", HudIcon.BombSpeed, font);
 
         LayoutHud();
     }
@@ -159,6 +227,7 @@ public sealed class GameStatusHudController : MonoBehaviour
     {
         RectTransform cell = CreatePanel(key, statusPanel,
             new Color(0.1f, 0.13f, 0.18f, 0.92f));
+        Image background = cell.GetComponent<Image>();
 
         GameObject iconObject = new GameObject("Icon", typeof(RectTransform),
             typeof(CanvasRenderer), typeof(RawImage));
@@ -167,28 +236,45 @@ public sealed class GameStatusHudController : MonoBehaviour
         icon.texture = GetIconTexture(iconType);
         icon.raycastTarget = false;
         RectTransform iconRect = icon.rectTransform;
-        iconRect.anchorMin = iconRect.anchorMax = new Vector2(0.25f, 0.62f);
+        iconRect.anchorMin = iconRect.anchorMax = new Vector2(0.18f, 0.5f);
         iconRect.sizeDelta = new Vector2(36f, 36f);
 
-        Text captionText = CreateText("Caption", cell, font, 10,
-            TextAnchor.MiddleCenter, FontStyle.Bold);
+        Text captionText = CreateText("Caption", cell, font, 12,
+            TextAnchor.UpperCenter, FontStyle.Bold);
         captionText.text = caption;
         captionText.color = new Color(0.72f, 0.78f, 0.86f, 1f);
         RectTransform captionRect = captionText.rectTransform;
-        captionRect.anchorMin = new Vector2(0f, 0f);
-        captionRect.anchorMax = new Vector2(0.5f, 0.28f);
+        captionRect.anchorMin = new Vector2(0.38f, 0.48f);
+        captionRect.anchorMax = new Vector2(1f, 0.94f);
         captionRect.offsetMin = Vector2.zero;
-        captionRect.offsetMax = Vector2.zero;
+        captionRect.offsetMax = new Vector2(-3f, 0f);
+        captionText.resizeTextForBestFit = true;
+        captionText.resizeTextMinSize = 9;
+        captionText.resizeTextMaxSize = 12;
 
-        Text value = CreateText("Value", cell, font, key == "Special" ? 13 : 22,
+        Text value = CreateText("Value", cell, font, 20,
             TextAnchor.MiddleCenter, FontStyle.Bold);
         RectTransform valueRect = value.rectTransform;
-        valueRect.anchorMin = new Vector2(0.5f, 0f);
-        valueRect.anchorMax = Vector2.one;
+        valueRect.anchorMin = new Vector2(0.38f, 0.02f);
+        valueRect.anchorMax = new Vector2(1f, 0.58f);
         valueRect.offsetMin = Vector2.zero;
-        valueRect.offsetMax = Vector2.zero;
+        valueRect.offsetMax = new Vector2(-3f, 0f);
+        value.resizeTextForBestFit = true;
+        value.resizeTextMinSize = 12;
+        value.resizeTextMaxSize = 20;
 
-        cells[key] = new StatusCell { icon = icon, value = value };
+        cells[key] = new StatusCell { icon = icon, value = value, background = background };
+    }
+
+    private void CreateGroupLabel(string name, string label, Font font, Color color)
+    {
+        Text text = CreateText(name, statusPanel, font, 12,
+            TextAnchor.MiddleLeft, FontStyle.Bold);
+        text.text = label;
+        text.color = color;
+        text.resizeTextForBestFit = true;
+        text.resizeTextMinSize = 9;
+        text.resizeTextMaxSize = 12;
     }
 
     private void LayoutHud()
@@ -212,7 +298,7 @@ public sealed class GameStatusHudController : MonoBehaviour
               ResponsiveGameUiController.ReturnButtonSize.y + PanelGap +
               StagePanelHeight * 0.5f));
 
-        float statusWidth = Mathf.Min(600f, availableWidth);
+        float statusWidth = Mathf.Min(760f, availableWidth);
         float statusHeight = StatusPanelHeight;
         statusPanel.anchorMin = statusPanel.anchorMax = new Vector2(0.5f, 0f);
         statusPanel.pivot = new Vector2(0.5f, 0.5f);
@@ -220,21 +306,41 @@ public sealed class GameStatusHudController : MonoBehaviour
         statusPanel.anchoredPosition = new Vector2((safe.x - safe.y) * 0.5f,
             safe.w + StatusPanelBottomMargin + statusHeight * 0.5f);
 
-        float cellWidth = (statusWidth - CellGap * (CellCount + 1)) / CellCount;
-        int index = 0;
-        foreach (string key in new[] { "Fire", "Bomb", "Move", "BombSpeed", "Kick", "Special" })
-        {
-            RectTransform cell = cells[key].value.transform.parent as RectTransform;
-            cell.anchorMin = cell.anchorMax = new Vector2(0f, 0.5f);
-            cell.pivot = new Vector2(0f, 0.5f);
-            cell.sizeDelta = new Vector2(cellWidth, statusHeight - CellGap * 2f);
-            cell.anchoredPosition = new Vector2(CellGap + index * (cellWidth + CellGap), 0f);
-            index++;
-        }
+        LayoutGroupLabel("CoreGroup", statusWidth, -3f);
+        LayoutStatusRow(new[] { "Fire", "Bomb", "Move", "Kick" },
+            CoreCellCount, statusWidth, -23f, 52f);
+        LayoutGroupLabel("AbilityGroup", statusWidth, -78f);
+        LayoutStatusRow(new[] { "BombType", "DropMode", "ThrowSpeed" },
+            AbilityCellCount, statusWidth, -99f, 52f);
 
         lastWidth = Screen.width;
         lastHeight = Screen.height;
         nextLayoutTime = Time.unscaledTime + LayoutInterval;
+    }
+
+    private void LayoutGroupLabel(string name, float width, float top)
+    {
+        RectTransform label = statusPanel.Find(name) as RectTransform;
+        if (label == null) return;
+        label.anchorMin = label.anchorMax = new Vector2(0f, 1f);
+        label.pivot = new Vector2(0f, 1f);
+        label.sizeDelta = new Vector2(width - CellGap * 2f, 18f);
+        label.anchoredPosition = new Vector2(CellGap + 2f, top);
+    }
+
+    private void LayoutStatusRow(string[] keys, int count, float width,
+        float top, float height)
+    {
+        float cellWidth = (width - CellGap * (count + 1)) / count;
+        for (int index = 0; index < keys.Length; index++)
+        {
+            RectTransform cell = cells[keys[index]].value.transform.parent as RectTransform;
+            cell.anchorMin = cell.anchorMax = new Vector2(0f, 1f);
+            cell.pivot = new Vector2(0f, 1f);
+            cell.sizeDelta = new Vector2(cellWidth, height);
+            cell.anchoredPosition = new Vector2(
+                CellGap + index * (cellWidth + CellGap), top);
+        }
     }
 
     private void RefreshStage()
@@ -248,11 +354,19 @@ public sealed class GameStatusHudController : MonoBehaviour
 
     private void RefreshAudioStatus()
     {
-        bool ready = SoundManager.Instance != null && SoundManager.Instance.IsAudioReady;
-        audioText.text = ready ? "SFX ON" : "SFX --";
-        audioText.color = ready
-            ? new Color(0.35f, 1f, 0.55f, 1f)
-            : new Color(0.65f, 0.68f, 0.72f, 1f);
+        SoundManager sound = SoundManager.Instance;
+        bool ready = sound != null && sound.IsAudioReady;
+        bool enabled = ready && sound.IsSoundEnabled;
+        audioText.text = !ready ? "SOUND --" : enabled ? "SOUND ON" : "SOUND OFF";
+        audioText.color = enabled ? Color.white : new Color(0.78f, 0.8f, 0.83f, 1f);
+        if (audioButtonImage != null)
+        {
+            audioButtonImage.color = enabled
+                ? new Color(0.07f, 0.42f, 0.23f, 0.98f)
+                : ready
+                    ? new Color(0.34f, 0.11f, 0.12f, 0.98f)
+                    : new Color(0.16f, 0.17f, 0.19f, 0.9f);
+        }
     }
 
     private void RefreshItemStatus()
@@ -275,22 +389,49 @@ public sealed class GameStatusHudController : MonoBehaviour
         cells["Bomb"].Set(bomb.Get<int>(GetKind.BomNum).ToString(), true);
         cells["Move"].Set(movement.GetMoveSpeed().ToString("0.#",
             CultureInfo.InvariantCulture), true);
-        cells["BombSpeed"].Set(bomb.Get<int>(GetKind.BomSpeed).ToString(), true);
         bool kick = bomb.Get<bool>(GetKind.BomKick);
-        cells["Kick"].Set(kick ? "ON" : "--", kick);
-        cells["Special"].Set(GetSpecialStatus(bomb), true);
+        cells["Kick"].Set(kick ? "ON" : "OFF", kick);
+
+        BOM_KIND kind = bomb.Get<BOM_KIND>(GetKind.BomKind);
+        cells["BombType"].Set(GetBombTypeStatus(kind), true);
+        cells["BombType"].SetIcon(GetBombTypeIcon(kind));
+
+        BOM_ATTACK attack = bomb.Get<BOM_ATTACK>(GetKind.BomAttack);
+        cells["DropMode"].Set(GetDropModeStatus(attack), true);
+        cells["DropMode"].SetIcon(GetDropModeIcon(attack));
+
+        bool throwing = attack == BOM_ATTACK.BOM_ATTACK_THROW;
+        cells["ThrowSpeed"].Set(throwing
+            ? bomb.Get<int>(GetKind.BomSpeed).ToString()
+            : "OFF", throwing);
     }
 
-    public static string GetSpecialStatus(PlayerBom bomb)
+    public static string GetBombTypeStatus(BOM_KIND kind)
     {
-        if (bomb == null) return "--";
-        BOM_KIND kind = bomb.Get<BOM_KIND>(GetKind.BomKind);
         if (kind == BOM_KIND.BOM_KIND_BIGBAN) return "BIG";
-        if (kind == BOM_KIND.BOM_KIND_EXPLODE) return "BURST";
-        BOM_ATTACK attack = bomb.Get<BOM_ATTACK>(GetKind.BomAttack);
+        if (kind == BOM_KIND.BOM_KIND_EXPLODE) return "EXPLODE";
+        return "NORMAL";
+    }
+
+    public static string GetDropModeStatus(BOM_ATTACK attack)
+    {
         if (attack == BOM_ATTACK.BOM_ATTACK_MULTI) return "MULTI";
         if (attack == BOM_ATTACK.BOM_ATTACK_THROW) return "THROW";
         return "NORMAL";
+    }
+
+    private static HudIcon GetBombTypeIcon(BOM_KIND kind)
+    {
+        if (kind == BOM_KIND.BOM_KIND_BIGBAN) return HudIcon.TypeBig;
+        if (kind == BOM_KIND.BOM_KIND_EXPLODE) return HudIcon.TypeExplode;
+        return HudIcon.TypeNormal;
+    }
+
+    private static HudIcon GetDropModeIcon(BOM_ATTACK attack)
+    {
+        if (attack == BOM_ATTACK.BOM_ATTACK_MULTI) return HudIcon.ModeMulti;
+        if (attack == BOM_ATTACK.BOM_ATTACK_THROW) return HudIcon.ModeThrow;
+        return HudIcon.ModeNormal;
     }
 
     private void FindLocalPlayer()
@@ -379,23 +520,20 @@ public sealed class GameStatusHudController : MonoBehaviour
         Color32 clear = new Color32(0, 0, 0, 0);
         switch (type)
         {
-            case HudIcon.Fire:
+            case HudIcon.FireRange:
                 if (y >= 6 && y <= 41 && Mathf.Abs(x - 24) <= (42 - y) * 0.55f)
                     return y < 23 ? new Color32(255, 196, 32, 255) : new Color32(255, 80, 28, 255);
                 return clear;
-            case HudIcon.Bomb:
-                if ((x - 22) * (x - 22) + (y - 21) * (y - 21) <= 15 * 15)
+            case HudIcon.BombCount:
+                if (InCircle(x, y, 20, 21, 14))
                     return new Color32(25, 30, 38, 255);
-                if (x >= 29 && x <= 38 && y >= 32 && y <= 37) return new Color32(245, 180, 45, 255);
-                if (x >= 37 && y >= 36) return new Color32(255, 90, 35, 255);
+                if (InCircle(x, y, 35, 14, 8))
+                    return new Color32(74, 86, 105, 255);
+                if (x >= 27 && x <= 36 && y >= 32 && y <= 37)
+                    return new Color32(245, 180, 45, 255);
                 return clear;
-            case HudIcon.Move:
+            case HudIcon.MoveSpeed:
                 if (IsChevron(x, y, 8) || IsChevron(x, y, 21)) return new Color32(55, 220, 255, 255);
-                return clear;
-            case HudIcon.BombSpeed:
-                if ((x - 17) * (x - 17) + (y - 22) * (y - 22) <= 11 * 11)
-                    return new Color32(115, 65, 205, 255);
-                if (IsChevron(x, y, 24)) return new Color32(255, 105, 235, 255);
                 return clear;
             case HudIcon.Kick:
                 if ((x >= 12 && x <= 26 && y >= 19 && y <= 41) ||
@@ -403,11 +541,47 @@ public sealed class GameStatusHudController : MonoBehaviour
                     (x >= 33 && x <= 42 && y >= 7 && y <= 15))
                     return new Color32(255, 205, 55, 255);
                 return clear;
-            case HudIcon.Special:
-                int diamond = Mathf.Abs(x - 24) + Mathf.Abs(y - 24);
-                if (diamond <= 18) return diamond <= 8
-                    ? new Color32(255, 235, 110, 255)
-                    : new Color32(190, 90, 255, 255);
+            case HudIcon.TypeNormal:
+                return GetBombPixel(x, y, 24, 21, 14,
+                    new Color32(125, 138, 158, 255));
+            case HudIcon.TypeExplode:
+                int burst = Mathf.Abs(x - 24) + Mathf.Abs(y - 24);
+                if (burst <= 10 ||
+                    (Mathf.Abs(x - 24) <= 2 && Mathf.Abs(y - 24) <= 21) ||
+                    (Mathf.Abs(y - 24) <= 2 && Mathf.Abs(x - 24) <= 21))
+                    return burst <= 7
+                        ? new Color32(255, 238, 95, 255)
+                        : new Color32(255, 86, 30, 255);
+                return clear;
+            case HudIcon.TypeBig:
+                return GetBombPixel(x, y, 23, 20, 18,
+                    new Color32(255, 174, 38, 255));
+            case HudIcon.ModeNormal:
+                Color32 normalBomb = GetBombPixel(x, y, 24, 23, 11,
+                    new Color32(150, 164, 184, 255));
+                if (normalBomb.a > 0) return normalBomb;
+                if (x >= 22 && x <= 26 && y >= 3 && y <= 12 ||
+                    y >= 3 && y <= 7 && Mathf.Abs(x - 24) <= 8 - y)
+                    return new Color32(90, 215, 255, 255);
+                return clear;
+            case HudIcon.ModeThrow:
+                Color32 throwBomb = GetBombPixel(x, y, 14, 15, 8,
+                    new Color32(180, 105, 255, 255));
+                if (throwBomb.a > 0) return throwBomb;
+                if (x >= 18 && x <= 40 && Mathf.Abs(y - x - 2) <= 2 ||
+                    x >= 34 && x <= 43 && y >= 34 && Mathf.Abs((x + y) - 78) <= 2)
+                    return new Color32(255, 118, 225, 255);
+                return clear;
+            case HudIcon.ModeMulti:
+                if (InCircle(x, y, 13, 18, 7) || InCircle(x, y, 24, 27, 7) ||
+                    InCircle(x, y, 35, 18, 7))
+                    return new Color32(190, 105, 255, 255);
+                return clear;
+            case HudIcon.BombSpeed:
+                if (InCircle(x, y, 16, 22, 10))
+                    return new Color32(115, 65, 205, 255);
+                if ((y == 13 || y == 21 || y == 29) && x >= 27 && x <= 43)
+                    return new Color32(255, 105, 235, 255);
                 return clear;
             default:
                 return clear;
@@ -419,5 +593,24 @@ public sealed class GameStatusHudController : MonoBehaviour
         int localX = x - offset;
         return localX >= 0 && localX <= 15 &&
             Mathf.Abs(Mathf.Abs(y - 24) - localX) <= 2;
+    }
+
+    private static bool InCircle(int x, int y, int centerX, int centerY, int radius)
+    {
+        int dx = x - centerX;
+        int dy = y - centerY;
+        return dx * dx + dy * dy <= radius * radius;
+    }
+
+    private static Color32 GetBombPixel(int x, int y, int centerX, int centerY,
+        int radius, Color32 body)
+    {
+        if (InCircle(x, y, centerX, centerY, radius)) return body;
+        if (x >= centerX + radius - 3 && x <= centerX + radius + 5 &&
+            y >= centerY + radius - 1 && y <= centerY + radius + 4)
+            return new Color32(245, 190, 55, 255);
+        if (x >= centerX + radius + 4 && y >= centerY + radius + 3)
+            return new Color32(255, 92, 38, 255);
+        return new Color32(0, 0, 0, 0);
     }
 }
