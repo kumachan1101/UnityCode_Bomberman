@@ -88,6 +88,7 @@ public class PlayerActionStrategy : BasePlayerActionStrategy
 public class PlayerAction : MonoBehaviour
 {
     private PlayerMovement playerMovement;
+    private GameManager gameManager;
 
     protected PlayerBomToBomControl cPlayerBomToBomControl;
     protected IPlayerActionStrategy playerStrategy;
@@ -96,6 +97,8 @@ public class PlayerAction : MonoBehaviour
     {
         cPlayerBomToBomControl = gameObject.AddComponent<PlayerBomToBomControl>();
         playerMovement = gameObject.AddComponent<PlayerMovement>();
+        GameObject gameManagerObject = GameObject.Find("GameManager");
+        gameManager = gameManagerObject != null ? gameManagerObject.GetComponent<GameManager>() : null;
 
         CreatePlayerStrategy();
     }
@@ -109,7 +112,14 @@ public class PlayerAction : MonoBehaviour
 
     void Update()
     {
-        if (!IsAvailable()) return;
+        if (!IsAvailable() || (gameManager != null && !gameManager.GetSetUp()))
+        {
+            if (playerMovement != null)
+            {
+                playerMovement.MoveClear();
+            }
+            return;
+        }
 
         playerStrategy.UpdateStrategy(playerMovement);
     }
@@ -119,4 +129,3 @@ public class PlayerAction : MonoBehaviour
         playerStrategy.DropBom();
     }
 }
-

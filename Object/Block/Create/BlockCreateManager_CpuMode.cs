@@ -6,8 +6,7 @@ public class BlockCreateManager_CpuMode : BlockCreateManager {
     void Start()
     {
         CreateFixedBlock();
-        CreateBrokenBlock();
-        CompleteBlockCreate();
+        StartBlockCreation();
     }
 
 

@@ -13,6 +13,24 @@ public class BlockCreateManager_Online : BlockCreateManager {
         brokenBlockManager = CreateBlockManager<BrokenBlockManager_Online>();
     }
 
+    public override void StartBlockCreation()
+    {
+        // 全クライアントが同じ順序でブロックRPCと完了RPCを受信する。
+        if (!PhotonNetwork.IsMasterClient || !TryBeginBlockCreation())
+        {
+            return;
+        }
+
+        AddBrokenBlock(5, () =>
+            photonView.RPC(nameof(CompleteBlockCreateForAll), RpcTarget.AllViaServer));
+    }
+
+    [PunRPC]
+    private void CompleteBlockCreateForAll()
+    {
+        CompleteBlockCreate();
+    }
+
 	protected override void SetFieldRange(){
 		GameManager.SetFieldRange(10,10);
 	}
@@ -40,7 +58,7 @@ public class BlockCreateManager_Online : BlockCreateManager {
 public class BrokenBlockManager_Online : BrokenBlockManager
 {
     protected override void InsBrokenBlock_RPC(int x, int y, int z){
-        photonView.RPC(nameof(InsBrokenBlock), RpcTarget.All, x, y, z);
+		photonView.RPC(nameof(InsBrokenBlock), RpcTarget.AllViaServer, x, y, z);
     }
  
 

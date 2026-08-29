@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using Photon.Pun;
 using System.Collections;
@@ -21,6 +22,8 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
     protected virtual void InsObjMove_RPC(int x, int y, int z, Library_Base.Direction randomDirection) { }
 
     protected EventDispatcher eventDispatcher;
+    private bool blockCreationStarted;
+    private bool blockCreationCompleted;
     protected void InitEvent(){
          eventDispatcher = GameObject.Find("EventDispatcher").GetComponent<EventDispatcher>();        
     }
@@ -33,8 +36,38 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
     }
 
     public void CompleteBlockCreate(){
+        if (blockCreationCompleted)
+        {
+            return;
+        }
+
+        blockCreationCompleted = true;
         var vEvent = new CompleteBlockCreateEvent();
         eventDispatcher.DispatchEvent(vEvent);
+    }
+
+    /// <summary>
+    /// 破壊可能ブロックの配置が実際に完了してからゲーム開始を通知する。
+    /// </summary>
+    public virtual void StartBlockCreation()
+    {
+        if (!TryBeginBlockCreation())
+        {
+            return;
+        }
+
+        AddBrokenBlock(5, CompleteBlockCreate);
+    }
+
+    protected bool TryBeginBlockCreation()
+    {
+        if (blockCreationStarted)
+        {
+            return false;
+        }
+
+        blockCreationStarted = true;
+        return true;
     }
 
     // `ExplosionManager` を生成し、適切な `PoolerType` で初期化
@@ -77,7 +110,12 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
 
     public void AddBrokenBlock(int randomRangeMax)
     {
-        brokenBlockManager.AddBrokenBlock(randomRangeMax);
+        AddBrokenBlock(randomRangeMax, null);
+    }
+
+    protected void AddBrokenBlock(int randomRangeMax, Action onCompleted)
+    {
+        brokenBlockManager.AddBrokenBlock(randomRangeMax, onCompleted);
     }
 
     [PunRPC]
@@ -112,6 +150,13 @@ public abstract class BlockCreateManager : MonoBehaviourPunCallbacks
     public bool IsMatchObjMove(Vector3 targetPosition)
     {
         return objMoveBlockManager.IsMatchObjMove(targetPosition);
+    }
+
+    public bool IsBlockedForBomb(Vector3 targetPosition)
+    {
+        return IsAllWall(targetPosition) ||
+               brokenBlockManager.IsBroken(targetPosition) ||
+               IsMatchObjMove(targetPosition);
     }
 
 }
@@ -228,12 +273,12 @@ public class BrokenBlockManager : MonoBehaviourPunCallbacks
 
     protected virtual void InsBrokenBlock_RPC(int x, int y, int z){}
 
-    public void AddBrokenBlock(int randomRangeMax)
+    public void AddBrokenBlock(int randomRangeMax, Action onCompleted = null)
     {
-        StartCoroutine(AddBrokenBlockCoroutine(randomRangeMax));
+        StartCoroutine(AddBrokenBlockCoroutine(randomRangeMax, onCompleted));
     }
 
-    private IEnumerator AddBrokenBlockCoroutine(int randomRangeMax)
+    private IEnumerator AddBrokenBlockCoroutine(int randomRangeMax, Action onCompleted)
     {
         int y = 1;
         for (int x = 0; x < GameManager.xmax; x++)
@@ -259,6 +304,10 @@ public class BrokenBlockManager : MonoBehaviourPunCallbacks
                 yield return null;
             }
         }
+
+        // 直前に生成したColliderを、完了イベントを受ける側から確実に参照できるようにする。
+        Physics.SyncTransforms();
+        onCompleted?.Invoke();
     }
 
     public bool IsBroken(Vector3 v3)

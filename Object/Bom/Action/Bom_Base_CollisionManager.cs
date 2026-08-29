@@ -2,53 +2,79 @@ using UnityEngine;
 
 public class Bom_Base_CollisionManager : MonoBehaviour
 {
+    private const float CellProbeRadius = 0.35f;
+
     public bool CheckForCollision()
     {
+        Vector3 direction = BomGridRules.GetCardinalDirection(transform.forward);
+        Vector3 nextCell = BomGridRules.GetCellInDirection(transform.position, direction, 1);
+        return CheckForCollisionAtCell(nextCell);
+    }
 
-        bool bCollistion = false;
-        // 移動方向にレイを飛ばして衝突を検知
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, transform.forward, out hit, 1f))
+    public bool CheckForCollisionAtCell(Vector3 cell)
+    {
+        if (BomGridRules.IsBombAtCell(cell, gameObject))
         {
-            // 衝突したオブジェクトの名前によって処理を分岐する
-            switch (hit.transform.name)
+            return true;
+        }
+
+        Collider[] colliders = Physics.OverlapSphere(
+            BomGridRules.ToCell(cell), CellProbeRadius, ~0, QueryTriggerInteraction.Collide);
+        foreach (Collider candidateCollider in colliders)
+        {
+            if (candidateCollider == null ||
+                candidateCollider.transform == transform ||
+                candidateCollider.transform.IsChildOf(transform))
             {
-                case "Broken(Clone)":
-                case "FixedWall(Clone)":
-                case "Wall(Clone)":
-                case "Bom(Clone)":
-                case "Bombigban(Clone)":
-                case "BomExplode(Clone)":
-                    bCollistion = true;
-                    break;
-                default:
-                    bCollistion = false;
-                    break;
+                continue;
+            }
+
+            if (IsBlockingObject(candidateCollider.gameObject))
+            {
+                return true;
             }
         }
-        return bCollistion;
-    }
-/*
-    void OnTriggerEnter(Collider other)
-    {
-        switch (other.transform.name)
-        {
-            case "Explosion1(Clone)":
-            case "Explosion2(Clone)":
-            case "Explosion3(Clone)":
-            case "Explosion4(Clone)":
-                //CancelInvokeAndCallExplosion();
-                break;
-            default:
-                return;
-        }
-    }
-*/
 
-    void OnTriggerExit(Collider other)
+        return false;
+    }
+
+    public static bool IsBlockingObject(GameObject candidate)
     {
-        //Debug.Log("すり抜けた！");
-        GetComponent<SphereCollider>().isTrigger = false;
-        
+        if (candidate == null)
+        {
+            return false;
+        }
+
+        Transform current = candidate.transform;
+        while (current != null)
+        {
+            if (current.GetComponent<Bom_Base>() != null)
+            {
+                return true;
+            }
+
+            string objectName = current.name;
+            if (objectName.StartsWith("Broken") ||
+                objectName.StartsWith("FixedWall") ||
+                objectName.StartsWith("Wall") ||
+                objectName.StartsWith("Bom") ||
+                objectName.StartsWith("Bombigban"))
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        SphereCollider sphereCollider = GetComponent<SphereCollider>();
+        if (sphereCollider != null)
+        {
+            sphereCollider.isTrigger = false;
+        }
     }
 }

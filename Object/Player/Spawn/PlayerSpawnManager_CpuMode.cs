@@ -121,7 +121,9 @@ public class PlayerPositionManager_CpuMode : PlayerPositionManager {
 	            return true;
 	        }
 	    }
-	    return false;
+
+        // ブロック配置完了後に選ばれるため、生成済みブロック上には出現させない。
+        return Library_Base.IsGameObjectAtPosition(Library_Base.GetPos(position));
 	}
 }
 

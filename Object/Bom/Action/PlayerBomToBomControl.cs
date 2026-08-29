@@ -8,12 +8,15 @@ public class PlayerBomToBomControl : MonoBehaviour
     GameManager cGameManager;
 
     ItemControl cItemControl;
+    BlockCreateManager cField;
 
     public void Awake(){
         cBomControl = GameObject.Find("BomControl").GetComponent<BomControl>();
         cPlayerBom = this.gameObject.AddComponent<PlayerBom>();
         cGameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         cItemControl = GameObject.Find("ItemControl").GetComponent<ItemControl>();
+        GameObject fieldObject = GameObject.Find("Field");
+        cField = fieldObject != null ? fieldObject.GetComponent<BlockCreateManager>() : null;
     }
 
 
@@ -37,19 +40,23 @@ public class PlayerBomToBomControl : MonoBehaviour
         if(false == CanDropBom(position)){
             return;
         }
-        BomParameters bomParams = cPlayerBom.CreateBomParameters(position, transform.forward);
+        Vector3 direction = BomGridRules.GetCardinalDirection(transform.forward);
+        BomParameters bomParams = cPlayerBom.CreateBomParameters(position, direction);
         GameObject cBom = cBomControl.DropBom(bomParams);
         cPlayerBom.Add(cBom);
     }
     private void RequestDropBomMulti(){
-        Vector3 currentPos = transform.position;
-        Vector3 direction = transform.forward;
-
-        while (true)
+        Vector3 originCell = BomGridRules.ToCell(transform.position);
+        Vector3 direction = BomGridRules.GetCardinalDirection(transform.forward);
+        if (direction == Vector3.zero)
         {
-            // 方向に1マス進める
-            currentPos += direction;
-            Vector3 dropPos = Library_Base.GetPos(currentPos);
+            return;
+        }
+
+        int maximumCells = Mathf.Max(GameManager.xmax, GameManager.zmax);
+        for (int distance = 1; distance <= maximumCells; distance++)
+        {
+            Vector3 dropPos = BomGridRules.GetCellInDirection(originCell, direction, distance);
 
             if (false == CanDropBom(dropPos))
             {
@@ -81,6 +88,13 @@ public class PlayerBomToBomControl : MonoBehaviour
 			return false;
 		}
         if(false == cPlayerBom.IsBomAvailable(position)){
+            return false;
+        }
+        // 所有者が異なるボムも含め、同じグリッドへは設置しない。
+        if(BomGridRules.IsBombAtCell(position)){
+            return false;
+        }
+        if(cField != null && cField.IsBlockedForBomb(position)){
             return false;
         }
         if(null == cItemControl){

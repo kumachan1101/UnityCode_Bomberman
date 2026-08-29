@@ -133,12 +133,11 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
         Destroy(gGameEndCanvasLocal);
 
         if (PhotonNetwork.IsMasterClient) {
-            cField.CreateBrokenBlock();
             GameObject gGameEndCanvas = PhotonNetwork.Instantiate("GameEndCanvas_Online", Vector3.zero, Quaternion.identity);
         }
 
-        //cField.SetupStage();
-        cField.CompleteBlockCreate();
+        // マスターが全ブロックを送信し終えた後、全クライアントへ開始を通知する。
+        cField.StartBlockCreation();
         gameObject.SetActive(false);
     }
 

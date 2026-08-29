@@ -1,48 +1,110 @@
+using System;
 using UnityEngine;
-public interface IBomMoveState
-{
-    void Execute(Transform transform);
-}
 
-public class BomStoppedState : IBomMoveState
+/// <summary>
+/// ボムの設置・移動で共通利用するグリッド変換。
+/// プレイヤーが斜めを向いていても、必ず縦横どちらか1方向の別マスへ進める。
+/// </summary>
+public static class BomGridRules
 {
-    public void Execute(Transform transform)
+    public static Vector3 ToCell(Vector3 position)
     {
-        transform.position = Library_Base.GetPos(transform.position);
+        return Library_Base.GetPos(position);
     }
-}
 
-public class BomMovingState : IBomMoveState
-{
-    private float moveSpeed = 1.5f;
-
-    public BomMovingState(int iSpeed){
-        moveSpeed = iSpeed;
-    }
-    public void Execute(Transform transform)
+    public static Vector3 GetCardinalDirection(Vector3 direction)
     {
-        transform.position += transform.forward * moveSpeed * Time.deltaTime * 2;
+        float absoluteX = Mathf.Abs(direction.x);
+        float absoluteZ = Mathf.Abs(direction.z);
+        if (absoluteX <= Mathf.Epsilon && absoluteZ <= Mathf.Epsilon)
+        {
+            return Vector3.zero;
+        }
+
+        if (absoluteX > absoluteZ)
+        {
+            return direction.x >= 0f ? Vector3.right : Vector3.left;
+        }
+
+        return direction.z >= 0f ? Vector3.forward : Vector3.back;
+    }
+
+    public static Vector3 GetCellInDirection(Vector3 origin, Vector3 direction, int distance)
+    {
+        Vector3 cell = ToCell(origin);
+        Vector3 cardinalDirection = GetCardinalDirection(direction);
+        return cell + cardinalDirection * Mathf.Max(0, distance);
+    }
+
+    public static bool IsBombAtCell(Vector3 position, GameObject ignoredObject = null)
+    {
+        return Bom_Base.IsActiveBomAtCell(position, ignoredObject);
     }
 }
 
+/// <summary>
+/// 最後に到達した安全なマスを保持し、障害物が現れた場合もそのマスへ戻して停止する。
+/// </summary>
 public class BomMover : MonoBehaviour
 {
-    IBomMoveState currentState = new BomStoppedState();
-    public void ReqMove(Vector3 direction, int iSpeed)
+    private float moveSpeed = 1.5f;
+    private Vector3 moveDirection;
+    private Vector3 settledCell;
+    private bool moving;
+
+    public bool IsMoving { get { return moving; } }
+    public Vector3 SettledCell { get { return settledCell; } }
+
+    public void ReqMove(Vector3 direction, int speed)
     {
-        if (direction == Vector3.zero) return; // 無効
-        transform.forward = direction;
-        currentState = new BomMovingState(iSpeed);
+        Vector3 cardinalDirection = BomGridRules.GetCardinalDirection(direction);
+        if (cardinalDirection == Vector3.zero)
+        {
+            return;
+        }
+
+        moveDirection = cardinalDirection;
+        moveSpeed = Mathf.Max(0.1f, speed);
+        settledCell = BomGridRules.ToCell(transform.position);
+        transform.position = settledCell;
+        transform.forward = cardinalDirection;
+        moving = true;
     }
 
-    void Update()
+    public void Advance(float deltaTime, Func<Vector3, bool> isCellBlocked)
     {
-        currentState.Execute(transform);
+        if (!moving)
+        {
+            transform.position = BomGridRules.ToCell(transform.position);
+            return;
+        }
+
+        Vector3 targetCell = settledCell + moveDirection;
+        if (isCellBlocked != null && isCellBlocked(targetCell))
+        {
+            ForceStopAt(settledCell);
+            return;
+        }
+
+        float distance = moveSpeed * Mathf.Max(0f, deltaTime) * 2f;
+        transform.position = Vector3.MoveTowards(transform.position, targetCell, distance);
+        if ((transform.position - targetCell).sqrMagnitude <= 0.000001f)
+        {
+            transform.position = targetCell;
+            settledCell = targetCell;
+        }
     }
 
     public void ForceStop()
     {
-        currentState = new BomStoppedState();
+        ForceStopAt(BomGridRules.ToCell(transform.position));
+    }
+
+    public void ForceStopAt(Vector3 safeCell)
+    {
+        settledCell = BomGridRules.ToCell(safeCell);
+        transform.position = settledCell;
+        moving = false;
     }
 }
 
@@ -50,66 +112,42 @@ public class Bom_Base_MoveManager : MonoBehaviour
 {
     private BomMover mover;
     private BomStatusData status;
-    private Bom_Base_CollisionManager cCollisionManager;
+    private Bom_Base_CollisionManager collisionManager;
 
     private void Awake()
     {
-        cCollisionManager = gameObject.AddComponent<Bom_Base_CollisionManager>();
+        collisionManager = gameObject.AddComponent<Bom_Base_CollisionManager>();
         mover = gameObject.AddComponent<BomMover>();
     }
 
     public void BomAttack(BomParameters bomParams)
     {
-        UpdateBomStatus(bomParams);
-        if(CanBomAttack()){
+        status = new BomStatusData(bomParams);
+        if (status.bomAttack == BOM_ATTACK.BOM_ATTACK_THROW)
+        {
             mover.ReqMove(bomParams.direction, bomParams.iSpeed);
         }
     }
 
-    private void UpdateBomStatus(BomParameters bomParams){
-        // ボム複数ドロップアイテム取得済みの場合は、ボムアタックを実行しない
-        status = new BomStatusData(bomParams);
-    }
-
-    private bool CanBomAttack(){
-        // ボム複数ドロップアイテム取得済みの場合は、ボムアタックを実行しない
-        if(BOM_ATTACK.BOM_ATTACK_THROW == status.bomAttack){
-            return true;
-        }
-
-        return false;
-    }
-
-    public void BomKick(Vector3 direction, int iSpeed)
+    public void BomKick(Vector3 direction, int speed)
     {
-        if(status.bomKick){
-            mover.ReqMove(direction, iSpeed);
-        }
-    }
-
-    void Update()
-    {
-        UpdateState();
-    }
-
-    private void UpdateState()
-    {
-        if (IsOutOfBounds() || HasCollision())
+        if (status != null && status.bomKick)
         {
-            mover.ForceStop();
+            mover.ReqMove(direction, speed);
         }
     }
 
-    private bool IsOutOfBounds()
+    private void Update()
     {
-        Vector3 pos = transform.position;
-        return pos.x < 0 || pos.z < 0 || pos.x >= GameManager.xmax || pos.z >= GameManager.zmax;
+        mover.Advance(Time.deltaTime, IsCellBlocked);
     }
 
-    private bool HasCollision()
+    private bool IsCellBlocked(Vector3 position)
     {
-        return cCollisionManager.CheckForCollision();
+        return Library_Base.IsPositionOutOfBounds(position) ||
+               collisionManager.CheckForCollisionAtCell(position);
     }
+
     public void Explosion()
     {
         mover.ForceStop();

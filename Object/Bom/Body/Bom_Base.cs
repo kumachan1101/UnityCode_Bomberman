@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Bom_Base : MonoBehaviour
 {
+    private static readonly HashSet<Bom_Base> activeBombs = new HashSet<Bom_Base>();
     public GameObject ExplosionPrefab;
     protected BlockCreateManager cField;
     private BrokenBlockManager cBrokenBlockManager;
@@ -15,6 +16,36 @@ public class Bom_Base : MonoBehaviour
 
     void Awake(){
         AwakeCommon();
+    }
+
+    private void OnEnable()
+    {
+        activeBombs.Add(this);
+    }
+
+    private void OnDisable()
+    {
+        activeBombs.Remove(this);
+    }
+
+    public static bool IsActiveBomAtCell(Vector3 position, GameObject ignoredObject = null)
+    {
+        Vector3 targetCell = Library_Base.GetPos(position);
+        foreach (Bom_Base bomb in activeBombs)
+        {
+            if (bomb == null || bomb.bDel || bomb.gameObject == ignoredObject ||
+                !bomb.gameObject.activeInHierarchy)
+            {
+                continue;
+            }
+
+            if (Library_Base.GetPos(bomb.transform.position) == targetCell)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void AwakeCommon(){
@@ -78,6 +109,7 @@ public class Bom_Base : MonoBehaviour
 
     private void OnDestroy()
     {
+        activeBombs.Remove(this);
         // Destroy時に登録したInvokeをすべてキャンセル
         CancelInvoke();
     }
