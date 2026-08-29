@@ -8,6 +8,8 @@ public class Player_Base : MonoBehaviourPunCallbacks
     public static UnityEvent<Player_Base> onPlayerRemoved = new UnityEvent<Player_Base>();
 
     void Awake(){
+        if (GetComponent<PlayerInvincibility>() == null)
+            gameObject.AddComponent<PlayerInvincibility>();
    }    
     void Start ()
     {

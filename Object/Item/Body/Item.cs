@@ -3,7 +3,12 @@ public abstract class Item : MonoBehaviour {
     private SoundManager soundManager;
 
     void Awake(){
-        soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
+        soundManager = SoundManager.Instance;
+        if (soundManager == null)
+        {
+            GameObject soundObject = GameObject.Find("SoundManager");
+            if (soundObject != null) soundManager = soundObject.GetComponent<SoundManager>();
+        }
     }
     void Start(){
     }
@@ -14,7 +19,7 @@ public abstract class Item : MonoBehaviour {
         if(col.transform.name.StartsWith("Player")){
             Reflection(col.gameObject);
             Destroy(this.gameObject);
-            soundManager.PlaySoundEffect("GETITEM");
+            if (soundManager != null) soundManager.PlaySoundEffect("GETITEM");
         }
     }
 

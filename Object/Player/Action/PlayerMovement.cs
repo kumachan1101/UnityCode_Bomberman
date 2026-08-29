@@ -5,6 +5,7 @@ using Photon.Pun;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
+    public const float MaximumMoveSpeed = 7f;
     private const float PlayableMinimum = 2f;
     private const float BoundaryTolerance = 0.0001f;
 
@@ -115,7 +116,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void SpeedUp()
     {
-        if (moveSpeed < 7)
+        if (moveSpeed < MaximumMoveSpeed)
         {
             moveSpeed += 1f;
         }

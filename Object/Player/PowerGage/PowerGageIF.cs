@@ -42,7 +42,7 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 
     public void SetDamage(int iDamage){
 		//Debug.Log(cPowerGage);
-        if(cPowerGage == null){
+        if(cPowerGage == null || IsDamageBlockedByInvincibility()){
             return;
         }
         SetDamage_RPC(iDamage);
@@ -84,6 +84,7 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 			//StartCoroutine(RetrySyncSetDamage(iDamage));
 			return;
 		}
+		if (IsDamageBlockedByInvincibility()) return;
 		cPowerGage.SetDamage(iDamage);
 		if (cPowerGage.IsDead())
 		{
@@ -91,6 +92,12 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 			DestroySync();
 		}
 	}
+
+    private bool IsDamageBlockedByInvincibility()
+    {
+        PlayerInvincibility effect = GetComponent<PlayerInvincibility>();
+        return effect != null && effect.IsInvincible;
+    }
 
 
 	protected void DestroySync(){
@@ -129,4 +136,3 @@ abstract public class PowerGageIF : MonoBehaviourPunCallbacks
 	}
 
 }
-

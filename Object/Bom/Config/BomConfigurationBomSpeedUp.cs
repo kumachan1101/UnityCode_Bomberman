@@ -8,13 +8,15 @@ public class BomConfigurationBomSpeedUpManager : BomConfigurationManagerBase
 
 public class BomConfigurationBomSpeedUp : BomConfigurationBase
 {
+    public const int MaximumValue = 5;
+
     public BomConfigurationBomSpeedUp(){
         value = 1;
     }
     public override void Request()
     {
         int ivalue = (int)Get();
-        if(ivalue >= 5){
+        if(ivalue >= MaximumValue){
             return;
         }
         ivalue++;

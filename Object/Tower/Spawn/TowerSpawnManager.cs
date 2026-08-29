@@ -102,6 +102,13 @@ public class TowerSpawnManager : MonoBehaviourPunCallbacks
         return power != null && power.CanSpendPower(powerCost);
     }
 
+    public virtual float GetCurrentRevivalPower(int playerNo)
+    {
+        GameObject tower = GameObject.Find("Tower" + playerNo);
+        PowerGageIF power = tower != null ? tower.GetComponent<PowerGageIF>() : null;
+        return power != null && power.IsPowerGageReady() ? power.GetCurrentPower() : -1f;
+    }
+
     public virtual bool TrySpendRevivalPower(int playerNo, int powerCost)
     {
         GameObject tower = GameObject.Find("Tower" + playerNo);

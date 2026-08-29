@@ -13,6 +13,7 @@ public sealed class GameStatusHudController : MonoBehaviour
         BombCount,
         MoveSpeed,
         Kick,
+        Invincible,
         TypeNormal,
         TypeExplode,
         TypeBig,
@@ -28,14 +29,20 @@ public sealed class GameStatusHudController : MonoBehaviour
         public Text value;
         public Image background;
         public bool isActive;
+        public bool isMaxed;
 
-        public void Set(string text, bool active)
+        public void Set(string text, bool active, bool maxed = false)
         {
             isActive = active;
+            isMaxed = maxed;
             value.text = text;
-            value.color = active ? Color.white : new Color(0.65f, 0.68f, 0.72f, 1f);
+            value.color = maxed
+                ? new Color(1f, 0.86f, 0.28f, 1f)
+                : active ? Color.white : new Color(0.65f, 0.68f, 0.72f, 1f);
             icon.color = active ? Color.white : new Color(1f, 1f, 1f, 0.28f);
-            background.color = active
+            background.color = maxed
+                ? new Color(0.28f, 0.22f, 0.05f, 0.98f)
+                : active
                 ? new Color(0.1f, 0.15f, 0.21f, 0.96f)
                 : new Color(0.065f, 0.075f, 0.09f, 0.78f);
         }
@@ -54,7 +61,7 @@ public sealed class GameStatusHudController : MonoBehaviour
     public const float StatusPanelBottomMargin = 20f;
     public const float PanelGap = 8f;
     private const float CellGap = 5f;
-    private const int CoreCellCount = 4;
+    private const int CoreCellCount = 5;
     private const int AbilityCellCount = 3;
 
     private static readonly Dictionary<HudIcon, Texture2D> iconTextures =
@@ -140,6 +147,12 @@ public sealed class GameStatusHudController : MonoBehaviour
         return cells.TryGetValue(key, out cell) && cell.isActive;
     }
 
+    public bool GetCellMaxed(string key)
+    {
+        StatusCell cell;
+        return cells.TryGetValue(key, out cell) && cell.isMaxed;
+    }
+
     public string GetCellIconName(string key)
     {
         StatusCell cell;
@@ -206,12 +219,13 @@ public sealed class GameStatusHudController : MonoBehaviour
 
         statusPanel = CreatePanel("ItemStatus", transform,
             new Color(0.025f, 0.035f, 0.055f, 0.82f));
-        CreateGroupLabel("CoreGroup", "COEXISTING / STACKABLE", font,
+        CreateGroupLabel("CoreGroup", "COEXISTING  •  VALUE / LIMIT", font,
             new Color(0.35f, 0.86f, 1f, 1f));
         CreateStatusCell("Fire", "BLAST RANGE", HudIcon.FireRange, font);
         CreateStatusCell("Bomb", "BOMB COUNT", HudIcon.BombCount, font);
         CreateStatusCell("Move", "MOVE SPEED", HudIcon.MoveSpeed, font);
         CreateStatusCell("Kick", "KICK", HudIcon.Kick, font);
+        CreateStatusCell("Invincible", "GHOST SHIELD", HudIcon.Invincible, font);
 
         CreateGroupLabel("AbilityGroup",
             "TYPE + DROP COEXIST / ONE PER GROUP", font,
@@ -307,7 +321,7 @@ public sealed class GameStatusHudController : MonoBehaviour
             safe.w + StatusPanelBottomMargin + statusHeight * 0.5f);
 
         LayoutGroupLabel("CoreGroup", statusWidth, -3f);
-        LayoutStatusRow(new[] { "Fire", "Bomb", "Move", "Kick" },
+        LayoutStatusRow(new[] { "Fire", "Bomb", "Move", "Kick", "Invincible" },
             CoreCellCount, statusWidth, -23f, 52f);
         LayoutGroupLabel("AbilityGroup", statusWidth, -78f);
         LayoutStatusRow(new[] { "BombType", "DropMode", "ThrowSpeed" },
@@ -385,12 +399,19 @@ public sealed class GameStatusHudController : MonoBehaviour
             return;
         }
 
-        cells["Fire"].Set(bomb.Get<int>(GetKind.FireNum).ToString(), true);
-        cells["Bomb"].Set(bomb.Get<int>(GetKind.BomNum).ToString(), true);
-        cells["Move"].Set(movement.GetMoveSpeed().ToString("0.#",
-            CultureInfo.InvariantCulture), true);
+        cells["Fire"].Set(FormatUnlimitedStatus(bomb.Get<int>(GetKind.FireNum)), true);
+        cells["Bomb"].Set(FormatUnlimitedStatus(bomb.Get<int>(GetKind.BomNum)), true);
+        float moveSpeed = movement.GetMoveSpeed();
+        bool moveMaxed = moveSpeed >= PlayerMovement.MaximumMoveSpeed;
+        cells["Move"].Set(FormatCappedStatus(moveSpeed,
+            PlayerMovement.MaximumMoveSpeed), true, moveMaxed);
         bool kick = bomb.Get<bool>(GetKind.BomKick);
-        cells["Kick"].Set(kick ? "ON" : "OFF", kick);
+        cells["Kick"].Set(kick ? "OWNED" : "NOT OWNED", kick, kick);
+        PlayerInvincibility invincibility = localPlayer.GetComponent<PlayerInvincibility>();
+        bool shieldActive = invincibility != null && invincibility.IsInvincible;
+        cells["Invincible"].Set(shieldActive
+            ? Mathf.CeilToInt(invincibility.RemainingSeconds) + "s"
+            : "NONE", shieldActive);
 
         BOM_KIND kind = bomb.Get<BOM_KIND>(GetKind.BomKind);
         cells["BombType"].Set(GetBombTypeStatus(kind), true);
@@ -402,7 +423,10 @@ public sealed class GameStatusHudController : MonoBehaviour
         cells["DropMode"].SetIcon(GetDropModeIcon(attack));
 
         bool throwing = attack == BOM_ATTACK.BOM_ATTACK_THROW;
-        cells["ThrowSpeed"].Set(FormatThrowSpeedStatus(attack, throwSpeed), throwing);
+        bool throwSpeedMaxed = throwing &&
+            throwSpeed >= BomConfigurationBomSpeedUp.MaximumValue;
+        cells["ThrowSpeed"].Set(FormatThrowSpeedStatus(attack, throwSpeed),
+            throwing, throwSpeedMaxed);
     }
 
     public static string GetBombTypeStatus(BOM_KIND kind)
@@ -423,8 +447,8 @@ public sealed class GameStatusHudController : MonoBehaviour
     {
         if (attack == BOM_ATTACK.BOM_ATTACK_THROW)
         {
-            return string.Format(CultureInfo.InvariantCulture,
-                "THROW  SPD {0}", Mathf.Max(1, throwSpeed));
+            return "THROW SPD " + FormatCappedStatus(Mathf.Max(1, throwSpeed),
+                BomConfigurationBomSpeedUp.MaximumValue);
         }
 
         return GetDropModeStatus(attack);
@@ -433,8 +457,20 @@ public sealed class GameStatusHudController : MonoBehaviour
     public static string FormatThrowSpeedStatus(BOM_ATTACK attack, int throwSpeed)
     {
         if (attack != BOM_ATTACK.BOM_ATTACK_THROW) return "INACTIVE";
-        return string.Format(CultureInfo.InvariantCulture,
-            "SPEED {0}", Mathf.Max(1, throwSpeed));
+        return FormatCappedStatus(Mathf.Max(1, throwSpeed),
+            BomConfigurationBomSpeedUp.MaximumValue);
+    }
+
+    public static string FormatCappedStatus(float current, float maximum)
+    {
+        string values = string.Format(CultureInfo.InvariantCulture, "{0:0.#} / {1:0.#}",
+            current, maximum);
+        return current >= maximum ? values + " MAX" : values;
+    }
+
+    public static string FormatUnlimitedStatus(int current)
+    {
+        return string.Format(CultureInfo.InvariantCulture, "{0} / NO MAX", current);
     }
 
     private static HudIcon GetBombTypeIcon(BOM_KIND kind)
@@ -557,6 +593,16 @@ public sealed class GameStatusHudController : MonoBehaviour
                     (x >= 12 && x <= 39 && y >= 9 && y <= 23) ||
                     (x >= 33 && x <= 42 && y >= 7 && y <= 15))
                     return new Color32(255, 205, 55, 255);
+                return clear;
+            case HudIcon.Invincible:
+                int shieldDistance = Mathf.Abs(x - 24) + Mathf.Abs(y - 25);
+                if ((shieldDistance >= 14 && shieldDistance <= 19 && y >= 10) ||
+                    (y >= 6 && y <= 13 && Mathf.Abs(x - 24) <= 13))
+                    return new Color32(90, 235, 255, 255);
+                if (InCircle(x, y, 18, 25, 3) || InCircle(x, y, 30, 25, 3))
+                    return new Color32(245, 255, 255, 255);
+                if (y >= 17 && y <= 22 && Mathf.Abs(x - 24) <= 4)
+                    return new Color32(245, 255, 255, 255);
                 return clear;
             case HudIcon.TypeNormal:
                 return GetBombPixel(x, y, 24, 21, 14,

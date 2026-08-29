@@ -2,6 +2,7 @@ using System.Collections;
 using System.Reflection;
 using NUnit.Framework;
 using Photon.Pun;
+using TMPro;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -75,6 +76,16 @@ public sealed class TowerRevivalTests
         Assert.That(towerPower.GetCurrentPower(), Is.EqualTo(3f));
         Assert.That(button.interactable, Is.True,
             "A missing local player with sufficient tower power must be revivable.");
+        Assert.That(revival.CurrentStatusText,
+            Is.EqualTo("REVIVE PLAYER\nPOWER 3 -> 1"));
+        Assert.That(revival.GetComponentInChildren<TMP_Text>().text,
+            Is.EqualTo(revival.CurrentStatusText));
+        Assert.That(revival.GetComponentInChildren<TMP_Text>().enableAutoSizing, Is.True);
+        Color availableColor = button.GetComponent<Image>().color;
+        Assert.That(availableColor.r, Is.GreaterThan(0.9f));
+        Assert.That(availableColor.g, Is.GreaterThan(0.6f));
+        Assert.That(button.colors.normalColor.a, Is.EqualTo(1f));
+        Assert.That(button.colors.disabledColor.a, Is.GreaterThanOrEqualTo(0.75f));
 
         GameObject livingPlayer = new GameObject("Player1");
         livingPlayer.AddComponent<Player>();
@@ -82,6 +93,8 @@ public sealed class TowerRevivalTests
         revival.RefreshAvailability();
         Assert.That(button.interactable, Is.False,
             "The revival button must be disabled while Player1 is alive.");
+        Assert.That(revival.CurrentStatusText,
+            Is.EqualTo("PLAYER ACTIVE\nREVIVE NOT NEEDED"));
 
         Object.Destroy(livingPlayer);
         yield return null;
@@ -97,6 +110,12 @@ public sealed class TowerRevivalTests
             "Reviving costs two points from the player's own tower.");
         Assert.That(button.interactable, Is.False,
             "One remaining tower point is insufficient for another revival.");
+        Assert.That(revival.CurrentStatusText, Is.EqualTo("REVIVING PLAYER..."));
+
+        yield return null;
+        revival.RefreshAvailability();
+        Assert.That(revival.CurrentStatusText,
+            Is.EqualTo("REVIVE LOCKED\nPOWER 1 / NEED 3"));
 
         Object.Destroy(buttonCanvas);
         Object.Destroy(tower);

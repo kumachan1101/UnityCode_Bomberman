@@ -6,6 +6,25 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
+public sealed class InvincibleItemControlProbe : ItemControl
+{
+    protected override IItemPathProvider CreateItemPathProvider()
+    {
+        return new ItemPathProvider_CpuMode();
+    }
+
+    public override void CreateItem_RPC(Vector3 position) { }
+    protected override bool IsCreateItem() { return true; }
+
+    public ItemInvincible SpawnInvincibilityItem(Vector3 position)
+    {
+        int index = itemList.FindIndex(item => item.itemName == "Item_Invincible");
+        Assert.That(index, Is.GreaterThanOrEqualTo(0));
+        CreateRandomItem(position, index);
+        return Object.FindObjectOfType<ItemInvincible>();
+    }
+}
+
 public sealed class GameStatusAndAudioTests
 {
     [UnitySetUp]
@@ -85,11 +104,17 @@ public sealed class GameStatusAndAudioTests
     public void ThrowModeMakesItsSpeedExplicitAndOtherModesStayInactive()
     {
         Assert.That(GameStatusHudController.FormatDropModeStatus(
-            BOM_ATTACK.BOM_ATTACK_THROW, 3), Is.EqualTo("THROW  SPD 3"));
+            BOM_ATTACK.BOM_ATTACK_THROW, 3), Is.EqualTo("THROW SPD 3 / 5"));
         Assert.That(GameStatusHudController.FormatThrowSpeedStatus(
-            BOM_ATTACK.BOM_ATTACK_THROW, 3), Is.EqualTo("SPEED 3"));
+            BOM_ATTACK.BOM_ATTACK_THROW, 3), Is.EqualTo("3 / 5"));
+        Assert.That(GameStatusHudController.FormatThrowSpeedStatus(
+            BOM_ATTACK.BOM_ATTACK_THROW, 5), Is.EqualTo("5 / 5 MAX"));
         Assert.That(GameStatusHudController.FormatThrowSpeedStatus(
             BOM_ATTACK.BOM_ATTACK_MULTI, 3), Is.EqualTo("INACTIVE"));
+        Assert.That(GameStatusHudController.FormatCappedStatus(7, 7),
+            Is.EqualTo("7 / 7 MAX"));
+        Assert.That(GameStatusHudController.FormatUnlimitedStatus(6),
+            Is.EqualTo("6 / NO MAX"));
     }
 
     [UnityTest]
@@ -171,10 +196,16 @@ public sealed class GameStatusAndAudioTests
 
         Assert.That(canvasObject.transform.Find("ItemStatus/CoreGroup"), Is.Not.Null);
         Assert.That(canvasObject.transform.Find("ItemStatus/AbilityGroup"), Is.Not.Null);
-        Assert.That(hud.GetCellValue("Fire"), Is.EqualTo("3"));
-        Assert.That(hud.GetCellValue("Bomb"), Is.EqualTo("3"));
-        Assert.That(hud.GetCellValue("Move"), Is.EqualTo("3"));
-        Assert.That(hud.GetCellValue("Kick"), Is.EqualTo("OFF"));
+        RectTransform invincibleCell = canvasObject.transform
+            .Find("ItemStatus/Invincible") as RectTransform;
+        Assert.That(invincibleCell, Is.Not.Null);
+        Assert.That(invincibleCell.sizeDelta.x, Is.GreaterThan(100f));
+        Assert.That(hud.GetCellValue("Fire"), Is.EqualTo("3 / NO MAX"));
+        Assert.That(hud.GetCellValue("Bomb"), Is.EqualTo("3 / NO MAX"));
+        Assert.That(hud.GetCellValue("Move"), Is.EqualTo("3 / 7"));
+        Assert.That(hud.GetCellValue("Kick"), Is.EqualTo("NOT OWNED"));
+        Assert.That(hud.GetCellValue("Invincible"), Is.EqualTo("NONE"));
+        Assert.That(hud.GetCellActive("Invincible"), Is.False);
         Assert.That(hud.GetCellValue("BombType"), Is.EqualTo("NORMAL"));
         Assert.That(hud.GetCellValue("DropMode"), Is.EqualTo("NORMAL"));
         Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("INACTIVE"));
@@ -189,16 +220,44 @@ public sealed class GameStatusAndAudioTests
         movement.SpeedUp();
         hud.RefreshNow();
 
-        Assert.That(hud.GetCellValue("Fire"), Is.EqualTo("4"));
-        Assert.That(hud.GetCellValue("Bomb"), Is.EqualTo("4"));
-        Assert.That(hud.GetCellValue("Move"), Is.EqualTo("4"));
-        Assert.That(hud.GetCellValue("Kick"), Is.EqualTo("ON"));
+        Assert.That(hud.GetCellValue("Fire"), Is.EqualTo("4 / NO MAX"));
+        Assert.That(hud.GetCellValue("Bomb"), Is.EqualTo("4 / NO MAX"));
+        Assert.That(hud.GetCellValue("Move"), Is.EqualTo("4 / 7"));
+        Assert.That(hud.GetCellValue("Kick"), Is.EqualTo("OWNED"));
+        Assert.That(hud.GetCellMaxed("Kick"), Is.True);
         Assert.That(hud.GetCellValue("BombType"), Is.EqualTo("EXPLODE"));
-        Assert.That(hud.GetCellValue("DropMode"), Is.EqualTo("THROW  SPD 2"));
-        Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("SPEED 2"));
+        Assert.That(hud.GetCellValue("DropMode"), Is.EqualTo("THROW SPD 2 / 5"));
+        Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("2 / 5"));
         Assert.That(hud.GetCellActive("ThrowSpeed"), Is.True);
         Assert.That(hud.GetCellIconName("BombType"), Does.EndWith("TypeExplode"));
         Assert.That(hud.GetCellIconName("DropMode"), Does.EndWith("ModeThrow"));
+
+        for (int i = 0; i < 5; i++)
+        {
+            bomb.Request(ReqType.BomSpeedUp);
+            movement.SpeedUp();
+        }
+        bomb.Request(ReqType.FireUp);
+        bomb.Request(ReqType.FireUp);
+        bomb.Request(ReqType.BomUp);
+        bomb.Request(ReqType.BomUp);
+        hud.RefreshNow();
+        Assert.That(hud.GetCellValue("Fire"), Is.EqualTo("6 / NO MAX"));
+        Assert.That(hud.GetCellValue("Bomb"), Is.EqualTo("6 / NO MAX"));
+        Assert.That(hud.GetCellMaxed("Fire"), Is.False);
+        Assert.That(hud.GetCellMaxed("Bomb"), Is.False);
+        Assert.That(hud.GetCellValue("Move"), Is.EqualTo("7 / 7 MAX"));
+        Assert.That(hud.GetCellMaxed("Move"), Is.True);
+        Assert.That(hud.GetCellValue("DropMode"), Is.EqualTo("THROW SPD 5 / 5 MAX"));
+        Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("5 / 5 MAX"));
+        Assert.That(hud.GetCellMaxed("ThrowSpeed"), Is.True);
+
+        PlayerInvincibility shield = playerObject.GetComponent<PlayerInvincibility>();
+        shield.Activate(PlayerInvincibility.DefaultDurationSeconds);
+        hud.RefreshNow();
+        Assert.That(hud.GetCellValue("Invincible"), Is.EqualTo("6s"));
+        Assert.That(hud.GetCellActive("Invincible"), Is.True);
+        Assert.That(hud.GetCellIconName("Invincible"), Does.EndWith("Invincible"));
 
         // Bomb type and drop mode are independent. Each group is exclusive
         // internally, while the selected values from both groups coexist.
@@ -218,6 +277,77 @@ public sealed class GameStatusAndAudioTests
 
         Object.Destroy(playerObject);
         Object.Destroy(canvasObject);
+        yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator TimedInvincibilitySpawnsInEveryModeBlocksDamageAndRestoresVisibility()
+    {
+        Assert.That(new ItemPathProvider_CpuMode().GetItemPaths()["Item_Invincible"],
+            Is.EqualTo("item_invincible"));
+        Assert.That(new ItemPathProvider_Tower().GetItemPaths()["Item_Invincible"],
+            Is.EqualTo("item_invincible"));
+        Assert.That(new ItemPathProvider_Online().GetItemPaths()["Item_Invincible"],
+            Is.EqualTo("item_invincible"));
+        Assert.That(Resources.Load<GameObject>("item_invincible"), Is.Not.Null);
+
+        GameObject field = new GameObject("Field");
+        field.AddComponent<PlayerPowerManager_CpuMode>();
+        GameObject canvasObject = Object.Instantiate(
+            Resources.Load<GameObject>("CanvasPowerGage"));
+        canvasObject.name = "CanvasPowerGage1";
+        canvasObject.GetComponent<PowerGage_Slider>().SetPlayerNo(1);
+
+        GameObject playerObject = new GameObject("Player1", typeof(Animator),
+            typeof(Rigidbody));
+        playerObject.AddComponent<Player>();
+        PowerGageIF_CpuMode power = playerObject.AddComponent<PowerGageIF_CpuMode>();
+        power.SetCanvasInsID(canvasObject.GetInstanceID());
+        GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        visual.transform.SetParent(playerObject.transform, false);
+
+        GameObject controlObject = new GameObject("ItemControlProbe");
+        InvincibleItemControlProbe control =
+            controlObject.AddComponent<InvincibleItemControlProbe>();
+        ItemInvincible item = control.SpawnInvincibilityItem(new Vector3(20f, 2f, 20f));
+        Assert.That(item, Is.Not.Null);
+
+        yield return null;
+        yield return null;
+        Assert.That(power.IsPowerGageReady(), Is.True);
+        float initialPower = power.GetCurrentPower();
+        Renderer visualRenderer = visual.GetComponent<Renderer>();
+        float originalAlpha = visualRenderer.material.color.a;
+
+        item.Reflection(playerObject);
+        PlayerInvincibility effect = playerObject.GetComponent<PlayerInvincibility>();
+        Assert.That(effect.IsInvincible, Is.True);
+        Assert.That(effect.RemainingSeconds,
+            Is.GreaterThan(PlayerInvincibility.DefaultDurationSeconds - 0.5f));
+        Assert.That(visualRenderer.material.color.a, Is.LessThan(originalAlpha * 0.7f));
+
+        power.SetDamage(1);
+        power.SyncSetDamage(1);
+        Assert.That(power.GetCurrentPower(), Is.EqualTo(initialPower),
+            "Both local and synchronized damage must be ignored while protected.");
+
+        effect.Deactivate();
+        Assert.That(effect.IsInvincible, Is.False);
+        Assert.That(visualRenderer.material.color.a,
+            Is.EqualTo(originalAlpha).Within(0.01f));
+        power.SetDamage(1);
+        Assert.That(power.GetCurrentPower(), Is.EqualTo(initialPower - 1f));
+
+        effect.Activate(0.05f);
+        yield return new WaitForSecondsRealtime(0.08f);
+        Assert.That(effect.IsInvincible, Is.False,
+            "The shield must expire instead of becoming permanent.");
+
+        Object.Destroy(item.gameObject);
+        Object.Destroy(controlObject);
+        Object.Destroy(playerObject);
+        Object.Destroy(canvasObject);
+        Object.Destroy(field);
         yield return null;
     }
 

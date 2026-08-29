@@ -91,9 +91,13 @@ abstract public class ItemControl: MonoBehaviourPunCallbacks
     {
         CreateItem selectedItem = itemList[randomIndex];
         GameObject itemInstance = Instantiate(selectedItem.itemPrefab, position, Quaternion.identity);
+        if (selectedItem.itemName == "Item_Invincible" &&
+            itemInstance.GetComponent<ItemInvincible>() == null)
+        {
+            itemInstance.AddComponent<ItemInvincible>();
+        }
     }
 
     abstract protected bool IsCreateItem();
 
 }
-

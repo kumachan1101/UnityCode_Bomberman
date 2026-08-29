@@ -1,6 +1,8 @@
 using System.Collections;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Photon.Pun;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +13,7 @@ public class TowerAddedRemoved_PlayerControl : Field_Event
 
     private Button button;
     private Image buttonImage;
+    private TMP_Text buttonLabel;
     private PlayerSpawnManager playerSpawnManager;
     private PlayerCountManager playerCountManager;
     private PlayerNameManager playerNameManager;
@@ -21,10 +24,12 @@ public class TowerAddedRemoved_PlayerControl : Field_Event
     private int playerNo;
     private float nextRefreshTime;
     private readonly Color enabledColor = new Color(1f, 0.84f, 0f);
+    private readonly Color pulseColor = new Color(1f, 0.46f, 0.05f);
     private readonly Color disabledColor = new Color(0.6627f, 0.6627f, 0.6627f);
 
     public int ControlledPlayerNumber { get { return playerNo; } }
     public bool IsRevivalAvailable { get { return CanRevivePlayer(); } }
+    public string CurrentStatusText { get; private set; }
 
     protected override void Init()
     {
@@ -42,18 +47,42 @@ public class TowerAddedRemoved_PlayerControl : Field_Event
 
         button = GetComponent<Button>();
         buttonImage = button != null ? button.GetComponent<Image>() : null;
+        buttonLabel = GetComponentInChildren<TMP_Text>(true);
         if (button != null)
         {
+            ColorBlock colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = Color.white;
+            colors.selectedColor = Color.white;
+            colors.pressedColor = new Color(0.82f, 0.82f, 0.82f, 1f);
+            colors.disabledColor = new Color(1f, 1f, 1f, 0.78f);
+            colors.colorMultiplier = 1f;
+            button.colors = colors;
             button.onClick.RemoveListener(PushButton);
             button.onClick.AddListener(PushButton);
         }
 
+        if (buttonLabel != null)
+        {
+            buttonLabel.enableAutoSizing = true;
+            buttonLabel.fontSizeMin = 13f;
+            buttonLabel.fontSizeMax = 24f;
+            buttonLabel.alignment = TextAlignmentOptions.Center;
+            buttonLabel.raycastTarget = false;
+        }
+
         TryResolvePlayerNumber(null);
         SetToneDown();
+        UpdateStatusText(false);
     }
 
     private void Update()
     {
+        if (button != null && button.interactable && buttonImage != null)
+        {
+            float pulse = (Mathf.Sin(Time.unscaledTime * 7f) + 1f) * 0.5f;
+            buttonImage.color = Color.Lerp(enabledColor, pulseColor, pulse);
+        }
         if (Time.unscaledTime < nextRefreshTime) return;
         RefreshAvailability();
         nextRefreshTime = Time.unscaledTime + RefreshInterval;
@@ -61,8 +90,10 @@ public class TowerAddedRemoved_PlayerControl : Field_Event
 
     public void RefreshAvailability()
     {
-        if (CanRevivePlayer()) SetToneUp();
+        bool available = CanRevivePlayer();
+        if (available) SetToneUp();
         else SetToneDown();
+        UpdateStatusText(available);
     }
 
     public void SetToneUp()
@@ -70,6 +101,7 @@ public class TowerAddedRemoved_PlayerControl : Field_Event
         if (button == null || buttonImage == null) return;
         button.interactable = true;
         buttonImage.color = enabledColor;
+        if (buttonLabel != null) buttonLabel.color = new Color(0.12f, 0.08f, 0.02f, 1f);
     }
 
     public void SetToneDown()
@@ -77,6 +109,52 @@ public class TowerAddedRemoved_PlayerControl : Field_Event
         if (button == null || buttonImage == null) return;
         button.interactable = false;
         buttonImage.color = disabledColor;
+        if (buttonLabel != null) buttonLabel.color = new Color(0.18f, 0.18f, 0.18f, 1f);
+    }
+
+    private void UpdateStatusText(bool available)
+    {
+        string status;
+        if (revivalInProgress)
+        {
+            status = "REVIVING PLAYER...";
+        }
+        else if (gameManager == null || !gameManager.GetSetUp())
+        {
+            status = "REVIVE PLAYER\nWAIT FOR START";
+        }
+        else if (!TryResolvePlayerNumber(null) || playerSpawnManager == null ||
+                 towerSpawnManager == null)
+        {
+            status = "REVIVE PLAYER\nWAITING";
+        }
+        else if (IsControlledPlayerAlive())
+        {
+            status = "PLAYER ACTIVE\nREVIVE NOT NEEDED";
+        }
+        else
+        {
+            float currentPower = towerSpawnManager.GetCurrentRevivalPower(playerNo);
+            if (available && currentPower >= 0f)
+            {
+                status = string.Format(CultureInfo.InvariantCulture,
+                    "REVIVE PLAYER\nPOWER {0:0.#} -> {1:0.#}",
+                    currentPower, currentPower - RevivalPowerCost);
+            }
+            else if (currentPower >= 0f)
+            {
+                status = string.Format(CultureInfo.InvariantCulture,
+                    "REVIVE LOCKED\nPOWER {0:0.#} / NEED {1}",
+                    currentPower, RevivalPowerCost + 1);
+            }
+            else
+            {
+                status = "REVIVE PLAYER\nPOWER WAITING";
+            }
+        }
+
+        CurrentStatusText = status;
+        if (buttonLabel != null) buttonLabel.text = status;
     }
 
     protected override void RegisterListeners()
@@ -170,6 +248,7 @@ public class TowerAddedRemoved_PlayerControl : Field_Event
         if (!JudgeMyPlayer(player)) return;
         revivalInProgress = false;
         SetToneDown();
+        UpdateStatusText(false);
     }
 
     private void Field_Player_Tower_OnRemoved(Player_Base player)
@@ -190,6 +269,7 @@ public class TowerAddedRemoved_PlayerControl : Field_Event
 
         revivalInProgress = true;
         SetToneDown();
+        UpdateStatusText(false);
         if (!towerSpawnManager.TrySpendRevivalPower(playerNo, RevivalPowerCost))
         {
             revivalInProgress = false;
