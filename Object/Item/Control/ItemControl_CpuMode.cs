@@ -17,7 +17,8 @@ public class ItemPathProvider_CpuMode : IItemPathProvider
         { "Item_Rainbow", "item_rainbow" },
         { "Item_Heart", "item_heart" },
         { "Item_AddBlock", "item_addblock" },
-        { "Item_Invincible", "item_invincible" }
+        { "Item_Invincible", "item_invincible" },
+        { "Item_Magnet", "item_invincible" }
         //{ "Item_AddDummy", "item_adddummy" }
     };
 }

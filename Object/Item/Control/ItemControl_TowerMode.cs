@@ -18,7 +18,8 @@ public class ItemPathProvider_Tower : IItemPathProvider, IItemCountProvider
         { "Item_Heart", "item_heart" },
         { "Item_AddBlock", "item_addblock" },
         { "Item_AddDummy", "item_adddummy" },
-        { "Item_Invincible", "item_invincible" }
+        { "Item_Invincible", "item_invincible" },
+        { "Item_Magnet", "item_invincible" }
     };
 
     public Dictionary<string, int> GetItemCounts() => new Dictionary<string, int>

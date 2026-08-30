@@ -96,6 +96,13 @@ abstract public class ItemControl: MonoBehaviourPunCallbacks
         {
             itemInstance.AddComponent<ItemInvincible>();
         }
+        else if (selectedItem.itemName == "Item_Magnet" &&
+            itemInstance.GetComponent<ItemMagnet>() == null)
+        {
+            // The existing pickup cube supplies the collider and base mesh.
+            // ItemMagnet replaces its appearance with a clear U-shaped magnet.
+            itemInstance.AddComponent<ItemMagnet>();
+        }
     }
 
     abstract protected bool IsCreateItem();

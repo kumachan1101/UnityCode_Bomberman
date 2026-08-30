@@ -14,6 +14,7 @@ public sealed class GameStatusHudController : MonoBehaviour
         MoveSpeed,
         Kick,
         Invincible,
+        Magnet,
         TypeNormal,
         TypeExplode,
         TypeBig,
@@ -61,8 +62,8 @@ public sealed class GameStatusHudController : MonoBehaviour
     public const float StatusPanelBottomMargin = 20f;
     public const float PanelGap = 8f;
     private const float CellGap = 5f;
-    private const int CoreCellCount = 5;
-    private const int AbilityCellCount = 3;
+    private const int CoreCellCount = 4;
+    private const int AbilityCellCount = 5;
 
     private static readonly Dictionary<HudIcon, Texture2D> iconTextures =
         new Dictionary<HudIcon, Texture2D>();
@@ -225,14 +226,15 @@ public sealed class GameStatusHudController : MonoBehaviour
         CreateStatusCell("Bomb", "BOMB COUNT", HudIcon.BombCount, font);
         CreateStatusCell("Move", "MOVE SPEED", HudIcon.MoveSpeed, font);
         CreateStatusCell("Kick", "KICK", HudIcon.Kick, font);
-        CreateStatusCell("Invincible", "GHOST SHIELD", HudIcon.Invincible, font);
 
         CreateGroupLabel("AbilityGroup",
-            "TYPE + DROP COEXIST / ONE PER GROUP", font,
+            "TYPE/DROP: ONE PER GROUP  •  SHIELD/MAGNET: TIMED + COEXIST", font,
             new Color(1f, 0.72f, 0.28f, 1f));
         CreateStatusCell("BombType", "BOMB TYPE (ONE)", HudIcon.TypeNormal, font);
         CreateStatusCell("DropMode", "DROP MODE (ONE)", HudIcon.ModeNormal, font);
         CreateStatusCell("ThrowSpeed", "THROW SPEED", HudIcon.BombSpeed, font);
+        CreateStatusCell("Invincible", "GHOST SHIELD", HudIcon.Invincible, font);
+        CreateStatusCell("Magnet", "ITEM MAGNET", HudIcon.Magnet, font);
 
         LayoutHud();
     }
@@ -321,10 +323,11 @@ public sealed class GameStatusHudController : MonoBehaviour
             safe.w + StatusPanelBottomMargin + statusHeight * 0.5f);
 
         LayoutGroupLabel("CoreGroup", statusWidth, -3f);
-        LayoutStatusRow(new[] { "Fire", "Bomb", "Move", "Kick", "Invincible" },
+        LayoutStatusRow(new[] { "Fire", "Bomb", "Move", "Kick" },
             CoreCellCount, statusWidth, -23f, 52f);
         LayoutGroupLabel("AbilityGroup", statusWidth, -78f);
-        LayoutStatusRow(new[] { "BombType", "DropMode", "ThrowSpeed" },
+        LayoutStatusRow(new[]
+            { "BombType", "DropMode", "ThrowSpeed", "Invincible", "Magnet" },
             AbilityCellCount, statusWidth, -99f, 52f);
 
         lastWidth = Screen.width;
@@ -412,6 +415,11 @@ public sealed class GameStatusHudController : MonoBehaviour
         cells["Invincible"].Set(shieldActive
             ? Mathf.CeilToInt(invincibility.RemainingSeconds) + "s"
             : "NONE", shieldActive);
+        PlayerItemMagnet magnet = localPlayer.GetComponent<PlayerItemMagnet>();
+        bool magnetActive = magnet != null && magnet.IsActive;
+        cells["Magnet"].Set(magnetActive
+            ? Mathf.CeilToInt(magnet.RemainingSeconds) + "s"
+            : "NONE", magnetActive);
 
         BOM_KIND kind = bomb.Get<BOM_KIND>(GetKind.BomKind);
         cells["BombType"].Set(GetBombTypeStatus(kind), true);
@@ -603,6 +611,18 @@ public sealed class GameStatusHudController : MonoBehaviour
                     return new Color32(245, 255, 255, 255);
                 if (y >= 17 && y <= 22 && Mathf.Abs(x - 24) <= 4)
                     return new Color32(245, 255, 255, 255);
+                return clear;
+            case HudIcon.Magnet:
+                bool leftArm = x >= 8 && x <= 15 && y >= 14 && y <= 39;
+                bool rightArm = x >= 33 && x <= 40 && y >= 14 && y <= 39;
+                bool curvedBase = y >= 7 && y <= 15 && x >= 8 && x <= 40;
+                if (leftArm || curvedBase)
+                    return new Color32(255, 72, 48, 255);
+                if (rightArm)
+                    return new Color32(55, 205, 255, 255);
+                if ((x >= 7 && x <= 16 || x >= 32 && x <= 41) &&
+                    y >= 38 && y <= 44)
+                    return new Color32(245, 250, 255, 255);
                 return clear;
             case HudIcon.TypeNormal:
                 return GetBombPixel(x, y, 24, 21, 14,

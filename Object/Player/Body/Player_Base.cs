@@ -10,6 +10,8 @@ public class Player_Base : MonoBehaviourPunCallbacks
     void Awake(){
         if (GetComponent<PlayerInvincibility>() == null)
             gameObject.AddComponent<PlayerInvincibility>();
+        if (GetComponent<PlayerItemMagnet>() == null)
+            gameObject.AddComponent<PlayerItemMagnet>();
    }    
     void Start ()
     {

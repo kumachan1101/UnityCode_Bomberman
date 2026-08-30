@@ -19,7 +19,8 @@ public class ItemPathProvider_Online : IItemPathProvider
         { "Item_Heart", "item_heart" },
         { "Item_AddBlock", "item_addblock" },
         { "Item_AddDummy", "item_adddummy" },
-        { "Item_Invincible", "item_invincible" }
+        { "Item_Invincible", "item_invincible" },
+        { "Item_Magnet", "item_invincible" }
     };
 }
 public class ItemControl_Online: ItemControl

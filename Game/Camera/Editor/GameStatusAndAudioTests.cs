@@ -23,6 +23,14 @@ public sealed class InvincibleItemControlProbe : ItemControl
         CreateRandomItem(position, index);
         return Object.FindObjectOfType<ItemInvincible>();
     }
+
+    public ItemMagnet SpawnMagnetItem(Vector3 position)
+    {
+        int index = itemList.FindIndex(item => item.itemName == "Item_Magnet");
+        Assert.That(index, Is.GreaterThanOrEqualTo(0));
+        CreateRandomItem(position, index);
+        return Object.FindObjectOfType<ItemMagnet>();
+    }
 }
 
 public sealed class GameStatusAndAudioTests
@@ -200,12 +208,18 @@ public sealed class GameStatusAndAudioTests
             .Find("ItemStatus/Invincible") as RectTransform;
         Assert.That(invincibleCell, Is.Not.Null);
         Assert.That(invincibleCell.sizeDelta.x, Is.GreaterThan(100f));
+        RectTransform magnetCell = canvasObject.transform
+            .Find("ItemStatus/Magnet") as RectTransform;
+        Assert.That(magnetCell, Is.Not.Null);
+        Assert.That(magnetCell.sizeDelta.x, Is.GreaterThan(100f));
         Assert.That(hud.GetCellValue("Fire"), Is.EqualTo("3 / NO MAX"));
         Assert.That(hud.GetCellValue("Bomb"), Is.EqualTo("3 / NO MAX"));
         Assert.That(hud.GetCellValue("Move"), Is.EqualTo("3 / 7"));
         Assert.That(hud.GetCellValue("Kick"), Is.EqualTo("NOT OWNED"));
         Assert.That(hud.GetCellValue("Invincible"), Is.EqualTo("NONE"));
         Assert.That(hud.GetCellActive("Invincible"), Is.False);
+        Assert.That(hud.GetCellValue("Magnet"), Is.EqualTo("NONE"));
+        Assert.That(hud.GetCellActive("Magnet"), Is.False);
         Assert.That(hud.GetCellValue("BombType"), Is.EqualTo("NORMAL"));
         Assert.That(hud.GetCellValue("DropMode"), Is.EqualTo("NORMAL"));
         Assert.That(hud.GetCellValue("ThrowSpeed"), Is.EqualTo("INACTIVE"));
@@ -259,6 +273,15 @@ public sealed class GameStatusAndAudioTests
         Assert.That(hud.GetCellActive("Invincible"), Is.True);
         Assert.That(hud.GetCellIconName("Invincible"), Does.EndWith("Invincible"));
 
+        PlayerItemMagnet magnet = playerObject.GetComponent<PlayerItemMagnet>();
+        magnet.Activate(PlayerItemMagnet.DefaultDurationSeconds);
+        hud.RefreshNow();
+        Assert.That(hud.GetCellValue("Magnet"), Is.EqualTo("8s"));
+        Assert.That(hud.GetCellActive("Magnet"), Is.True);
+        Assert.That(hud.GetCellIconName("Magnet"), Does.EndWith("Magnet"));
+        Assert.That(hud.GetCellActive("Invincible"), Is.True,
+            "Timed shield and magnet effects must coexist.");
+
         // Bomb type and drop mode are independent. Each group is exclusive
         // internally, while the selected values from both groups coexist.
         bomb.Request(ReqType.BomMulti);
@@ -305,6 +328,11 @@ public sealed class GameStatusAndAudioTests
         power.SetCanvasInsID(canvasObject.GetInstanceID());
         GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
         visual.transform.SetParent(playerObject.transform, false);
+        Renderer playerPrefabRenderer = Resources.Load<GameObject>("Player")
+            .GetComponentInChildren<Renderer>(true);
+        Assert.That(playerPrefabRenderer, Is.Not.Null);
+        visual.GetComponent<Renderer>().sharedMaterial =
+            playerPrefabRenderer.sharedMaterial;
 
         GameObject controlObject = new GameObject("ItemControlProbe");
         InvincibleItemControlProbe control =
@@ -317,14 +345,24 @@ public sealed class GameStatusAndAudioTests
         Assert.That(power.IsPowerGageReady(), Is.True);
         float initialPower = power.GetCurrentPower();
         Renderer visualRenderer = visual.GetComponent<Renderer>();
-        float originalAlpha = visualRenderer.material.color.a;
+        Shader originalShader = visualRenderer.sharedMaterial.shader;
+        Texture originalTexture = visualRenderer.sharedMaterial.GetTexture("_MainTex");
+        Assert.That(visualRenderer.sharedMaterial.HasProperty("_Color"), Is.False,
+            "The production player uses Unlit/Texture, which exposed the old visual bug.");
 
         item.Reflection(playerObject);
         PlayerInvincibility effect = playerObject.GetComponent<PlayerInvincibility>();
         Assert.That(effect.IsInvincible, Is.True);
         Assert.That(effect.RemainingSeconds,
             Is.GreaterThan(PlayerInvincibility.DefaultDurationSeconds - 0.5f));
-        Assert.That(visualRenderer.material.color.a, Is.LessThan(originalAlpha * 0.7f));
+        Assert.That(visualRenderer.material.HasProperty("_Color"), Is.True);
+        Assert.That(visualRenderer.material.GetColor("_Color").a,
+            Is.LessThan(0.7f));
+        Assert.That(visualRenderer.material.GetTag("RenderType", false),
+            Is.EqualTo("Transparent"));
+        Assert.That(effect.CapturedRendererCount, Is.EqualTo(1));
+        Assert.That(playerObject.transform.Find("GhostShieldAura"), Is.Not.Null,
+            "The shield needs an unmistakable cyan visual around the player.");
 
         power.SetDamage(1);
         power.SyncSetDamage(1);
@@ -333,21 +371,118 @@ public sealed class GameStatusAndAudioTests
 
         effect.Deactivate();
         Assert.That(effect.IsInvincible, Is.False);
-        Assert.That(visualRenderer.material.color.a,
-            Is.EqualTo(originalAlpha).Within(0.01f));
+        Assert.That(visualRenderer.sharedMaterial.shader, Is.EqualTo(originalShader));
+        Assert.That(visualRenderer.sharedMaterial.GetTexture("_MainTex"),
+            Is.EqualTo(originalTexture));
         power.SetDamage(1);
         Assert.That(power.GetCurrentPower(), Is.EqualTo(initialPower - 1f));
 
-        effect.Activate(0.05f);
-        yield return new WaitForSecondsRealtime(0.08f);
+        effect.Activate(0.75f);
+        bool sawVisibleFrame = false;
+        bool sawHiddenFrame = false;
+        for (int sample = 0; sample < 8; sample++)
+        {
+            yield return new WaitForSecondsRealtime(0.08f);
+            sawVisibleFrame |= visualRenderer.enabled;
+            sawHiddenFrame |= !visualRenderer.enabled;
+        }
+        Assert.That(sawVisibleFrame && sawHiddenFrame, Is.True,
+            "The real player renderer must visibly blink before expiration.");
+        yield return new WaitForSecondsRealtime(0.2f);
         Assert.That(effect.IsInvincible, Is.False,
             "The shield must expire instead of becoming permanent.");
+        Assert.That(visualRenderer.enabled, Is.True);
+        Assert.That(visualRenderer.sharedMaterial.shader, Is.EqualTo(originalShader));
+        Assert.That(visualRenderer.sharedMaterial.GetTexture("_MainTex"),
+            Is.EqualTo(originalTexture));
 
         Object.Destroy(item.gameObject);
         Object.Destroy(controlObject);
         Object.Destroy(playerObject);
         Object.Destroy(canvasObject);
         Object.Destroy(field);
+        yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator TimedMagnetSpawnsInEveryModePullsVisibleItemsAndRespectsWalls()
+    {
+        Assert.That(new ItemPathProvider_CpuMode().GetItemPaths()["Item_Magnet"],
+            Is.EqualTo("item_invincible"));
+        Assert.That(new ItemPathProvider_Tower().GetItemPaths()["Item_Magnet"],
+            Is.EqualTo("item_invincible"));
+        Assert.That(new ItemPathProvider_Online().GetItemPaths()["Item_Magnet"],
+            Is.EqualTo("item_invincible"));
+
+        GameObject controlObject = new GameObject("ItemControlProbe");
+        InvincibleItemControlProbe control =
+            controlObject.AddComponent<InvincibleItemControlProbe>();
+        ItemMagnet pickup = control.SpawnMagnetItem(new Vector3(20f, 2f, 20f));
+        Assert.That(pickup, Is.Not.Null);
+        Assert.That(pickup.transform.Find("MagnetRedArm"), Is.Not.Null);
+        Assert.That(pickup.transform.Find("MagnetBlueArm"), Is.Not.Null);
+        Assert.That(pickup.GetComponentsInChildren<Renderer>(true).Length,
+            Is.GreaterThanOrEqualTo(6),
+            "The ground pickup must show an unmistakable red/blue U magnet.");
+
+        GameObject playerObject = new GameObject("Player1");
+        PlayerItemMagnet magnet = playerObject.AddComponent<PlayerItemMagnet>();
+        pickup.Reflection(playerObject);
+        Assert.That(magnet.IsActive, Is.True);
+        Assert.That(magnet.RemainingSeconds,
+            Is.GreaterThan(PlayerItemMagnet.DefaultDurationSeconds - 0.5f));
+
+        GameObject nearItemObject = new GameObject("NearItem", typeof(BoxCollider));
+        nearItemObject.GetComponent<BoxCollider>().isTrigger = true;
+        nearItemObject.AddComponent<ItemInvincible>();
+        nearItemObject.transform.position = new Vector3(3f, 0f, 0f);
+
+        GameObject blockedItemObject = new GameObject("BlockedItem", typeof(BoxCollider));
+        blockedItemObject.GetComponent<BoxCollider>().isTrigger = true;
+        blockedItemObject.AddComponent<ItemInvincible>();
+        blockedItemObject.transform.position = new Vector3(0f, 0f, 3f);
+
+        GameObject farItemObject = new GameObject("FarItem", typeof(BoxCollider));
+        farItemObject.GetComponent<BoxCollider>().isTrigger = true;
+        farItemObject.AddComponent<ItemInvincible>();
+        farItemObject.transform.position = new Vector3(6f, 0f, 0f);
+
+        GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall.name = "SolidBlock";
+        wall.transform.position = new Vector3(0f, 0.25f, 1.5f);
+        wall.transform.localScale = new Vector3(1f, 1.5f, 0.5f);
+
+        Physics.SyncTransforms();
+        Vector3 nearStart = nearItemObject.transform.position;
+        Vector3 blockedStart = blockedItemObject.transform.position;
+        Vector3 farStart = farItemObject.transform.position;
+        for (int frame = 0; frame < 10; frame++) yield return null;
+
+        Assert.That(Vector3.Distance(nearItemObject.transform.position,
+            playerObject.transform.position),
+            Is.LessThan(Vector3.Distance(nearStart, playerObject.transform.position) - 0.25f));
+        Assert.That(Vector3.Distance(blockedItemObject.transform.position, blockedStart),
+            Is.LessThan(0.001f),
+            "The magnet must not pull an item through a solid block.");
+        Assert.That(Vector3.Distance(farItemObject.transform.position, farStart),
+            Is.LessThan(0.001f),
+            "Items outside the attraction radius must stay in place.");
+        Assert.That(magnet.AttractedItemCountLastFrame, Is.GreaterThan(0));
+
+        magnet.Activate(0.05f);
+        magnet.Deactivate();
+        magnet.Activate(0.05f);
+        yield return new WaitForSecondsRealtime(0.08f);
+        Assert.That(magnet.IsActive, Is.False,
+            "The magnet must expire instead of becoming permanent.");
+
+        Object.Destroy(wall);
+        Object.Destroy(farItemObject);
+        Object.Destroy(blockedItemObject);
+        Object.Destroy(nearItemObject);
+        Object.Destroy(playerObject);
+        Object.Destroy(pickup.gameObject);
+        Object.Destroy(controlObject);
         yield return null;
     }
 
