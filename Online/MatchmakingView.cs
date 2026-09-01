@@ -129,7 +129,7 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
     // 最大プレイヤー数に達した際の処理
     private void HandleMaxPlayers() {
         BlockCreateManager cField = gField.GetComponent<BlockCreateManager>();
-        GameObject gGameEndCanvasLocal = GameObject.Find("GameEndCanvas_Local(Clone)");
+        GameObject gGameEndCanvasLocal = GameObject.Find("GameEndCanvas_Online_Local");
         Destroy(gGameEndCanvasLocal);
 
         if (PhotonNetwork.IsMasterClient) {

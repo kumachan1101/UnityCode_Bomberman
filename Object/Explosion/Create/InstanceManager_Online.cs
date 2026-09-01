@@ -12,7 +12,8 @@ public class InstanceManager_Online : InstanceManager_Base
     public override void InstantiateInstancePool(Vector3 position)
 	{
         PhotonView photonView = PhotonView.Find(iViewID);
-		if(false == GetComponent<PhotonView>().IsMine){
+		if(false == GetComponent<PhotonView>().IsMine ||
+            !PhotonNetwork.IsConnectedAndReady || !PhotonNetwork.InRoom){
 			return;
 		}
 		photonView.RPC("InstantiateInstancePool_RPC",RpcTarget.All, position);
@@ -22,7 +23,8 @@ public class InstanceManager_Online : InstanceManager_Base
     {
         instanceQueue.Enqueue(instance);
         PhotonView photonView = PhotonView.Find(iViewID);
-		if(false == GetComponent<PhotonView>().IsMine){
+		if(false == GetComponent<PhotonView>().IsMine ||
+            !PhotonNetwork.IsConnectedAndReady || !PhotonNetwork.InRoom){
 			return;
 		}
         photonView.RPC("DestroyInstancePool_RPC",RpcTarget.All);
@@ -33,8 +35,13 @@ public class InstanceManager_Online : InstanceManager_Base
         if (instance != null)
         {
             PhotonView pv = instance.GetComponent<PhotonView>();
-            if (pv != null && pv.IsMine) {
+            if (pv != null && pv.IsMine && PhotonNetwork.IsConnectedAndReady &&
+                PhotonNetwork.InRoom) {
                 PhotonNetwork.Destroy(instance); // ネットワーク全体で削除
+            }
+            else if (pv == null || !PhotonNetwork.InRoom)
+            {
+                Destroy(instance);
             }
         }
         else

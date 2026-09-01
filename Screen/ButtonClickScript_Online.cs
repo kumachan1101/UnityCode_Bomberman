@@ -8,7 +8,9 @@ using UnityEngine.SceneManagement;
 public class ButtonClickScript_Online : ButtonClickScript, IOnEventCallback
 {
     public const byte ReturnTitleEventCode = 199;
+    public const byte ReturnTitleCommitEventCode = 198;
     private bool loadRequested;
+    private bool commitSent;
 
     private void OnEnable()
     {
@@ -23,26 +25,29 @@ public class ButtonClickScript_Online : ButtonClickScript, IOnEventCallback
     public void OnEvent(EventData photonEvent)
     {
         if (photonEvent.Code == ReturnTitleEventCode && PhotonNetwork.IsMasterClient)
-            LoadTitleAsMaster();
+            BroadcastReturnToTitle();
+        else if (photonEvent.Code == ReturnTitleCommitEventCode)
+            BeginGracefulReturn();
     }
 
     override public void LoadGameScene()
     {
+        PrepareGameManagerForTitle();
         if (!PhotonNetwork.IsConnected || !PhotonNetwork.InRoom)
         {
-            LoadTitleLocally();
+            BeginGracefulReturn();
             return;
         }
 
         if (PhotonNetwork.IsMasterClient)
         {
-            LoadTitleAsMaster();
+            BroadcastReturnToTitle();
             return;
         }
 
         if (PhotonNetwork.MasterClient == null)
         {
-            LoadTitleLocally();
+            BeginGracefulReturn();
             return;
         }
 
@@ -53,39 +58,75 @@ public class ButtonClickScript_Online : ButtonClickScript, IOnEventCallback
         if (!PhotonNetwork.RaiseEvent(
             ReturnTitleEventCode, null, options, SendOptions.SendReliable))
         {
-            LoadTitleLocally();
+            BeginGracefulReturn();
             return;
         }
 
         StartCoroutine(ReturnToTitleIfMasterDoesNotRespond());
     }
 
-    private void LoadTitleAsMaster()
+    private void BroadcastReturnToTitle()
     {
-        if (loadRequested) return;
+        if (commitSent) return;
         if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected || !PhotonNetwork.InRoom)
         {
             Debug.LogError("Cannot load title: master client is not connected to a room.");
+            BeginGracefulReturn();
             return;
         }
 
-        loadRequested = true;
-        StartCoroutine(ReturnToTitleIfMasterDoesNotRespond());
-        PhotonNetwork.LoadLevel("GameTitle");
+        commitSent = true;
+        PrepareGameManagerForTitle();
+        RaiseEventOptions options = new RaiseEventOptions
+        {
+            Receivers = ReceiverGroup.Others
+        };
+        if (!PhotonNetwork.RaiseEvent(ReturnTitleCommitEventCode, null,
+            options, SendOptions.SendReliable))
+            Debug.LogError("Return-to-title commit could not be sent to the room.");
+        BeginGracefulReturn();
     }
 
     private IEnumerator ReturnToTitleIfMasterDoesNotRespond()
     {
         yield return new WaitForSecondsRealtime(3f);
         if (SceneManager.GetActiveScene().name != "GameTitle")
-            LoadTitleLocally();
+            BeginGracefulReturn();
     }
 
-    private void LoadTitleLocally()
+    private void BeginGracefulReturn()
     {
-        StopAllCoroutines();
+        if (loadRequested) return;
+        loadRequested = true;
+        PrepareGameManagerForTitle();
+        // PUN's scene-loaded callback writes the current scene to the room when
+        // automatic synchronization is enabled.  Loading the local title while
+        // LeaveRoom is completing otherwise attempts SetProperties in Leaving.
+        // RoomButton enables synchronization again before the next room join.
+        PhotonNetwork.AutomaticallySyncScene = false;
+        StartCoroutine(LeaveRoomThenLoadTitle());
+    }
+
+    private IEnumerator LeaveRoomThenLoadTitle()
+    {
         if (PhotonNetwork.InRoom)
-            PhotonNetwork.LeaveRoom(false);
+        {
+            bool leaveStarted = PhotonNetwork.LeaveRoom(false);
+            float timeoutAt = Time.realtimeSinceStartup + 5f;
+            while (leaveStarted && PhotonNetwork.InRoom &&
+                   Time.realtimeSinceStartup < timeoutAt)
+                yield return null;
+
+            if (PhotonNetwork.InRoom)
+                PhotonNetwork.Disconnect();
+        }
+
         SceneManager.LoadScene("GameTitle");
+    }
+
+    private static void PrepareGameManagerForTitle()
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.PrepareReturnToTitle();
     }
 }

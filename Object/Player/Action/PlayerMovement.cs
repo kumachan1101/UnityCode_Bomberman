@@ -25,9 +25,26 @@ public class PlayerMovement : MonoBehaviour
         requiresLocalOwnership = GetComponent<PlayerAction_Online>() != null;
         wasLocallyControlled = CanControlMovement();
 
-        // Transformを直接移動すると、フレーム落ち時の大きな移動量でColliderを飛び越える。
-        // Rigidbodyの物理更新と連続動的衝突判定を必ず使用する。
-        playerRigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        // リモート側では PhotonTransformView が座標を受信する。動的 Rigidbody の
+        // 物理解決と競合させると、遅延時に位置が戻ったり振動したりするため、
+        // 所有者以外は kinematic として受信座標だけを反映する。
+        bool isRemoteOnlinePlayer = requiresLocalOwnership && photonView != null &&
+                                    !photonView.IsMine;
+        if (isRemoteOnlinePlayer)
+        {
+            playerRigidbody.velocity = Vector3.zero;
+            playerRigidbody.angularVelocity = Vector3.zero;
+            playerRigidbody.isKinematic = true;
+            playerRigidbody.collisionDetectionMode =
+                CollisionDetectionMode.ContinuousSpeculative;
+        }
+        else
+        {
+            // ローカル所有者は物理更新と連続動的衝突判定で外壁抜けを防ぐ。
+            playerRigidbody.isKinematic = false;
+            playerRigidbody.collisionDetectionMode =
+                CollisionDetectionMode.ContinuousDynamic;
+        }
         playerRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
     }
 

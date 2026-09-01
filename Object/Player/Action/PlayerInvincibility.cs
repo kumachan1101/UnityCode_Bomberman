@@ -7,7 +7,7 @@ using UnityEngine.Rendering;
 public sealed class PlayerInvincibility : MonoBehaviour
 {
     public const float DefaultDurationSeconds = 6f;
-    public const float VisibleAlpha = 0.26f;
+    public const float VisibleAlpha = 0.38f;
     public const float ExpirationWarningSeconds = 1.5f;
     private const float BlinkFrequency = 8f;
 
@@ -46,6 +46,9 @@ public sealed class PlayerInvincibility : MonoBehaviour
     private GameObject auraObject;
     private Renderer auraRenderer;
     private Material auraMaterial;
+    private GameObject statusObject;
+    private TextMesh statusText;
+    private Renderer statusRenderer;
 
     public bool IsInvincible { get; private set; }
     public bool WarningBlinkVisible { get; private set; } = true;
@@ -84,6 +87,7 @@ public sealed class PlayerInvincibility : MonoBehaviour
         WarningBlinkVisible = true;
         RestoreRenderersAndMaterials();
         if (auraObject != null) auraObject.SetActive(false);
+        if (statusObject != null) statusObject.SetActive(false);
     }
 
     private void Update()
@@ -110,6 +114,7 @@ public sealed class PlayerInvincibility : MonoBehaviour
         SetRendererVisibility(visible);
         ApplyVisualAlpha(alpha);
         UpdateAura(alpha, visible);
+        UpdateStatusLabel(warning);
     }
 
     private void OnDisable()
@@ -128,7 +133,8 @@ public sealed class PlayerInvincibility : MonoBehaviour
         materialStates.Clear();
         foreach (Renderer rendererComponent in GetComponentsInChildren<Renderer>(true))
         {
-            if (rendererComponent == auraRenderer) continue;
+            if (rendererComponent == auraRenderer || rendererComponent == statusRenderer)
+                continue;
             rendererStates.Add(new RendererState
             {
                 renderer = rendererComponent,
@@ -285,6 +291,7 @@ public sealed class PlayerInvincibility : MonoBehaviour
         if (auraObject != null)
         {
             auraObject.SetActive(true);
+            if (statusObject != null) statusObject.SetActive(true);
             return;
         }
 
@@ -314,6 +321,25 @@ public sealed class PlayerInvincibility : MonoBehaviour
             auraMaterial.SetColor("_EmissionColor", new Color(0.05f, 0.65f, 0.85f));
         }
         auraRenderer.material = auraMaterial;
+
+        statusObject = new GameObject("GhostShieldStatus");
+        statusObject.transform.SetParent(transform, false);
+        statusObject.transform.localPosition = new Vector3(0f, 2.05f, 0f);
+        statusText = statusObject.AddComponent<TextMesh>();
+        statusText.anchor = TextAnchor.MiddleCenter;
+        statusText.alignment = TextAlignment.Center;
+        statusText.fontSize = 64;
+        statusText.characterSize = 0.045f;
+        statusText.fontStyle = FontStyle.Bold;
+        statusText.color = new Color(0.2f, 1f, 1f, 1f);
+        statusRenderer = statusObject.GetComponent<Renderer>();
+        if (statusRenderer != null)
+        {
+            statusRenderer.shadowCastingMode = ShadowCastingMode.Off;
+            statusRenderer.receiveShadows = false;
+            statusRenderer.sortingOrder = 1000;
+        }
+        UpdateStatusLabel(false);
     }
 
     private void UpdateAura(float alpha, bool visible)
@@ -330,6 +356,28 @@ public sealed class PlayerInvincibility : MonoBehaviour
         if (auraMaterial.HasProperty("_Color")) auraMaterial.SetColor("_Color", color);
         if (auraMaterial.HasProperty("_BaseColor"))
             auraMaterial.SetColor("_BaseColor", color);
+    }
+
+    private void UpdateStatusLabel(bool warning)
+    {
+        if (statusObject == null || statusText == null) return;
+        statusObject.SetActive(true);
+        int seconds = Mathf.Max(1, Mathf.CeilToInt(RemainingSeconds));
+        statusText.text = warning
+            ? "SHIELD END " + seconds + "s"
+            : "INVINCIBLE " + seconds + "s";
+        statusText.color = warning && !WarningBlinkVisible
+            ? new Color(1f, 0.9f, 0.2f, 1f)
+            : new Color(0.2f, 1f, 1f, 1f);
+
+        Camera mainCamera = Camera.main;
+        if (mainCamera != null)
+        {
+            Vector3 facing = statusObject.transform.position -
+                             mainCamera.transform.position;
+            if (facing.sqrMagnitude > 0.0001f)
+                statusObject.transform.rotation = Quaternion.LookRotation(facing);
+        }
     }
 
     private static void SetKeyword(Material material, string keyword, bool enabled)

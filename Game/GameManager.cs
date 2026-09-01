@@ -137,8 +137,18 @@ public class GameManager : MonoBehaviour
     
     public void ReturnTitle()
     {
-        iStage = 0;
+        PrepareReturnToTitle();
         SwitchGameOver();
+    }
+
+    public void PrepareReturnToTitle()
+    {
+        iStage = 0;
+        stageTransitionPending = true;
+        CancelInvoke("SwitchGameScene");
+        CancelInvoke("SwitchTowerScene");
+        CancelInvoke("SwitchGameOver");
+        CancelInvoke("SwitchGameTowerOnline");
     }
 
     public void GameOver()

@@ -54,7 +54,18 @@ public class RoomButton : MonoBehaviour
         PhotonNetwork.AutomaticallySyncScene = true;
 
         roomOptions.MaxPlayers = MaxPlayers;
-        PhotonNetwork.JoinOrCreateRoom(RoomName, roomOptions, TypedLobby.Default);
+        // ルーム一覧を受信しているロビーと、実際にルームを作るロビーを一致させる。
+        // 以前は常に Default ロビーへ作成していたため、Lobby1/Lobby2 側の
+        // 待機人数が 0 のままになり、別クライアントから部屋が見えなかった。
+        PhotonNetwork.JoinOrCreateRoom(RoomName, roomOptions,
+            ResolveTargetLobby(PhotonNetwork.CurrentLobby));
+    }
+
+    public static TypedLobby ResolveTargetLobby(TypedLobby currentLobby)
+    {
+        return currentLobby != null && !string.IsNullOrEmpty(currentLobby.Name)
+            ? currentLobby
+            : TypedLobby.Default;
     }
 
     public void SetPlayerCount(int playerCount) {

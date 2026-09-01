@@ -15,6 +15,10 @@ public class Bom_Online : Bom_Base
         if(null == cInsManager){
             return false;
         }
+        if (!PhotonNetwork.IsConnectedAndReady || !PhotonNetwork.InRoom)
+        {
+            return false;
+        }
         // 管理者のみが爆風を表示する。
         // RPCで位置情報を同期して、ネットワーク全体でブロードキャストして、各キューから取り出してもらう。インスタンス生成は各自で生成のまま。
         // Bomクラスはオンライン用の派生クラスを爆風別に用意して、Player側でボム生成時に、AddComponentでオンラインの場合は、オンラインスクリプトをaddする

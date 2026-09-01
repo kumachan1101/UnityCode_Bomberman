@@ -108,6 +108,30 @@ public sealed class GameStatusAndAudioTests
         yield return null;
     }
 
+    [UnityTest]
+    public IEnumerator ReturningToTitleResetsStageAndIgnoresSceneTeardownDeaths()
+    {
+        GameObject dispatcherObject = new GameObject("EventDispatcher");
+        dispatcherObject.AddComponent<EventDispatcher>();
+        GameObject managerObject = new GameObject("GameManager");
+        GameManager manager = managerObject.AddComponent<GameManager>();
+        yield return null;
+
+        SetPrivateField(manager, "iStage", 3);
+        manager.PrepareReturnToTitle();
+        Assert.That(manager.GetCurrentStage(), Is.Zero);
+        Assert.That(manager.IsStageTransitionPending(), Is.True);
+
+        new PlayerAddedRemovedHandler(manager).OnRemoved(null);
+        Assert.That(manager.GetCurrentStage(), Is.Zero,
+            "Destroying players during title teardown must not schedule another game scene.");
+
+        manager.CancelInvoke();
+        Object.Destroy(managerObject);
+        Object.Destroy(dispatcherObject);
+        yield return null;
+    }
+
     [Test]
     public void ThrowModeMakesItsSpeedExplicitAndOtherModesStayInactive()
     {
@@ -363,6 +387,12 @@ public sealed class GameStatusAndAudioTests
         Assert.That(effect.CapturedRendererCount, Is.EqualTo(1));
         Assert.That(playerObject.transform.Find("GhostShieldAura"), Is.Not.Null,
             "The shield needs an unmistakable cyan visual around the player.");
+        Transform shieldStatus = playerObject.transform.Find("GhostShieldStatus");
+        Assert.That(shieldStatus, Is.Not.Null,
+            "The active shield must show a readable status above the player.");
+        TextMesh shieldStatusText = shieldStatus.GetComponent<TextMesh>();
+        Assert.That(shieldStatusText.text, Does.StartWith("INVINCIBLE"));
+        Assert.That(shieldStatus.gameObject.activeSelf, Is.True);
 
         power.SetDamage(1);
         power.SyncSetDamage(1);
@@ -371,24 +401,25 @@ public sealed class GameStatusAndAudioTests
 
         effect.Deactivate();
         Assert.That(effect.IsInvincible, Is.False);
+        Assert.That(shieldStatus.gameObject.activeSelf, Is.False);
         Assert.That(visualRenderer.sharedMaterial.shader, Is.EqualTo(originalShader));
         Assert.That(visualRenderer.sharedMaterial.GetTexture("_MainTex"),
             Is.EqualTo(originalTexture));
         power.SetDamage(1);
         Assert.That(power.GetCurrentPower(), Is.EqualTo(initialPower - 1f));
 
-        effect.Activate(0.75f);
+        effect.Activate(1.2f);
         bool sawVisibleFrame = false;
         bool sawHiddenFrame = false;
-        for (int sample = 0; sample < 8; sample++)
+        for (int sample = 0; sample < 15; sample++)
         {
-            yield return new WaitForSecondsRealtime(0.08f);
+            yield return new WaitForSecondsRealtime(0.06f);
             sawVisibleFrame |= visualRenderer.enabled;
             sawHiddenFrame |= !visualRenderer.enabled;
         }
         Assert.That(sawVisibleFrame && sawHiddenFrame, Is.True,
             "The real player renderer must visibly blink before expiration.");
-        yield return new WaitForSecondsRealtime(0.2f);
+        yield return new WaitForSecondsRealtime(0.35f);
         Assert.That(effect.IsInvincible, Is.False,
             "The shield must expire instead of becoming permanent.");
         Assert.That(visualRenderer.enabled, Is.True);

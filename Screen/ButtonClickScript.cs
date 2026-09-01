@@ -39,6 +39,8 @@ public class ButtonClickScript : MonoBehaviour
 
     public virtual void LoadGameScene()
     {
+        if (GameManager.Instance != null)
+            GameManager.Instance.PrepareReturnToTitle();
         SceneManager.LoadScene("GameTitle");
     }
 }

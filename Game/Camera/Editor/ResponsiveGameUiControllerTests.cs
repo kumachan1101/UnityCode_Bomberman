@@ -205,6 +205,8 @@ public class ResponsiveGameUiControllerTests
             ButtonClickScript_Online onlineButton =
                 Object.FindObjectOfType<ButtonClickScript_Online>();
             Assert.That(onlineButton, Is.Not.Null, screen.GetType().Name);
+            Assert.That(Object.FindObjectsOfType<ButtonClickScript_Online>().Length,
+                Is.EqualTo(1), "Only one return handler may respond to a tap.");
             Assert.That(onlineButton, Is.InstanceOf<Photon.Realtime.IOnEventCallback>(),
                 screen.GetType().Name);
             Assert.That(Object.FindObjectOfType<ButtonClickScript_CpuMode>(), Is.Null,
@@ -216,6 +218,10 @@ public class ResponsiveGameUiControllerTests
         }
 
         Assert.That(ButtonClickScript_Online.ReturnTitleEventCode,
+            Is.Not.EqualTo(MasterClientNotificationManager.NotificationEventCode));
+        Assert.That(ButtonClickScript_Online.ReturnTitleCommitEventCode,
+            Is.Not.EqualTo(ButtonClickScript_Online.ReturnTitleEventCode));
+        Assert.That(ButtonClickScript_Online.ReturnTitleCommitEventCode,
             Is.Not.EqualTo(MasterClientNotificationManager.NotificationEventCode));
     }
 

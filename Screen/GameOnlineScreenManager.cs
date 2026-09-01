@@ -5,5 +5,6 @@ public class GameOnlineScreenManager : BaseScreenManager
     {
         InitializeCanvas();
         GameObject gGameEndCanvas = Instantiate(Resources.Load("GameEndCanvas_Online") as GameObject);
+        gGameEndCanvas.name = "GameEndCanvas_Online_Local";
     }
 }
